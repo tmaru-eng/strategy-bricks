@@ -59,8 +59,8 @@ cd "$HOME/eon/mql5"
 If user says "extract mql5 articles" without specifics, prompt for:
 
 1. Article URL OR User ID
-1. Quantity limit (for testing)
-1. Output location preference
+2. Quantity limit (for testing)
+3. Output location preference
 
 ---
 

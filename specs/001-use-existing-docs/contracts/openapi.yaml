@@ -116,7 +116,7 @@ components:
           type: string
         status:
           type: string
-          enum: [unresolved, resolved, needs-decision]
+          enum: [needs-decision]
         sourceRefs:
           type: array
           items:

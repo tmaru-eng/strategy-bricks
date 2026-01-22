@@ -24,17 +24,17 @@ When user makes vague request:
 1. **Ask for domain confirmation** (if ambiguous):
    - "Is this for mql5.com articles? (This tool only works with mql5.com)"
 
-1. **Request specific input**:
+2. **Request specific input**:
    - "Please provide one of:
      - Article URL: <https://www.mql5.com/en/articles/[ID>]
      - User ID: numeric or username from mql5.com profile
      - Path to file with article URLs"
 
-1. **Suggest scope limits**:
+3. **Suggest scope limits**:
    - "For testing, use --max-articles N to limit quantity"
    - "For production, omit limit to extract all"
 
-1. **Confirm before large operations**:
+4. **Confirm before large operations**:
    - If user says "all articles" → ask "User X has Y articles. Proceed with full extraction?"
 
 ## Common Usage Examples
@@ -45,8 +45,8 @@ When user makes vague request:
 **Skill**: "This extracts from mql5.com only. Please specify:
 
 1. Article URL (<https://www.mql5.com/en/articles/[ID>])
-1. MQL5 user ID (e.g., 29210372)
-1. Path to URL file
+2. MQL5 user ID (e.g., 29210372)
+3. Path to URL file
 
 Which do you have?"
 

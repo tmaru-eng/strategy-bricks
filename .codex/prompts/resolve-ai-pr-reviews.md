@@ -1,5 +1,5 @@
 ---
-description: Resolve AI PR review feedback using the resolve-ai-pr-reviews skill.
+description: resolve-ai-pr-reviews スキルを使用してAIのPRレビューフィードバックを解決します。
 ---
 
 ## User Input
@@ -8,11 +8,11 @@ description: Resolve AI PR review feedback using the resolve-ai-pr-reviews skill
 $ARGUMENTS
 ```
 
-You MUST consider the user input before proceeding (if not empty).
+続行する前に、ユーザーの入力を必ず考慮してください（空でない場合）。
 
 ## Execution Rules
 
-- Read `.codex/skills/resolve-ai-pr-reviews/SKILL.md` and follow it strictly.
-- Use `gh` to collect CodeRabbit/Gemini comments and summarize unresolved items in Japanese.
-- Apply fixes, resolve Gemini threads, push changes, and request re-review as instructed.
-- Use `/gemini review` when requesting Gemini re-review.
+- `.codex/skills/resolve-ai-pr-reviews/SKILL.md` を読み、厳密に従う。
+- `gh` を使って CodeRabbit/Gemini のコメントを収集し、未解決事項を日本語で要約する。
+- 修正を適用し、Geminiスレッドを解決し、push し、指示どおり再レビュー依頼を行う。
+- Gemini再レビュー依頼は `/gemini review` を使用する。
