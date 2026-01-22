@@ -1,0 +1,189 @@
+---
+
+description: "機能実装のタスクリスト用テンプレート"
+---
+
+# タスク: 既存ドキュメント準拠の進行
+
+**入力**: `/Users/ctake3/Documents/pProgram/MQL/Strategy Bricks/specs/001-use-existing-docs/` の設計ドキュメント
+**前提**: plan.md（必須）、spec.md（必須）、research.md、data-model.md、contracts/
+
+**テスト**: 本機能はドキュメント整理のみのため、テストタスクは作成しない。
+
+**整理方針**: タスクはユーザーストーリー単位でグルーピングし、各ストーリーを独立して
+実装・検証できるようにする。
+
+## 形式: `[ID] [P?] [Story] 説明`
+
+- **[P]**: 並列実行可能（別ファイル、依存なし）
+- **[Story]**: どのユーザーストーリーに属するか（例: US1, US2, US3）
+- 説明には正確なファイルパスを含める
+
+## パス規約
+
+- 本機能はドキュメントのみを対象とするため、`/Users/ctake3/Documents/pProgram/MQL/Strategy Bricks/docs/` 配下を使用
+
+## フェーズ1: セットアップ（共通基盤）
+
+**目的**: ドキュメント整理の作業基盤を用意する
+
+- [x] T001 `/Users/ctake3/Documents/pProgram/MQL/Strategy Bricks/docs/00_overview.md` に
+  合意事項一覧・矛盾一覧・未決事項一覧・用語正規化・変更提案影響点のセクション枠を追加
+- [x] T002 `/Users/ctake3/Documents/pProgram/MQL/Strategy Bricks/docs/README.md` に
+  一覧の参照先（`docs/00_overview.md`）へのリンクを追加
+
+---
+
+## フェーズ2: 基盤（ブロッキング前提）
+
+**目的**: すべてのストーリーが参照する一覧形式を確定する
+
+**⚠️ 重要**: このフェーズが完了するまでユーザーストーリーの実装は開始しない
+
+- [x] T003 `/Users/ctake3/Documents/pProgram/MQL/Strategy Bricks/docs/00_overview.md` に
+  一覧の必須項目（参照元/ステータス/影響範囲/優先度/担当者）と記載ルールを定義
+
+**チェックポイント**: 基盤完了 - 以降のユーザーストーリーは順次着手可能
+
+---
+
+## フェーズ3: ユーザーストーリー1 - 合意事項の一元参照 (優先度: P1) 🎯 MVP
+
+**ゴール**: 合意事項・制約・用語を参照元付きで一元化する
+
+**独立テスト**: `docs/00_overview.md` に合意事項一覧があり、参照元が確認できる
+
+### ユーザーストーリー1の実装
+
+- [x] T004 [US1] `/Users/ctake3/Documents/pProgram/MQL/Strategy Bricks/docs/00_overview.md` の
+  合意事項一覧に、
+  `/Users/ctake3/Documents/pProgram/MQL/Strategy Bricks/docs/02_requirements/10_requirements.md`、
+  `/Users/ctake3/Documents/pProgram/MQL/Strategy Bricks/docs/03_design/30_config_spec.md`、
+  `/Users/ctake3/Documents/pProgram/MQL/Strategy Bricks/docs/03_design/40_block_catalog_spec.md`
+  から抽出した合意事項を参照元付きで追加
+- [x] T005 [US1] `/Users/ctake3/Documents/pProgram/MQL/Strategy Bricks/docs/00_overview.md` の
+  用語正規化に単一定義を記載し、
+  `/Users/ctake3/Documents/pProgram/MQL/Strategy Bricks/docs/01_proposal/01_project_brief.md`、
+  `/Users/ctake3/Documents/pProgram/MQL/Strategy Bricks/docs/02_requirements/10_requirements.md`、
+  `/Users/ctake3/Documents/pProgram/MQL/Strategy Bricks/docs/03_design/50_ea_runtime_design.md`、
+  `/Users/ctake3/Documents/pProgram/MQL/Strategy Bricks/docs/03_design/60_gui_builder_design.md`
+  の用語定義を正規化に合わせて更新
+
+**チェックポイント**: 合意事項一覧と用語正規化が参照元付きで確認できる
+
+---
+
+## フェーズ4: ユーザーストーリー2 - 既存文書との整合判断 (優先度: P2)
+
+**ゴール**: 矛盾を「要判断」として一覧化し、影響判断の入口を明確にする
+
+**独立テスト**: `docs/00_overview.md` に矛盾一覧があり、全件が「要判断」になっている
+
+### ユーザーストーリー2の実装
+
+- [x] T006 [US2] `/Users/ctake3/Documents/pProgram/MQL/Strategy Bricks/docs/01_proposal/02_concept_deck.md`、
+  `/Users/ctake3/Documents/pProgram/MQL/Strategy Bricks/docs/02_requirements/12_acceptance_criteria.md`、
+  `/Users/ctake3/Documents/pProgram/MQL/Strategy Bricks/docs/03_design/20_architecture.md`
+  を照合し、矛盾点を
+  `/Users/ctake3/Documents/pProgram/MQL/Strategy Bricks/docs/00_overview.md`
+  の矛盾一覧へ参照元付きで記録（ステータスは「要判断」）
+- [x] T007 [US2] `/Users/ctake3/Documents/pProgram/MQL/Strategy Bricks/docs/00_overview.md` に
+  変更提案の影響点（追加/変更/削除）を記録するテンプレートと記載ルールを追加
+
+**チェックポイント**: 矛盾一覧と影響点テンプレートが整備されている
+
+---
+
+## フェーズ5: ユーザーストーリー3 - 未決事項の可視化 (優先度: P3)
+
+**ゴール**: 未決事項に担当者・影響範囲・優先度を付与し可視化する
+
+**独立テスト**: 未決事項一覧に担当者が必ず記載されている
+
+### ユーザーストーリー3の実装
+
+- [x] T008 [US3] `/Users/ctake3/Documents/pProgram/MQL/Strategy Bricks/docs/00_overview.md` の
+  未決事項一覧に、
+  `/Users/ctake3/Documents/pProgram/MQL/Strategy Bricks/docs/00_overview.md` の「未決事項」記述と
+  `/Users/ctake3/Documents/pProgram/MQL/Strategy Bricks/docs/05_development_plan/10_development_plan.md`
+  を基に、影響範囲・優先度・担当者（owner）を付与して追記
+- [x] T009 [P] [US3] `/Users/ctake3/Documents/pProgram/MQL/Strategy Bricks/docs/05_development_plan/10_development_plan.md` に
+  未決事項の担当者が明示されていない場合は追記
+
+**チェックポイント**: 未決事項一覧に担当者が必須で記載されている
+
+---
+
+## フェーズN: 仕上げと横断的改善
+
+**目的**: 参照整合性と成果物の最終確認
+
+- [x] T010 `/Users/ctake3/Documents/pProgram/MQL/Strategy Bricks/docs/00_overview.md` と
+  `/Users/ctake3/Documents/pProgram/MQL/Strategy Bricks/docs/README.md` の参照元リンクを点検し、
+  参照切れを修正
+- [x] T011 [P] `/Users/ctake3/Documents/pProgram/MQL/Strategy Bricks/specs/001-use-existing-docs/quickstart.md`
+  の手順が最新の一覧構成と一致しているか確認し、必要に応じて更新
+
+---
+
+## 依存関係と実行順序
+
+### フェーズ依存
+
+- **セットアップ（フェーズ1）**: 依存なし - すぐに開始可能
+- **基盤（フェーズ2）**: セットアップ完了が前提 - すべてのストーリーをブロック
+- **ユーザーストーリー（フェーズ3+）**: 基盤完了が前提
+  - 以降、ストーリーは優先度順に順次実施（P1 → P2 → P3）
+- **仕上げ（最終フェーズ）**: 対象ストーリーの完了が前提
+
+### ユーザーストーリー依存
+
+- **ユーザーストーリー1（P1）**: 基盤完了後に開始可能 - 他ストーリーへの依存なし
+- **ユーザーストーリー2（P2）**: 基盤完了後に開始可能 - US1 に依存しない
+- **ユーザーストーリー3（P3）**: 基盤完了後に開始可能 - US1/US2 に依存しない
+
+### 各ユーザーストーリー内
+
+- 一覧の定義・テンプレートに従って記述する
+- 参照元が不足する項目は追加前に確認する
+
+### 並列化ポイント
+
+- T009 と T011 は別ファイルのため並列実行可能
+
+---
+
+## 並列実行の例: ユーザーストーリー3
+
+```bash
+タスク: "T009 docs/05_development_plan/10_development_plan.md に担当者を追記"
+タスク: "T011 specs/001-use-existing-docs/quickstart.md を最新内容に更新"
+```
+
+---
+
+## 実装戦略
+
+### MVP優先（ユーザーストーリー1のみ）
+
+1. フェーズ1: セットアップ
+2. フェーズ2: 基盤
+3. フェーズ3: ユーザーストーリー1
+4. **停止して検証**: 合意事項一覧と参照元を確認
+
+### 段階的デリバリー
+
+1. セットアップ + 基盤 → 基盤準備完了
+2. ユーザーストーリー1追加 → 合意事項一覧を確認
+3. ユーザーストーリー2追加 → 矛盾一覧と影響点テンプレートを確認
+4. ユーザーストーリー3追加 → 未決事項一覧（担当者付き）を確認
+
+---
+
+## メモ
+
+- [P] タスク = 別ファイル、依存なし
+- [Story] ラベルでタスクとユーザーストーリーを対応付ける
+- 各ユーザーストーリーは独立して完結・検証可能にする
+- 参照元リンクは必ず確認する
+- 避けるべきこと: 曖昧なタスク、同一ファイル競合、独立性を壊す依存

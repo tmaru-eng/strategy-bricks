@@ -42,7 +42,7 @@
 
 ## 5. システム構成（合意イメージ）
 ### 5.1 コンポーネント
-- Electron Strategy Builder
+- GUI Builder（Electron）
   - block_catalog.json を読み込みパレット表示
   - OR/ANDルールをノードで編集
   - paramsSchemaに基づきフォーム生成
@@ -133,5 +133,64 @@
 - ビジュアルプログラミング（Visual Programming）
 - ノードベース（Node-based Editor）
 - ルール構造はDNF（ORでAND塊を束ねる）
+
+## 11. 合意事項・矛盾・未決事項の一覧（運用）
+
+### 11.0 記載ルール
+- 合意事項一覧：種別（制約/契約/用語）、要約、参照元（ファイル/節）を必須とする。
+- 矛盾一覧：ステータスは「要判断」で固定し、参照元は2件以上を推奨する。
+- 未決事項一覧：影響範囲/優先度（高/中/低）/担当者（owner）/参照元を必須とする。
+- 用語正規化：用語/定義/別表記/参照元を記載し、定義は単一定義に統合する。
+- 変更提案の影響点：追加/変更/削除の別、対象、理由、参照元を記載する。
+
+### 11.1 合意事項一覧
+
+| ID | 種別 | 要約 | 参照元 |
+| --- | --- | --- | --- |
+| A-01 | 制約 | 動作足はM1、評価はM1新バーのみ、判定は確定足（shift=1） | docs/03_design/30_config_spec.md（4. 評価タイミング）, docs/02_requirements/10_requirements.md（6. 制約） |
+| A-02 | 制約 | 同一足再エントリー禁止（二重ガード必須） | docs/03_design/30_config_spec.md（4. 評価タイミング）, docs/02_requirements/10_requirements.md（6. 制約） |
+| A-03 | 契約 | EntryRequirementはOR、ruleGroupはANDのDNF構造 | docs/03_design/30_config_spec.md（3. ルール構造）, docs/02_requirements/10_requirements.md（4.1 FR-GUI-02） |
+| A-04 | 契約 | `meta.formatVersion` 必須、非互換は取引停止＋理由ログ | docs/03_design/30_config_spec.md（2. 互換性）, docs/02_requirements/10_requirements.md（4.2 FR-EA-01） |
+| A-05 | 契約 | conflictPolicyのMVP既定は `firstOnly` | docs/03_design/30_config_spec.md（6.3 strategies[]）, docs/02_requirements/10_requirements.md（4.2 FR-EA-06） |
+| A-06 | 契約 | ブロックは副作用禁止、BlockResultはPASS/FAIL/NEUTRAL等を持つ | docs/03_design/40_block_catalog_spec.md（1. ブロック設計原則） |
+| A-07 | 契約 | GUI/EAは `typeId` を共通キーとしてブロックを一致させる | docs/03_design/40_block_catalog_spec.md（0. 目的, 6. ブロックID運用） |
+| A-08 | 契約 | paramsSchemaに基づきGUIでフォーム生成する | docs/03_design/40_block_catalog_spec.md（3. paramsSchema）, docs/02_requirements/10_requirements.md（4.1 FR-GUI-03） |
+
+### 11.2 矛盾一覧（ステータスは「要判断」）
+
+| ID | 内容 | ステータス | 参照元 |
+| --- | --- | --- | --- |
+| C-01 | ポジション管理の評価タイミングが「新バーのみ決定」と「未決事項」で不整合 | 要判断 | docs/00_overview.md（7.1 A1）, docs/05_development_plan/10_development_plan.md（5. 未決事項とリスク） |
+
+補足: `docs/01_proposal/02_concept_deck.md`、`docs/02_requirements/12_acceptance_criteria.md`、`docs/03_design/20_architecture.md` では矛盾は検出されていない。
+
+### 11.3 未決事項一覧
+
+| ID | 内容 | 影響範囲 | 優先度 | 担当者（owner） | 参照元 |
+| --- | --- | --- | --- | --- | --- |
+| U-01 | ナンピン詳細仕様（追加条件、シリーズ損切りなど） | EA Runtime/運用 | 中 | EA Runtime担当 | docs/00_overview.md（7.2）, docs/05_development_plan/10_development_plan.md（5. 未決事項とリスク） |
+| U-02 | Strategy競合解決の拡張（bestScore/all等） | EA Runtime/評価 | 中 | EA Runtime担当 | docs/00_overview.md（7.2） |
+| U-03 | ルール合成拡張（NOT, KofN, スコア合成） | GUI Builder/EA | 低 | GUI Builder担当 | docs/00_overview.md（7.2） |
+| U-04 | ニュース連携（外部APIなしの初期方針含む） | GUI Builder/EA | 低 | 運用/検証担当 | docs/00_overview.md（7.2） |
+| U-05 | 状態永続化（再起動復元範囲） | EA Runtime | 中 | EA Runtime担当 | docs/00_overview.md（7.2） |
+| U-06 | ポジション管理の毎Tick評価オプション | EA Runtime | 低 | EA Runtime担当 | docs/00_overview.md（7.2） |
+| U-07 | ログ形式（CSV/JSONL）とテスト自動化範囲 | 運用/検証 | 中 | 運用/検証担当 | docs/05_development_plan/10_development_plan.md（5. 未決事項とリスク）, docs/04_operations/90_observability_and_testing.md（5. 未決事項） |
+
+### 11.4 用語正規化
+
+| 正規用語 | 定義 | 別表記 | 参照元 |
+| --- | --- | --- | --- |
+| GUI Builder | 戦略をGUIで構築し `active.json` を生成するアプリ | Strategy Builder, Electron Strategy Builder, Strategy Bricks Builder | docs/01_proposal/01_project_brief.md（1.2）, docs/01_proposal/02_concept_deck.md（概要） |
+| EA Runtime | MT5上で実行されるEAの実行基盤 | EA, MT5 EA | docs/02_requirements/10_requirements.md（2.1）, docs/03_design/50_ea_runtime_design.md（1.1） |
+| Strategy | RuleGroupとロット/リスク/決済/ナンピンを含む取引ルールセット | 戦略 | docs/02_requirements/10_requirements.md（3. 用語定義） |
+| ruleGroup | AND条件の集合（全条件PASSで成立） | RuleGroup | docs/03_design/30_config_spec.md（3. ルール構造） |
+| EntryRequirement | OR条件の合成ルート | エントリー条件ルート | docs/02_requirements/10_requirements.md（3. 用語定義） |
+| Block | 判定・計算のみを行う副作用なしの部品 | ブロック | docs/03_design/40_block_catalog_spec.md（1. ブロック設計原則） |
+
+### 11.5 変更提案の影響点（テンプレート）
+
+| ID | 種別 | 対象 | 影響/理由 | 参照元 |
+| --- | --- | --- | --- | --- |
+| I-01 | 追加/変更/削除 | <項目> | <理由> | <参照元> |
 
 ---

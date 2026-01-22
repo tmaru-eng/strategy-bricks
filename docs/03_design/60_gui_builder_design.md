@@ -5,7 +5,7 @@
 - ファイル名：`docs/03_design/60_gui_builder_design.md`
 - 版：v0.1
 - 対象：GUI実装担当（AIエージェント含む）
-- 目的：Electron Strategy Builderの実装可能レベルでの詳細設計
+- 目的：GUI Builder（Electron）の実装可能レベルでの詳細設計
 
 ---
 
@@ -13,7 +13,7 @@
 
 ### 1.1 GUI Builderの役割
 
-Electron Strategy Builderは、ユーザーがブロックを視覚的に組み合わせて戦略を構築し、`active.json`を生成するためのGUIアプリケーションです。
+GUI Builder（Electron）は、ユーザーがブロックを視覚的に組み合わせて戦略を構築し、`active.json`を生成するためのGUIアプリケーションです。
 
 **主要機能:**
 - ブロックカタログの読み込みとパレット表示
@@ -1179,7 +1179,7 @@ export class Exporter {
       meta: {
         formatVersion: '1.0',
         name: config.name || 'active',
-        generatedBy: 'Strategy Bricks Builder',
+        generatedBy: 'Strategy Bricks GUI Builder',
         generatedAt: new Date().toISOString(),
       },
       globalGuards: config.globalGuards,
