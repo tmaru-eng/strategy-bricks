@@ -1,0 +1,176 @@
+openapi: 3.0.3
+info:
+  title: 既存ドキュメント整合確認 API
+  version: 1.0.0
+  description: 既存ドキュメントの合意事項/矛盾/未決事項を参照するための契約
+servers:
+  - url: https://example.invalid
+paths:
+  /documents:
+    get:
+      summary: ドキュメント一覧を取得する
+      responses:
+        "200":
+          description: ドキュメント一覧
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Document"
+  /agreements:
+    get:
+      summary: 合意事項一覧を取得する
+      responses:
+        "200":
+          description: 合意事項一覧
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Agreement"
+  /conflicts:
+    get:
+      summary: 矛盾一覧を取得する
+      responses:
+        "200":
+          description: 矛盾一覧
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Conflict"
+  /pending-issues:
+    get:
+      summary: 未決事項一覧を取得する
+      responses:
+        "200":
+          description: 未決事項一覧
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PendingIssue"
+  /change-impacts:
+    post:
+      summary: 変更提案が既存制約に与える影響点を評価する
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChangeProposal"
+      responses:
+        "200":
+          description: 影響点の評価結果
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChangeImpactResult"
+components:
+  schemas:
+    Document:
+      type: object
+      required: [id, path, title, lastUpdated]
+      properties:
+        id:
+          type: string
+        path:
+          type: string
+        title:
+          type: string
+        lastUpdated:
+          type: string
+          format: date
+    Agreement:
+      type: object
+      required: [id, category, summary, sourceRefs]
+      properties:
+        id:
+          type: string
+        category:
+          type: string
+          enum: [constraint, contract, term]
+        summary:
+          type: string
+        term:
+          type: string
+          description: category=term の場合に必須
+        definition:
+          type: string
+          description: category=term の場合に必須
+        sourceRefs:
+          type: array
+          items:
+            $ref: "#/components/schemas/SourceRef"
+    Conflict:
+      type: object
+      required: [id, description, status, sourceRefs]
+      properties:
+        id:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+          enum: [unresolved, resolved, needs-decision]
+        sourceRefs:
+          type: array
+          items:
+            $ref: "#/components/schemas/SourceRef"
+    PendingIssue:
+      type: object
+      required: [id, summary, impactScope, priority, owner, sourceRefs]
+      properties:
+        id:
+          type: string
+        summary:
+          type: string
+        impactScope:
+          type: string
+        priority:
+          type: string
+          enum: [high, medium, low]
+        owner:
+          type: string
+        sourceRefs:
+          type: array
+          items:
+            $ref: "#/components/schemas/SourceRef"
+    ChangeProposal:
+      type: object
+      required: [title, description]
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        assumedScope:
+          type: string
+    ChangeImpactResult:
+      type: object
+      required: [added, modified, removed]
+      properties:
+        added:
+          type: array
+          items:
+            $ref: "#/components/schemas/Agreement"
+        modified:
+          type: array
+          items:
+            $ref: "#/components/schemas/Agreement"
+        removed:
+          type: array
+          items:
+            $ref: "#/components/schemas/Agreement"
+    SourceRef:
+      type: object
+      required: [path, section]
+      properties:
+        path:
+          type: string
+        section:
+          type: string
