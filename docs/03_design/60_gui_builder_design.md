@@ -1179,7 +1179,7 @@ export class Exporter {
       meta: {
         formatVersion: '1.0',
         name: config.name || 'active',
-        generatedBy: 'Strategy Bricks GUI Builder',
+        generatedBy: 'GUI Builder',
         generatedAt: new Date().toISOString(),
       },
       globalGuards: config.globalGuards,

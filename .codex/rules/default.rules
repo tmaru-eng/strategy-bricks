@@ -1,0 +1,3 @@
+prefix_rule(pattern=["gh", "repo", "view", "--json", "owner,name", "--jq", ".owner.login + \" \" + .name"], decision="allow")
+prefix_rule(pattern=["gh", "pr", "view", "--json", "number", "--jq", ".number"], decision="allow")
+prefix_rule(pattern=["git", "add", ".codex/skills/article-extractor/references/troubleshooting.md", "docs/03_design/60_gui_builder_design.md", "specs/001-use-existing-docs/tasks.md", ".codex/rules"], decision="allow")

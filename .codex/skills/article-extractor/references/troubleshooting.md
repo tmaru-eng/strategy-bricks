@@ -1,24 +1,27 @@
 **Skill**: [MQL5 Article Extractor](../SKILL.md)
 
-│ │ ├── copy*ticks_range.md
+```text
+mql5_articles/
+├── tick_data/
+│ ├── official_docs/
+│ │ ├── copy_ticks_range.md
 │ │ └── symbol_info_tick.md
 │ └── user_articles/ # 9 articles by author
-│ ├── artmedia70/article*[ID]/
-│ ├── lazymesh/article*[ID]/
-│ └── ...
+│   ├── artmedia70/article_[ID]/
+│   ├── lazymesh/article_[ID]/
+│   └── ...
 ├── python_integration/ # Topic collections
 │ ├── official_docs/ # 32 MT5 Python API functions
 │ │ ├── mt5initialize_py.md
 │ │ ├── mt5copyticksfrom_py.md
 │ │ └── ...
 │ └── user_articles/ # 15 implementation articles
-│ ├── dmitrievsky/article*[ID]/
-│ ├── koshtenko/article\_[ID]/
-│ └── ...
+│   ├── dmitrievsky/article_[ID]/
+│   ├── koshtenko/article_[ID]/
+│   └── ...
 ├── extraction_summary.json
 └── extraction.log
-
-`````
+```
 
 **Content Organization:**
 
@@ -31,7 +34,7 @@
 
 After extraction, verify outputs:
 
-````bash
+```bash
 # Count articles extracted
 find mql5_articles/ -name "article_*.md" | wc -l
 
@@ -40,7 +43,7 @@ grep -r "```mql5" mql5_articles/ | wc -l
 
 # View summary
 cat mql5_articles/extraction_summary.json
-`````
+```
 
 ## Error Handling
 

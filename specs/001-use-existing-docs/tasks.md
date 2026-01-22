@@ -5,7 +5,7 @@ description: "機能実装のタスクリスト用テンプレート"
 
 # タスク: 既存ドキュメント準拠の進行
 
-**入力**: `/Users/ctake3/Documents/pProgram/MQL/Strategy Bricks/specs/001-use-existing-docs/` の設計ドキュメント
+**入力**: `specs/001-use-existing-docs/` の設計ドキュメント
 **前提**: plan.md（必須）、spec.md（必須）、research.md、data-model.md、contracts/
 
 **テスト**: 本機能はドキュメント整理のみのため、テストタスクは作成しない。
@@ -21,15 +21,15 @@ description: "機能実装のタスクリスト用テンプレート"
 
 ## パス規約
 
-- 本機能はドキュメントのみを対象とするため、`/Users/ctake3/Documents/pProgram/MQL/Strategy Bricks/docs/` 配下を使用
+- 本機能はドキュメントのみを対象とするため、`docs/` 配下を使用
 
 ## フェーズ1: セットアップ（共通基盤）
 
 **目的**: ドキュメント整理の作業基盤を用意する
 
-- [x] T001 `/Users/ctake3/Documents/pProgram/MQL/Strategy Bricks/docs/00_overview.md` に
+- [x] T001 `docs/00_overview.md` に
   合意事項一覧・矛盾一覧・未決事項一覧・用語正規化・変更提案影響点のセクション枠を追加
-- [x] T002 `/Users/ctake3/Documents/pProgram/MQL/Strategy Bricks/docs/README.md` に
+- [x] T002 `docs/README.md` に
   一覧の参照先（`docs/00_overview.md`）へのリンクを追加
 
 ---
@@ -40,7 +40,7 @@ description: "機能実装のタスクリスト用テンプレート"
 
 **⚠️ 重要**: このフェーズが完了するまでユーザーストーリーの実装は開始しない
 
-- [x] T003 `/Users/ctake3/Documents/pProgram/MQL/Strategy Bricks/docs/00_overview.md` に
+- [x] T003 `docs/00_overview.md` に
   一覧の必須項目（参照元/ステータス/影響範囲/優先度/担当者）と記載ルールを定義
 
 **チェックポイント**: 基盤完了 - 以降のユーザーストーリーは順次着手可能
@@ -55,18 +55,18 @@ description: "機能実装のタスクリスト用テンプレート"
 
 ### ユーザーストーリー1の実装
 
-- [x] T004 [US1] `/Users/ctake3/Documents/pProgram/MQL/Strategy Bricks/docs/00_overview.md` の
+- [x] T004 [US1] `docs/00_overview.md` の
   合意事項一覧に、
-  `/Users/ctake3/Documents/pProgram/MQL/Strategy Bricks/docs/02_requirements/10_requirements.md`、
-  `/Users/ctake3/Documents/pProgram/MQL/Strategy Bricks/docs/03_design/30_config_spec.md`、
-  `/Users/ctake3/Documents/pProgram/MQL/Strategy Bricks/docs/03_design/40_block_catalog_spec.md`
+  `docs/02_requirements/10_requirements.md`、
+  `docs/03_design/30_config_spec.md`、
+  `docs/03_design/40_block_catalog_spec.md`
   から抽出した合意事項を参照元付きで追加
-- [x] T005 [US1] `/Users/ctake3/Documents/pProgram/MQL/Strategy Bricks/docs/00_overview.md` の
+- [x] T005 [US1] `docs/00_overview.md` の
   用語正規化に単一定義を記載し、
-  `/Users/ctake3/Documents/pProgram/MQL/Strategy Bricks/docs/01_proposal/01_project_brief.md`、
-  `/Users/ctake3/Documents/pProgram/MQL/Strategy Bricks/docs/02_requirements/10_requirements.md`、
-  `/Users/ctake3/Documents/pProgram/MQL/Strategy Bricks/docs/03_design/50_ea_runtime_design.md`、
-  `/Users/ctake3/Documents/pProgram/MQL/Strategy Bricks/docs/03_design/60_gui_builder_design.md`
+  `docs/01_proposal/01_project_brief.md`、
+  `docs/02_requirements/10_requirements.md`、
+  `docs/03_design/50_ea_runtime_design.md`、
+  `docs/03_design/60_gui_builder_design.md`
   の用語定義を正規化に合わせて更新
 
 **チェックポイント**: 合意事項一覧と用語正規化が参照元付きで確認できる
@@ -81,13 +81,13 @@ description: "機能実装のタスクリスト用テンプレート"
 
 ### ユーザーストーリー2の実装
 
-- [x] T006 [US2] `/Users/ctake3/Documents/pProgram/MQL/Strategy Bricks/docs/01_proposal/02_concept_deck.md`、
-  `/Users/ctake3/Documents/pProgram/MQL/Strategy Bricks/docs/02_requirements/12_acceptance_criteria.md`、
-  `/Users/ctake3/Documents/pProgram/MQL/Strategy Bricks/docs/03_design/20_architecture.md`
+- [x] T006 [US2] `docs/01_proposal/02_concept_deck.md`、
+  `docs/02_requirements/12_acceptance_criteria.md`、
+  `docs/03_design/20_architecture.md`
   を照合し、矛盾点を
-  `/Users/ctake3/Documents/pProgram/MQL/Strategy Bricks/docs/00_overview.md`
+  `docs/00_overview.md`
   の矛盾一覧へ参照元付きで記録（ステータスは「要判断」）
-- [x] T007 [US2] `/Users/ctake3/Documents/pProgram/MQL/Strategy Bricks/docs/00_overview.md` に
+- [x] T007 [US2] `docs/00_overview.md` に
   変更提案の影響点（追加/変更/削除）を記録するテンプレートと記載ルールを追加
 
 **チェックポイント**: 矛盾一覧と影響点テンプレートが整備されている
@@ -102,12 +102,12 @@ description: "機能実装のタスクリスト用テンプレート"
 
 ### ユーザーストーリー3の実装
 
-- [x] T008 [US3] `/Users/ctake3/Documents/pProgram/MQL/Strategy Bricks/docs/00_overview.md` の
+- [x] T008 [US3] `docs/00_overview.md` の
   未決事項一覧に、
-  `/Users/ctake3/Documents/pProgram/MQL/Strategy Bricks/docs/00_overview.md` の「未決事項」記述と
-  `/Users/ctake3/Documents/pProgram/MQL/Strategy Bricks/docs/05_development_plan/10_development_plan.md`
+  `docs/00_overview.md` の「未決事項」記述と
+  `docs/05_development_plan/10_development_plan.md`
   を基に、影響範囲・優先度・担当者（owner）を付与して追記
-- [x] T009 [P] [US3] `/Users/ctake3/Documents/pProgram/MQL/Strategy Bricks/docs/05_development_plan/10_development_plan.md` に
+- [x] T009 [P] [US3] `docs/05_development_plan/10_development_plan.md` に
   未決事項の担当者が明示されていない場合は追記
 
 **チェックポイント**: 未決事項一覧に担当者が必須で記載されている
@@ -118,10 +118,10 @@ description: "機能実装のタスクリスト用テンプレート"
 
 **目的**: 参照整合性と成果物の最終確認
 
-- [x] T010 `/Users/ctake3/Documents/pProgram/MQL/Strategy Bricks/docs/00_overview.md` と
-  `/Users/ctake3/Documents/pProgram/MQL/Strategy Bricks/docs/README.md` の参照元リンクを点検し、
+- [x] T010 `docs/00_overview.md` と
+  `docs/README.md` の参照元リンクを点検し、
   参照切れを修正
-- [x] T011 [P] `/Users/ctake3/Documents/pProgram/MQL/Strategy Bricks/specs/001-use-existing-docs/quickstart.md`
+- [x] T011 [P] `specs/001-use-existing-docs/quickstart.md`
   の手順が最新の一覧構成と一致しているか確認し、必要に応じて更新
 
 ---
