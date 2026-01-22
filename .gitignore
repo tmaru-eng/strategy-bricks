@@ -1,0 +1,82 @@
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Node.js (GUI Builder)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.eslintcache
+
+# Electron
+dist/
+build/
+out/
+
+# MT5
+*.ex5
+*.ex4
+
+# Logs
+*.log
+logs/
+*.jsonl
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Build artifacts
+*.o
+*.obj
+*.exe
+
+# Configuration (local overrides)
+config/local/
+*.local.json
+
+# Secrets
+.env
+.env.local
+credentials.json
+secrets.json
+.codex/auth.json
+.codex/models_cache.json
+
+# Test outputs
+test-results/
+coverage/
+
+# Backup files
+*.bak
+*~
+
+# macOS
+.AppleDouble
+.LSOverride
+Icon
+._*
+
+# Windows
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
