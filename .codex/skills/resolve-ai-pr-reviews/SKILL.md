@@ -1,6 +1,6 @@
 ---
 name: resolve-ai-pr-reviews
-description: Resolve PR review feedback from CodeRabbit and Gemini using the gh CLI. Use when asked to fetch AI review comments, summarize unresolved items in Japanese, implement fixes, manually resolve Gemini review threads, push changes, and request a new Gemini review with @gemini /review.
+description: Resolve PR review feedback from CodeRabbit and Gemini using the gh CLI. Use when asked to fetch AI review comments, summarize unresolved items in Japanese, implement fixes, manually resolve Gemini review threads, push changes, and request a new Gemini review with /gemini review.
 ---
 
 # Resolve AI PR Reviews
@@ -54,6 +54,8 @@ gh api repos/$OWNER/$REPO/issues/$PR/comments --paginate --jq \
 
 - Do not resolve CodeRabbit threads (it auto-closes).
 - Resolve Gemini review threads manually after fixes are complete.
+- Before resolving a Gemini thread, add a short reply comment noting what was fixed
+  (e.g., "対応しました。: <summary>").
 
 ```bash
 THREAD_IDS=$(gh api graphql -f query='
@@ -90,10 +92,10 @@ done
 ### 6) Push and request re-review
 
 - Commit and push if appropriate for the repo workflow.
-- Post `@gemini /review` on the PR after push.
+- Post `/gemini review` on the PR after push.
 
 ```bash
-gh pr comment $PR --body "@gemini /review"
+gh pr comment $PR --body "/gemini review"
 ```
 
 ### 7) Report back
