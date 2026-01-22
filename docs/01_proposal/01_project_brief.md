@@ -13,7 +13,7 @@
 - Strategy Bricks（変更可）
 
 ### 1.2 何を作るか（要約）
-- **Electron（マルチプラットフォーム）で動くノード／ブロック型 Strategy Builder** と、
+- **Electron（マルチプラットフォーム）で動くノード／ブロック型 GUI Builder** と、
 - **MT5（MQL5）で動くEA Runtime** を作る。
 - ユーザーは Builder 上で **ブロック（判定・計算）**を組み合わせて戦略（複数）を作成し、
   出力された **strategy_config.json（独自設定ファイル）**をEAが読み込んで実行する。
@@ -70,14 +70,14 @@
 ### 5.1 全体アーキテクチャ図
 ~~~mermaid
 flowchart LR
-  GUI[Electron Strategy Builder] -->|読み込み| CAT[block_catalog.json<br/>（ブロック定義）]
+  GUI[GUI Builder] -->|読み込み| CAT[block_catalog.json<br/>（ブロック定義）]
   GUI -->|生成| CFG[strategy_config.json / active.json<br/>（戦略定義）]
   CFG -->|読み込み| EA[MT5 EA Runtime（MQL5）]
   EA -->|発注/決済/変更| MKT[Broker/Market]
   EA -->|ログ| LOG[Logs（原因追跡）]
 ~~~
 
-### 5.2 Builder（GUI）の役割
+### 5.2 GUI Builderの役割
 - ブロックパレット（カタログ）からドラッグ＆ドロップ
 - 条件をOR/ANDで合成してStrategyを複数作成
 - パラメータ入力（paramsSchemaからフォーム生成）
@@ -187,7 +187,7 @@ flowchart TB
 ---
 
 ## 11. 成果物（アウトプット）
-- Electron Strategy Builder（アプリ）
+- GUI Builder（Electronアプリ）
 - MT5 EA Runtime（MQL5）
 - block_catalog.json（ブロック定義）
 - strategy_config.json / active.json（実行設定）

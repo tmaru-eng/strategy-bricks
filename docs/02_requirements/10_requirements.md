@@ -24,7 +24,7 @@
 
 ### 2.1 対象（In Scope）
 - MT5（MQL5）EA Runtime
-- Electron Strategy Builder（マルチプラットフォーム）
+- GUI Builder（Electron）
 - 独自設定ファイル（JSON）：`strategy_config.json`（運用は `active.json` を推奨）
 - ブロック合成（OR枠 × AND内）
 - M1のみでトレンド・押し目・トリガー判定
@@ -49,7 +49,7 @@
 
 ## 4. 機能要件（Functional Requirements）
 
-## 4.1 Strategy Builder（Electron）
+## 4.1 GUI Builder（Electron）
 
 ### FR-GUI-01：ブロックカタログ表示
 - `block_catalog.json` を読み込み、カテゴリ別にブロックを表示できる。
