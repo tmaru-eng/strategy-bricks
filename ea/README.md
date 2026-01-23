@@ -1,71 +1,136 @@
-# EA Runtime（MQL5）
+# Strategy Bricks EA Runtime MVP
 
-MT5上で動作するExpert Advisor（EA）の実装です。
+JSON設定駆動型MT5エキスパートアドバイザーのMVP実装です。
 
-## ディレクトリ構造
+## ファイル構成
 
 ```
 ea/
-├── src/              # ソースコード（.mq5ファイル）
-│   ├── StrategyBricks.mq5        # メインEAファイル
-│   ├── Config/                   # 設定関連
-│   ├── Core/                     # コアロジック
-│   ├── Blocks/                   # ブロック実装
-│   ├── Indicators/               # インジケータキャッシュ
-│   ├── Execution/                # 発注・管理
-│   └── Utils/                    # ユーティリティ
-└── include/          # ヘッダファイル（.mqhファイル）
-    ├── Common.mqh                # 共通定義
-    ├── Interfaces.mqh            # インターフェース定義
-    └── Structs.mqh               # 構造体定義
+├── src/
+│   └── StrategyBricks.mq5          # メインEA
+│
+├── include/
+│   ├── Common/
+│   │   ├── Constants.mqh            # 定数定義
+│   │   ├── Enums.mqh                # 列挙型
+│   │   └── Structures.mqh           # 共通構造体
+│   │
+│   ├── Config/
+│   │   ├── ConfigLoader.mqh         # JSON設定読み込み
+│   │   └── ConfigValidator.mqh      # 設定検証
+│   │
+│   ├── Core/
+│   │   ├── NewBarDetector.mqh       # M1新バー検知
+│   │   ├── StrategyEngine.mqh       # 戦略評価エンジン
+│   │   ├── CompositeEvaluator.mqh   # OR/AND短絡評価
+│   │   └── BlockRegistry.mqh        # ブロック登録Factory
+│   │
+│   ├── Blocks/
+│   │   ├── IBlock.mqh               # インターフェース
+│   │   ├── Filter/FilterSpreadMax.mqh
+│   │   ├── Env/EnvSessionTimeWindow.mqh
+│   │   ├── Trend/TrendMARelation.mqh
+│   │   ├── Trigger/TriggerBBReentry.mqh
+│   │   ├── Lot/LotFixed.mqh
+│   │   ├── Risk/RiskFixedSLTP.mqh
+│   │   ├── Exit/ExitNone.mqh
+│   │   └── Nanpin/NanpinOff.mqh
+│   │
+│   ├── Indicators/
+│   │   └── IndicatorCache.mqh       # ハンドル共有・値キャッシュ
+│   │
+│   ├── Execution/
+│   │   ├── OrderExecutor.mqh        # 発注処理
+│   │   └── PositionManager.mqh      # ポジション管理
+│   │
+│   └── Support/
+│       ├── StateStore.mqh           # 状態管理
+│       ├── Logger.mqh               # JSONLログ出力
+│       └── JsonParser.mqh           # JSON解析
+│
+└── tests/
+    ├── active.json                  # テスト用設定
+    └── README.md
 ```
 
-## 実装状況
+## MVPブロック
 
-**現在の状態**: 未実装（Phase 0完了後に開始予定）
+| ブロック | typeId | 説明 |
+|---------|--------|------|
+| スプレッドフィルタ | filter.spreadMax | スプレッド上限チェック |
+| セッションフィルタ | env.session.timeWindow | 時間帯・曜日チェック |
+| MAトレンド | trend.maRelation | 終値とMAの上下関係 |
+| BB回帰トリガー | trigger.bbReentry | BB外→内の回帰検出 |
+| 固定ロット | lot.fixed | 固定ロット値 |
+| 固定SL/TP | risk.fixedSLTP | 固定pipsのSL/TP |
+| 出口なし | exit.none | SL/TPのみで決済 |
+| ナンピン無効 | nanpin.off | ナンピン無効 |
 
-**次のステップ**:
-1. プロトタイプ検証（Phase 0）
-2. コア実装（Phase 1）
+## 設計の特徴
 
-## 設計ドキュメント
+### 強い制約（絶対条件）
 
-**必読**:
-- `docs/03_design/45_interface_contracts.md` - インターフェース契約書
-- `docs/03_design/50_ea_runtime_design.md` - EA Runtime詳細設計
+- **M1固定**: 1分足のみ
+- **確定足基準**: shift=1のデータを使用
+- **同一足再エントリー禁止**: 二重ガードで保護
+  1. 新バー時のみ評価（第一ガード）
+  2. lastEntryBarTimeチェック（第二ガード）
+- **DNF形式**: 枠がOR、ルール内がAND
 
-**参照**:
-- `docs/03_design/30_config_spec.md` - 設定ファイル仕様
-- `docs/03_design/40_block_catalog_spec.md` - ブロックカタログ仕様
+### アーキテクチャ
 
-## 開発環境
+- **ブロック**: 副作用なし、判定・計算のみ
+- **Executor/Manager**: 副作用を集約
+- **IndicatorCache**: ハンドル共有、計算重複抑制
+- **StateStore**: 状態の一元管理・永続化
 
-**必要なツール**:
-- MetaTrader 5（MT5）
-- MetaEditor（MT5付属）
+## MT5への配置
 
-**コンパイル**:
 ```
-MetaEditorでStrategyBricks.mq5を開き、Compileボタンを押す
+MQL5/
+├── Experts/
+│   └── StrategyBricks.mq5      # ea/src/StrategyBricks.mq5
+├── Include/
+│   └── StrategyBricks/         # ea/include/* をコピー
+└── Files/
+    └── strategy/
+        ├── active.json          # 設定ファイル
+        └── logs/                # ログ出力先（自動作成）
 ```
 
-**テスト**:
-- Strategy Tester（MT5付属）を使用
+## コンパイル
 
-## 重要な実装ルール
+1. MetaEditorで `StrategyBricks.mq5` を開く
+2. F7でコンパイル
+3. エラーがないことを確認
 
-1. **shift=1（確定足）の使用を徹底**
-   - shift=0（未確定足）の使用は原則禁止
-2. **ブロックは副作用なし**
-   - 判定・計算のみ
-   - OrderSend()等の直接呼び出し禁止
-3. **IndicatorCache経由でインジケータ取得**
-   - 直接iMA()等を呼ばない
-4. **ログ出力の徹底**
-   - すべての判定・発注・拒否理由をログに残す
+## 入力パラメータ
 
-詳細: `docs/03_design/50_ea_runtime_design.md`
+| パラメータ | デフォルト | 説明 |
+|-----------|-----------|------|
+| InpConfigPath | strategy/active.json | 設定ファイルパス |
+| InpEnableLogging | true | ログ出力有効 |
+
+## ログ出力
+
+JSONL形式で以下のイベントを記録：
+
+- `CONFIG_LOADED` - 設定読込結果
+- `BAR_EVAL_START` - 新バー評価開始
+- `STRATEGY_EVAL` - Strategy評価結果
+- `RULEGROUP_EVAL` - RuleGroup評価結果
+- `BLOCK_EVAL` - ブロック評価結果
+- `ORDER_ATTEMPT` - 発注試行
+- `ORDER_RESULT` - 発注結果
+- `ORDER_REJECT` - 発注拒否
+
+## 参照ドキュメント
+
+- `docs/03_design/45_interface_contracts.md` - インターフェース契約
+- `docs/03_design/50_ea_runtime_design.md` - EA詳細設計
+- `docs/03_design/30_config_spec.md` - strategy_config.jsonスキーマ
+- `docs/05_development_plan/15_mvp_checklist.md` - MVPチェックリスト
 
 ---
 
-**最終更新**: 2026-01-22
+**最終更新**: 2026-01-22（MVP実装完了）
