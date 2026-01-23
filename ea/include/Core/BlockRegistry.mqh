@@ -124,8 +124,8 @@ public:
         }
         else if (typeId == "env.session.timeWindow") {
             CEnvSessionTimeWindow* sessionBlock = new CEnvSessionTimeWindow(blockId);
-            // グローバルセッション設定を適用
-            if (m_hasGlobalSession) {
+            // グローバルセッション設定を適用（NULLチェック追加）
+            if (m_hasGlobalSession && sessionBlock != NULL) {
                 sessionBlock->ApplyGlobalSession(m_globalSession);
             }
             block = sessionBlock;
