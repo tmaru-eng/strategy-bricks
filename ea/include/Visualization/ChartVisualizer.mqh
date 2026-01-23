@@ -60,9 +60,16 @@ private:
         text += "---\n";
         text += "Strategies Evaluated: " + IntegerToString(info.strategyCount) + "\n";
 
-        for (int i = 0; i < info.strategyCount && i < 8; i++) {
+        // 最大16個まで表示（EvalVisualInfoの最大値に合わせる）
+        int displayCount = MathMin(info.strategyCount, 16);
+        for (int i = 0; i < displayCount; i++) {
             string matched = info.strategies[i].matched ? "MATCH" : "---";
             text += "  " + info.strategies[i].strategyId + ": " + matched + "\n";
+        }
+
+        // 表示しきれない場合は残り数を表示
+        if (info.strategyCount > 16) {
+            text += "  ... and " + IntegerToString(info.strategyCount - 16) + " more\n";
         }
 
         return text;
@@ -74,11 +81,14 @@ private:
     string BuildBlockDetailText(const EvalVisualInfo &info) {
         string text = "";
 
-        // 各Strategyのブロック評価結果
-        for (int s = 0; s < info.strategyCount && s < 4; s++) {
+        // 各Strategyのブロック評価結果（最大16 Strategyまで表示）
+        int stratDisplayCount = MathMin(info.strategyCount, 16);
+        for (int s = 0; s < stratDisplayCount; s++) {
             text += "[" + info.strategies[s].strategyId + "]\n";
 
-            for (int b = 0; b < info.strategies[s].blockResultCount && b < 8; b++) {
+            // 最大32ブロックまで表示（StrategyVisualInfoの最大値に合わせる）
+            int blockDisplayCount = MathMin(info.strategies[s].blockResultCount, 32);
+            for (int b = 0; b < blockDisplayCount; b++) {
                 BlockVisualInfo block = info.strategies[s].blockResults[b];
                 string status = BlockStatusToString(block.status);
                 text += "  " + block.typeId + ": " + status + "\n";
@@ -181,7 +191,7 @@ public:
         ObjectSetInteger(m_chartId, name, OBJPROP_COLOR, arrowColor);
         ObjectSetInteger(m_chartId, name, OBJPROP_WIDTH, 2);
         ObjectSetInteger(m_chartId, name, OBJPROP_SELECTABLE, false);
-        ObjectSetInteger(m_chartId, name, OBJPROP_HIDDEN, true);
+        ObjectSetInteger(m_chartId, name, OBJPROP_HIDDEN, false);  // 矢印は表示する
 
         // 古い矢印を削除
         m_nameManager.TrimOldArrows(m_chartId, m_config.maxArrowHistory);
@@ -223,12 +233,12 @@ public:
 
         // シグナル矢印描画（シグナル発生時のみ）
         if (info.signalGenerated) {
-            // 価格取得（shift=1の確定足）
-            double price = iClose(Symbol(), PERIOD_M1, 1);
+            // 価格取得（shift=1の確定足）- EA_TIMEFRAMEを使用して一貫性を保つ
+            double price = iClose(Symbol(), EA_TIMEFRAME, 1);
             if (info.signalDirection == DIRECTION_SHORT) {
-                price = iHigh(Symbol(), PERIOD_M1, 1);  // SELLは高値の上
+                price = iHigh(Symbol(), EA_TIMEFRAME, 1);  // SELLは高値の上
             } else {
-                price = iLow(Symbol(), PERIOD_M1, 1);   // BUYは安値の下
+                price = iLow(Symbol(), EA_TIMEFRAME, 1);   // BUYは安値の下
             }
             DrawSignalArrow(info.barTime, price, info.signalDirection);
         }

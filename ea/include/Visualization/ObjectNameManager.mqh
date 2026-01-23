@@ -130,31 +130,68 @@ public:
     }
 
     //+------------------------------------------------------------------+
+    //| 矢印名から時刻を抽出                                                |
+    //+------------------------------------------------------------------+
+    long ExtractTimeFromArrowName(string name) {
+        // フォーマット: SB_VIS_ARROW_BUY_<timestamp> または SB_VIS_ARROW_SELL_<timestamp>
+        int lastUnderscorePos = -1;
+        for (int i = StringLen(name) - 1; i >= 0; i--) {
+            if (StringGetCharacter(name, i) == '_') {
+                lastUnderscorePos = i;
+                break;
+            }
+        }
+        if (lastUnderscorePos < 0) return 0;
+
+        string timeStr = StringSubstr(name, lastUnderscorePos + 1);
+        return StringToInteger(timeStr);
+    }
+
+    //+------------------------------------------------------------------+
     //| 古い矢印を削除（最大数を超えた分）                                   |
     //+------------------------------------------------------------------+
     int TrimOldArrows(long chartId, int maxCount) {
         // 矢印オブジェクトのみ収集
         string arrows[];
+        long arrowTimes[];
         int arrowCount = 0;
         int total = ObjectsTotal(chartId);
 
         ArrayResize(arrows, total);
+        ArrayResize(arrowTimes, total);
 
         for (int i = 0; i < total; i++) {
             string name = ObjectName(chartId, i);
             if (StringFind(name, VIS_ARROW_PREFIX) == 0) {
                 arrows[arrowCount] = name;
+                arrowTimes[arrowCount] = ExtractTimeFromArrowName(name);
                 arrowCount++;
             }
         }
 
         ArrayResize(arrows, arrowCount);
+        ArrayResize(arrowTimes, arrowCount);
 
         // 最大数を超えていれば古いものから削除
         int deleted = 0;
         if (arrowCount > maxCount) {
-            // 時刻でソート（名前に時刻が含まれる前提）
-            // 単純に先頭から削除（古い順に追加されている想定）
+            // 時刻でソート（バブルソート、昇順 = 古い順）
+            for (int i = 0; i < arrowCount - 1; i++) {
+                for (int j = 0; j < arrowCount - 1 - i; j++) {
+                    if (arrowTimes[j] > arrowTimes[j + 1]) {
+                        // スワップ
+                        long tempTime = arrowTimes[j];
+                        arrowTimes[j] = arrowTimes[j + 1];
+                        arrowTimes[j + 1] = tempTime;
+
+                        string tempName = arrows[j];
+                        arrows[j] = arrows[j + 1];
+                        arrows[j + 1] = tempName;
+                    }
+                }
+            }
+
+            // 古い順から削除
             int toDelete = arrowCount - maxCount;
             for (int i = 0; i < toDelete && i < arrowCount; i++) {
                 if (ObjectDelete(chartId, arrows[i])) {

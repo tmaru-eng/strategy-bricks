@@ -43,6 +43,9 @@
 input string InpConfigPath = "strategy/active.json";   // 設定ファイルパス
 input bool   InpEnableLogging = true;                  // ログ出力有効
 input bool   InpEnableVisualization = true;            // チャート可視化有効
+input bool   InpShowSignalArrows = true;               // シグナル矢印表示
+input bool   InpShowStatusPanel = true;                // 状態パネル表示
+input bool   InpShowBlockDetails = true;               // ブロック詳細表示
 input int    InpMaxArrowHistory = 100;                 // シグナル矢印最大保持数
 
 //+------------------------------------------------------------------+
@@ -149,6 +152,9 @@ int OnInit() {
         VisualConfig visConfig;
         visConfig.Reset();
         visConfig.enabled = true;
+        visConfig.showSignalArrows = InpShowSignalArrows;
+        visConfig.showStatusPanel = InpShowStatusPanel;
+        visConfig.showBlockDetails = InpShowBlockDetails;
         visConfig.maxArrowHistory = InpMaxArrowHistory;
         g_visualizer.Initialize(visConfig, &g_indicatorCache);
         g_logger.LogInfo("VISUALIZER_INIT", "Chart visualizer initialized");

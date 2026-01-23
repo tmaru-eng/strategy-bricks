@@ -71,13 +71,18 @@ struct BlockVisualInfo {
 //+------------------------------------------------------------------+
 //| Strategy可視化情報構造体                                            |
 //+------------------------------------------------------------------+
+// 固定サイズ配列の最大値定義
+#define MAX_VISUAL_BLOCKS_PER_STRATEGY 32  // 1 Strategyあたりの最大ブロック数
+#define MAX_VISUAL_STRATEGIES          16  // 最大Strategy数
+
 struct StrategyVisualInfo {
     string         strategyId;            // Strategy ID
     string         strategyName;          // Strategy名
     bool           matched;               // 成立したか
     TradeDirection direction;             // 成立した方向
     string         reason;                // 理由（不成立時の原因等）
-    BlockVisualInfo blockResults[32];     // ブロック評価結果（最大32個）
+    // 注: 固定サイズ配列。32個を超えるブロックは切り捨てられる
+    BlockVisualInfo blockResults[MAX_VISUAL_BLOCKS_PER_STRATEGY];
     int            blockResultCount;      // ブロック評価結果数
 
     void Reset() {
@@ -91,7 +96,11 @@ struct StrategyVisualInfo {
 
     // ブロック結果を追加
     bool AddBlockResult(const BlockVisualInfo &info) {
-        if (blockResultCount >= 32) return false;
+        if (blockResultCount >= MAX_VISUAL_BLOCKS_PER_STRATEGY) {
+            Print("WARNING: StrategyVisualInfo - Block result storage full (",
+                  MAX_VISUAL_BLOCKS_PER_STRATEGY, ")");
+            return false;
+        }
         blockResults[blockResultCount] = info;
         blockResultCount++;
         return true;
@@ -106,7 +115,8 @@ struct EvalVisualInfo {
     double             spreadPips;        // スプレッド（pips）
     bool               spreadOk;          // スプレッドチェック結果
     bool               positionLimitOk;   // ポジション制限チェック結果
-    StrategyVisualInfo strategies[16];    // Strategy評価結果（最大16個）
+    // 注: 固定サイズ配列。16個を超えるStrategyは切り捨てられる
+    StrategyVisualInfo strategies[MAX_VISUAL_STRATEGIES];
     int                strategyCount;     // Strategy評価数
     bool               signalGenerated;   // シグナル発生したか
     TradeDirection     signalDirection;   // シグナル方向
@@ -125,7 +135,11 @@ struct EvalVisualInfo {
 
     // Strategy結果を追加
     bool AddStrategyResult(const StrategyVisualInfo &info) {
-        if (strategyCount >= 16) return false;
+        if (strategyCount >= MAX_VISUAL_STRATEGIES) {
+            Print("WARNING: EvalVisualInfo - Strategy result storage full (",
+                  MAX_VISUAL_STRATEGIES, ")");
+            return false;
+        }
         strategies[strategyCount] = info;
         strategyCount++;
         return true;

@@ -33,7 +33,9 @@ private:
     double           m_lastTpPips;      // 最後のTP pips
 
     // 可視化用ブロック評価結果
-    BlockVisualInfo  m_blockResults[32];// ブロック評価結果保存
+    // 注: 固定サイズ配列。32個を超えるブロックがある場合は警告が出力される
+    static const int MAX_BLOCK_RESULTS = 32;
+    BlockVisualInfo  m_blockResults[32];// ブロック評価結果保存（最大32個）
     int              m_blockResultCount;// ブロック評価結果数
 
 public:
@@ -90,7 +92,12 @@ public:
     //| ブロック評価結果を保存                                              |
     //+------------------------------------------------------------------+
     void SaveBlockResult(string blockId, string typeId, const BlockResult &result) {
-        if (m_blockResultCount >= 32) return;
+        if (m_blockResultCount >= MAX_BLOCK_RESULTS) {
+            // 最大数を超えた場合は警告を出力
+            Print("WARNING: CompositeEvaluator - Block result storage full (",
+                  MAX_BLOCK_RESULTS, "). Additional results will be truncated.");
+            return;
+        }
 
         m_blockResults[m_blockResultCount].blockId = blockId;
         m_blockResults[m_blockResultCount].typeId = typeId;

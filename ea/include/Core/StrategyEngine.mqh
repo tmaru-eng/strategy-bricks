@@ -186,7 +186,9 @@ public:
             bool success = m_evaluator.EvaluateOR(strat.entryRequirement, ctx);
 
             // ブロック評価結果を取得して保存
-            for (int b = 0; b < m_evaluator.GetBlockResultCount() && b < 32; b++) {
+            // 注: GetBlockResultCount()のみで制御し、ハードコードされた値は使用しない
+            int blockCount = m_evaluator.GetBlockResultCount();
+            for (int b = 0; b < blockCount; b++) {
                 BlockVisualInfo blockInfo;
                 if (m_evaluator.GetBlockResult(b, blockInfo)) {
                     stratInfo.AddBlockResult(blockInfo);
@@ -253,9 +255,10 @@ public:
 
     //+------------------------------------------------------------------+
     //| スプレッド超過を評価情報に記録                                       |
+    //| 注: 既存のStrategy評価情報を保持し、スプレッド関連フィールドのみ更新    |
     //+------------------------------------------------------------------+
     void SetSpreadExceeded(double spreadPips) {
-        m_lastEvalInfo.Reset();
+        // Reset()は呼ばない - 既存の評価情報を保持
         m_lastEvalInfo.barTime = iTime(Symbol(), EA_TIMEFRAME, 0);
         m_lastEvalInfo.spreadPips = spreadPips;
         m_lastEvalInfo.spreadOk = false;
@@ -263,9 +266,10 @@ public:
 
     //+------------------------------------------------------------------+
     //| ポジション制限超過を評価情報に記録                                   |
+    //| 注: 既存のStrategy評価情報を保持し、ポジション制限フィールドのみ更新   |
     //+------------------------------------------------------------------+
     void SetPositionLimitExceeded() {
-        m_lastEvalInfo.Reset();
+        // Reset()は呼ばない - 既存の評価情報を保持
         m_lastEvalInfo.barTime = iTime(Symbol(), EA_TIMEFRAME, 0);
         m_lastEvalInfo.positionLimitOk = false;
     }
