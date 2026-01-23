@@ -20,22 +20,9 @@
 //| チャートオブジェクト名の生成・管理                                   |
 //+------------------------------------------------------------------+
 class CObjectNameManager {
-private:
-    int m_arrowCounter;       // 矢印カウンター
-    int m_labelCounter;       // ラベルカウンター
-    int m_lineCounter;        // ラインカウンター
-
 public:
     //--- コンストラクタ
     CObjectNameManager() {
-        Reset();
-    }
-
-    //--- カウンターリセット
-    void Reset() {
-        m_arrowCounter = 0;
-        m_labelCounter = 0;
-        m_lineCounter = 0;
     }
 
     //+------------------------------------------------------------------+

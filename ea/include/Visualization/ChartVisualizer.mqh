@@ -60,16 +60,16 @@ private:
         text += "---\n";
         text += "Strategies Evaluated: " + IntegerToString(info.strategyCount) + "\n";
 
-        // 最大16個まで表示（EvalVisualInfoの最大値に合わせる）
-        int displayCount = MathMin(info.strategyCount, 16);
+        // 最大MAX_VISUAL_STRATEGIES個まで表示（EvalVisualInfoの最大値に合わせる）
+        int displayCount = MathMin(info.strategyCount, MAX_VISUAL_STRATEGIES);
         for (int i = 0; i < displayCount; i++) {
             string matched = info.strategies[i].matched ? "MATCH" : "---";
             text += "  " + info.strategies[i].strategyId + ": " + matched + "\n";
         }
 
         // 表示しきれない場合は残り数を表示
-        if (info.strategyCount > 16) {
-            text += "  ... and " + IntegerToString(info.strategyCount - 16) + " more\n";
+        if (info.strategyCount > MAX_VISUAL_STRATEGIES) {
+            text += "  ... and " + IntegerToString(info.strategyCount - MAX_VISUAL_STRATEGIES) + " more\n";
         }
 
         return text;
@@ -81,13 +81,13 @@ private:
     string BuildBlockDetailText(const EvalVisualInfo &info) {
         string text = "";
 
-        // 各Strategyのブロック評価結果（最大16 Strategyまで表示）
-        int stratDisplayCount = MathMin(info.strategyCount, 16);
+        // 各Strategyのブロック評価結果（最大MAX_VISUAL_STRATEGIES個まで表示）
+        int stratDisplayCount = MathMin(info.strategyCount, MAX_VISUAL_STRATEGIES);
         for (int s = 0; s < stratDisplayCount; s++) {
             text += "[" + info.strategies[s].strategyId + "]\n";
 
-            // 最大32ブロックまで表示（StrategyVisualInfoの最大値に合わせる）
-            int blockDisplayCount = MathMin(info.strategies[s].blockResultCount, 32);
+            // 最大MAX_VISUAL_BLOCKS_PER_STRATEGYブロックまで表示
+            int blockDisplayCount = MathMin(info.strategies[s].blockResultCount, MAX_VISUAL_BLOCKS_PER_STRATEGY);
             for (int b = 0; b < blockDisplayCount; b++) {
                 BlockVisualInfo block = info.strategies[s].blockResults[b];
                 string status = BlockStatusToString(block.status);
@@ -293,7 +293,7 @@ public:
         ObjectSetInteger(m_chartId, name, OBJPROP_WIDTH, 1);
         ObjectSetInteger(m_chartId, name, OBJPROP_RAY_RIGHT, true);
         ObjectSetInteger(m_chartId, name, OBJPROP_SELECTABLE, false);
-        ObjectSetInteger(m_chartId, name, OBJPROP_HIDDEN, true);
+        ObjectSetInteger(m_chartId, name, OBJPROP_HIDDEN, false);  // インジケータラインは表示する
 
         return true;
     }
@@ -340,7 +340,7 @@ public:
                 ObjectSetInteger(m_chartId, nameUpper, OBJPROP_WIDTH, 1);
                 ObjectSetInteger(m_chartId, nameUpper, OBJPROP_RAY_RIGHT, true);
                 ObjectSetInteger(m_chartId, nameUpper, OBJPROP_SELECTABLE, false);
-                ObjectSetInteger(m_chartId, nameUpper, OBJPROP_HIDDEN, true);
+                ObjectSetInteger(m_chartId, nameUpper, OBJPROP_HIDDEN, false);  // BBバンドは表示する
             }
         }
 
@@ -353,7 +353,7 @@ public:
                 ObjectSetInteger(m_chartId, nameMiddle, OBJPROP_WIDTH, 1);
                 ObjectSetInteger(m_chartId, nameMiddle, OBJPROP_RAY_RIGHT, true);
                 ObjectSetInteger(m_chartId, nameMiddle, OBJPROP_SELECTABLE, false);
-                ObjectSetInteger(m_chartId, nameMiddle, OBJPROP_HIDDEN, true);
+                ObjectSetInteger(m_chartId, nameMiddle, OBJPROP_HIDDEN, false);  // BBバンドは表示する
             }
         }
 
@@ -366,7 +366,7 @@ public:
                 ObjectSetInteger(m_chartId, nameLower, OBJPROP_WIDTH, 1);
                 ObjectSetInteger(m_chartId, nameLower, OBJPROP_RAY_RIGHT, true);
                 ObjectSetInteger(m_chartId, nameLower, OBJPROP_SELECTABLE, false);
-                ObjectSetInteger(m_chartId, nameLower, OBJPROP_HIDDEN, true);
+                ObjectSetInteger(m_chartId, nameLower, OBJPROP_HIDDEN, false);  // BBバンドは表示する
             }
         }
 
