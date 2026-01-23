@@ -46,8 +46,8 @@ public:
     virtual void Evaluate(const Context &ctx, BlockResult &result) override {
         // BBハンドル取得（遅延生成）
         if (m_handle == INVALID_HANDLE && ctx.cache != NULL) {
-            m_handle = ctx.cache.GetBBHandle(ctx.market.symbol, EA_TIMEFRAME,
-                                            m_period, 0, m_deviation, PRICE_CLOSE);
+            m_handle = ctx.cache->GetBBHandle(ctx.market.symbol, EA_TIMEFRAME,
+                                             m_period, 0, m_deviation, PRICE_CLOSE);
         }
 
         if (m_handle == INVALID_HANDLE) {
@@ -58,10 +58,10 @@ public:
 
         // BB値取得（buffer: 0=middle, 1=upper, 2=lower）
         // shift=1（現在の確定足）とshift=2（1つ前の確定足）
-        double upper1 = ctx.cache.GetBBValue(m_handle, 1, CONFIRMED_BAR_SHIFT, ctx.state.barTime);
-        double lower1 = ctx.cache.GetBBValue(m_handle, 2, CONFIRMED_BAR_SHIFT, ctx.state.barTime);
-        double upper2 = ctx.cache.GetBBValue(m_handle, 1, CONFIRMED_BAR_SHIFT + 1, ctx.state.barTime);
-        double lower2 = ctx.cache.GetBBValue(m_handle, 2, CONFIRMED_BAR_SHIFT + 1, ctx.state.barTime);
+        double upper1 = ctx.cache->GetBBValue(m_handle, 1, CONFIRMED_BAR_SHIFT, ctx.state.barTime);
+        double lower1 = ctx.cache->GetBBValue(m_handle, 2, CONFIRMED_BAR_SHIFT, ctx.state.barTime);
+        double upper2 = ctx.cache->GetBBValue(m_handle, 1, CONFIRMED_BAR_SHIFT + 1, ctx.state.barTime);
+        double lower2 = ctx.cache->GetBBValue(m_handle, 2, CONFIRMED_BAR_SHIFT + 1, ctx.state.barTime);
 
         // 終値取得（shift=1, shift=2）
         double close1 = ctx.market.close[0];  // shift=1

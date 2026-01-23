@@ -49,8 +49,8 @@ public:
     virtual void Evaluate(const Context &ctx, BlockResult &result) override {
         // ハンドル取得（遅延生成）
         if (m_handle == INVALID_HANDLE && ctx.cache != NULL) {
-            m_handle = ctx.cache.GetMAHandle(ctx.market.symbol, EA_TIMEFRAME,
-                                            m_period, 0, m_maType, PRICE_CLOSE);
+            m_handle = ctx.cache->GetMAHandle(ctx.market.symbol, EA_TIMEFRAME,
+                                             m_period, 0, m_maType, PRICE_CLOSE);
         }
 
         if (m_handle == INVALID_HANDLE) {
@@ -60,7 +60,7 @@ public:
         }
 
         // MA値取得（shift=1、確定足）
-        double ma = ctx.cache.GetMAValue(m_handle, CONFIRMED_BAR_SHIFT, ctx.state.barTime);
+        double ma = ctx.cache->GetMAValue(m_handle, CONFIRMED_BAR_SHIFT, ctx.state.barTime);
         double close = ctx.market.close[0];  // Context内ではclose[0]がshift=1の終値
 
         // 判定
