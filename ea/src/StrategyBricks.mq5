@@ -35,12 +35,15 @@
 #include "../include/Core/NewBarDetector.mqh"
 #include "../include/Core/CompositeEvaluator.mqh"
 #include "../include/Core/StrategyEngine.mqh"
+#include "../include/Visualization/ChartVisualizer.mqh"
 
 //+------------------------------------------------------------------+
 //| 入力パラメータ                                                      |
 //+------------------------------------------------------------------+
 input string InpConfigPath = "strategy/active.json";   // 設定ファイルパス
 input bool   InpEnableLogging = true;                  // ログ出力有効
+input bool   InpEnableVisualization = true;            // チャート可視化有効
+input int    InpMaxArrowHistory = 100;                 // シグナル矢印最大保持数
 
 //+------------------------------------------------------------------+
 //| グローバル変数                                                      |
@@ -57,6 +60,7 @@ CCompositeEvaluator g_evaluator;            // 複合評価器
 CStrategyEngine     g_strategyEngine;       // 戦略エンジン
 COrderExecutor      g_orderExecutor;        // 発注実行
 CPositionManager    g_positionManager;      // ポジション管理
+CChartVisualizer    g_visualizer;           // チャート可視化
 
 bool                g_initialized = false;  // 初期化成功フラグ
 
@@ -140,6 +144,16 @@ int OnInit() {
     //--- 新バー検知初期化
     g_newBarDetector.Initialize();
 
+    //--- チャート可視化初期化
+    if (InpEnableVisualization) {
+        VisualConfig visConfig;
+        visConfig.Reset();
+        visConfig.enabled = true;
+        visConfig.maxArrowHistory = InpMaxArrowHistory;
+        g_visualizer.Initialize(visConfig, &g_indicatorCache);
+        g_logger.LogInfo("VISUALIZER_INIT", "Chart visualizer initialized");
+    }
+
     g_initialized = true;
     g_logger.LogInfo("INIT_COMPLETE", "Strategy Bricks EA initialized successfully");
     Print("Strategy Bricks EA initialized successfully");
@@ -154,6 +168,9 @@ int OnInit() {
 //+------------------------------------------------------------------+
 void OnDeinit(const int reason) {
     g_logger.LogInfo("DEINIT", "Deinit reason: " + IntegerToString(reason));
+
+    //--- チャート可視化クリーンアップ
+    g_visualizer.Cleanup();
 
     //--- 状態永続化
     g_stateStore.Persist();
@@ -194,6 +211,11 @@ void OnTick() {
         //--- ポジション制限チェック
         if (g_positionManager.IsPositionLimitExceeded()) {
             g_logger.LogInfo("LIMIT_EXCEEDED", "Position limit exceeded, entry skipped");
+            //--- 可視化用：ポジション制限超過を記録
+            g_strategyEngine.SetPositionLimitExceeded();
+            if (InpEnableVisualization) {
+                g_visualizer.Update(g_strategyEngine.GetLastEvalInfo());
+            }
             //--- 管理のみ実施
             g_positionManager.ManagePositions();
             return;
@@ -206,6 +228,11 @@ void OnTick() {
             g_logger.LogInfo("SPREAD_EXCEEDED",
                 "Spread=" + DoubleToString(spreadPips, 1) +
                 " pips > max=" + DoubleToString(g_config.globalGuards.maxSpreadPips, 1));
+            //--- 可視化用：スプレッド超過を記録
+            g_strategyEngine.SetSpreadExceeded(spreadPips);
+            if (InpEnableVisualization) {
+                g_visualizer.Update(g_strategyEngine.GetLastEvalInfo());
+            }
             //--- 管理のみ実施
             g_positionManager.ManagePositions();
             return;
@@ -213,6 +240,11 @@ void OnTick() {
 
         //--- 戦略評価（エントリー判定）
         g_strategyEngine.EvaluateStrategies(barTime);
+
+        //--- チャート可視化更新
+        if (InpEnableVisualization) {
+            g_visualizer.Update(g_strategyEngine.GetLastEvalInfo());
+        }
 
         //--- ポジション管理（新バー時のみ - 設計決定A1）
         g_positionManager.ManagePositions();
