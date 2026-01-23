@@ -10,6 +10,7 @@
 #include "../Common/Enums.mqh"
 #include "../Common/Structures.mqh"
 #include "../Indicators/IndicatorCache.mqh"
+#include "../Support/JsonParser.mqh"
 
 //+------------------------------------------------------------------+
 //| Context構造体（ブロック評価時に渡される完全な情報）                     |
@@ -60,111 +61,42 @@ protected:
     string m_blockId;       // ブロックID
     string m_typeId;        // タイプID
     string m_paramsJson;    // パラメータJSON
+    CJsonObject m_jsonObj;  // JSONパーサー
 
     //+------------------------------------------------------------------+
-    //| JSON文字列から数値を取得                                           |
+    //| JSON文字列から数値を取得（CJsonObject使用）                          |
     //+------------------------------------------------------------------+
     double GetParamDouble(string paramsJson, string key, double defaultValue) {
-        string searchKey = "\"" + key + "\"";
-        int pos = StringFind(paramsJson, searchKey);
-        if (pos < 0) return defaultValue;
-
-        // コロンを探す
-        pos = StringFind(paramsJson, ":", pos);
-        if (pos < 0) return defaultValue;
-        pos++;
-
-        // 空白スキップ
-        int len = StringLen(paramsJson);
-        while (pos < len) {
-            ushort c = StringGetCharacter(paramsJson, pos);
-            if (c != ' ' && c != '\t') break;
-            pos++;
-        }
-
-        // 数値の開始位置
-        int start = pos;
-        while (pos < len) {
-            ushort c = StringGetCharacter(paramsJson, pos);
-            if ((c >= '0' && c <= '9') || c == '.' || c == '-' || c == '+') {
-                pos++;
-            } else {
-                break;
-            }
-        }
-
-        string numStr = StringSubstr(paramsJson, start, pos - start);
-        return StringToDouble(numStr);
+        if (paramsJson == "") return defaultValue;
+        m_jsonObj.SetJson(paramsJson);
+        return m_jsonObj.GetDouble(key, defaultValue);
     }
 
     //+------------------------------------------------------------------+
-    //| JSON文字列から整数を取得                                           |
+    //| JSON文字列から整数を取得（CJsonObject使用）                          |
     //+------------------------------------------------------------------+
     int GetParamInt(string paramsJson, string key, int defaultValue) {
-        return (int)GetParamDouble(paramsJson, key, (double)defaultValue);
+        if (paramsJson == "") return defaultValue;
+        m_jsonObj.SetJson(paramsJson);
+        return m_jsonObj.GetInt(key, defaultValue);
     }
 
     //+------------------------------------------------------------------+
-    //| JSON文字列から文字列を取得                                          |
+    //| JSON文字列から文字列を取得（CJsonObject使用）                         |
     //+------------------------------------------------------------------+
     string GetParamString(string paramsJson, string key, string defaultValue) {
-        string searchKey = "\"" + key + "\"";
-        int pos = StringFind(paramsJson, searchKey);
-        if (pos < 0) return defaultValue;
-
-        // コロンを探す
-        pos = StringFind(paramsJson, ":", pos);
-        if (pos < 0) return defaultValue;
-        pos++;
-
-        // 空白スキップ
-        int len = StringLen(paramsJson);
-        while (pos < len) {
-            ushort c = StringGetCharacter(paramsJson, pos);
-            if (c != ' ' && c != '\t') break;
-            pos++;
-        }
-
-        // ダブルクォートの開始
-        if (StringGetCharacter(paramsJson, pos) != '"') return defaultValue;
-        pos++;
-
-        // 文字列の終了を探す
-        int start = pos;
-        while (pos < len) {
-            ushort c = StringGetCharacter(paramsJson, pos);
-            if (c == '"') break;
-            pos++;
-        }
-
-        return StringSubstr(paramsJson, start, pos - start);
+        if (paramsJson == "") return defaultValue;
+        m_jsonObj.SetJson(paramsJson);
+        return m_jsonObj.GetString(key, defaultValue);
     }
 
     //+------------------------------------------------------------------+
-    //| JSON文字列から真偽値を取得                                          |
+    //| JSON文字列から真偽値を取得（CJsonObject使用）                         |
     //+------------------------------------------------------------------+
     bool GetParamBool(string paramsJson, string key, bool defaultValue) {
-        string searchKey = "\"" + key + "\"";
-        int pos = StringFind(paramsJson, searchKey);
-        if (pos < 0) return defaultValue;
-
-        // コロンを探す
-        pos = StringFind(paramsJson, ":", pos);
-        if (pos < 0) return defaultValue;
-        pos++;
-
-        // trueまたはfalseを探す
-        int len = StringLen(paramsJson);
-        while (pos < len) {
-            ushort c = StringGetCharacter(paramsJson, pos);
-            if (c != ' ' && c != '\t') break;
-            pos++;
-        }
-
-        if (StringSubstr(paramsJson, pos, 4) == "true") return true;
-        if (StringSubstr(paramsJson, pos, 5) == "false") return false;
-
-        return defaultValue;
+        if (paramsJson == "") return defaultValue;
+        m_jsonObj.SetJson(paramsJson);
+        return m_jsonObj.GetBool(key, defaultValue);
     }
 
 public:

@@ -69,9 +69,9 @@ private:
     }
 
     //+------------------------------------------------------------------+
-    //| ロット検証                                                        |
+    //| ロット検証（正規化も実施）                                          |
     //+------------------------------------------------------------------+
-    bool ValidateLot(string symbol, double lot, string &reason) {
+    bool ValidateLot(string symbol, double &lot, string &reason) {
         double minLot = SymbolInfoDouble(symbol, SYMBOL_VOLUME_MIN);
         double maxLot = SymbolInfoDouble(symbol, SYMBOL_VOLUME_MAX);
         double lotStep = SymbolInfoDouble(symbol, SYMBOL_VOLUME_STEP);

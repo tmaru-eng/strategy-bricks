@@ -42,6 +42,21 @@ struct MarketInfo {
 };
 
 //+------------------------------------------------------------------+
+//| スプレッドをpipsに変換（ユーティリティ関数）                          |
+//| 5桁/3桁ブローカー: 10ポイント = 1pips                              |
+//| 4桁/2桁ブローカー: 1ポイント = 1pips                               |
+//+------------------------------------------------------------------+
+double CalculateSpreadPips(string symbol) {
+    double ask = SymbolInfoDouble(symbol, SYMBOL_ASK);
+    double bid = SymbolInfoDouble(symbol, SYMBOL_BID);
+    double point = SymbolInfoDouble(symbol, SYMBOL_POINT);
+    int digits = (int)SymbolInfoInteger(symbol, SYMBOL_DIGITS);
+
+    double spreadPoints = (ask - bid) / point;
+    return (digits == 3 || digits == 5) ? spreadPoints / 10.0 : spreadPoints;
+}
+
+//+------------------------------------------------------------------+
 //| 状態情報構造体                                                     |
 //+------------------------------------------------------------------+
 struct StateInfo {

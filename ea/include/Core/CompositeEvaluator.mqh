@@ -86,11 +86,8 @@ public:
         ctx.market.point = SymbolInfoDouble(Symbol(), SYMBOL_POINT);
         ctx.market.digits = (int)SymbolInfoInteger(Symbol(), SYMBOL_DIGITS);
 
-        // スプレッド計算（pips）
-        double spreadPoints = (ctx.market.ask - ctx.market.bid) / ctx.market.point;
-        // 5桁/3桁ブローカーの場合は10で割る
-        ctx.market.spreadPips = (ctx.market.digits == 3 || ctx.market.digits == 5) ?
-                                spreadPoints / 10.0 : spreadPoints;
+        // スプレッド計算（pips）- ユーティリティ関数使用
+        ctx.market.spreadPips = CalculateSpreadPips(Symbol());
 
         // 価格配列（shift=1の確定足）
         double closeBuffer[], highBuffer[], lowBuffer[], openBuffer[];
@@ -212,17 +209,8 @@ public:
             return false;
         }
 
-        // Contextにパラメータを設定（ブロック定義から）
-        Context evalCtx = ctx;
-        for (int i = 0; i < m_config.blockCount; i++) {
-            if (m_config.blocks[i].id == blockId) {
-                evalCtx.paramsJson = m_config.blocks[i].paramsJson;
-                break;
-            }
-        }
-
-        // 評価実行
-        block.Evaluate(evalCtx, result);
+        // 評価実行（パラメータはSetParams経由でブロックに事前設定済み）
+        block.Evaluate(ctx, result);
         return true;
     }
 

@@ -200,12 +200,7 @@ void OnTick() {
         }
 
         //--- スプレッドチェック（グローバルガード）
-        double currentSpread = (SymbolInfoDouble(Symbol(), SYMBOL_ASK) -
-                               SymbolInfoDouble(Symbol(), SYMBOL_BID)) /
-                               SymbolInfoDouble(Symbol(), SYMBOL_POINT);
-        int digits = (int)SymbolInfoInteger(Symbol(), SYMBOL_DIGITS);
-        double spreadPips = (digits == 3 || digits == 5) ?
-                           currentSpread / 10.0 : currentSpread;
+        double spreadPips = CalculateSpreadPips(Symbol());
 
         if (spreadPips > g_config.globalGuards.maxSpreadPips) {
             g_logger.LogInfo("SPREAD_EXCEEDED",

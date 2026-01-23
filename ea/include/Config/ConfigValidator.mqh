@@ -30,6 +30,92 @@ private:
         Print("CONFIG_ERROR: ", error);
     }
 
+    //+------------------------------------------------------------------+
+    //| Strategy必須フィールド検証（ヘルパー関数 - const参照）              |
+    //+------------------------------------------------------------------+
+    bool ValidateStrategyRequiredFields(const StrategyConfig &strat, int index) {
+        if (strat.id == "") {
+            SetError("strategies[" + IntegerToString(index) + "].id is required");
+            return false;
+        }
+
+        if (strat.entryRequirement.ruleGroupCount == 0) {
+            SetError("strategies[" + IntegerToString(index) +
+                    "].entryRequirement.ruleGroups[] is empty");
+            return false;
+        }
+
+        if (strat.lotModel.typeId == "") {
+            SetError("strategies[" + IntegerToString(index) + "].lotModel.type is required");
+            return false;
+        }
+
+        if (strat.riskModel.typeId == "") {
+            SetError("strategies[" + IntegerToString(index) + "].riskModel.type is required");
+            return false;
+        }
+
+        return true;
+    }
+
+    //+------------------------------------------------------------------+
+    //| RuleGroup内のブロック参照検証（ヘルパー関数 - const参照）           |
+    //+------------------------------------------------------------------+
+    bool ValidateRuleGroupBlockRefs(const RuleGroup &rg, const Config &config,
+                                     const string &stratId) {
+        for (int k = 0; k < rg.conditionCount; k++) {
+            string blockId = rg.conditions[k].blockId;
+
+            if (!IsBlockIdExists(config, blockId)) {
+                SetError("Block not found: " + blockId +
+                        " (referenced in " + stratId + "." + rg.id + ")");
+                return false;
+            }
+        }
+        return true;
+    }
+
+    //+------------------------------------------------------------------+
+    //| Strategy内のブロック参照検証（ヘルパー関数 - const参照）            |
+    //+------------------------------------------------------------------+
+    bool ValidateStrategyBlockRefs(const StrategyConfig &strat, const Config &config) {
+        for (int j = 0; j < strat.entryRequirement.ruleGroupCount; j++) {
+            if (!ValidateRuleGroupBlockRefs(strat.entryRequirement.ruleGroups[j],
+                                            config, strat.id)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    //+------------------------------------------------------------------+
+    //| Strategyモデルパラメータ検証（ヘルパー関数 - const参照）            |
+    //+------------------------------------------------------------------+
+    bool ValidateStrategyModelParams(const StrategyConfig &strat, int index) {
+        // ロット値
+        if (strat.lotModel.typeId == "lot.fixed" && strat.lotModel.lots <= 0) {
+            SetError("strategies[" + IntegerToString(index) +
+                    "].lotModel.params.lots must be > 0");
+            return false;
+        }
+
+        // SL/TP値
+        if (strat.riskModel.typeId == "risk.fixedSLTP") {
+            if (strat.riskModel.slPips < 0) {
+                SetError("strategies[" + IntegerToString(index) +
+                        "].riskModel.params.slPips must be >= 0");
+                return false;
+            }
+            if (strat.riskModel.tpPips < 0) {
+                SetError("strategies[" + IntegerToString(index) +
+                        "].riskModel.params.tpPips must be >= 0");
+                return false;
+            }
+        }
+
+        return true;
+    }
+
 public:
     //--- コンストラクタ
     CConfigValidator() {
@@ -94,30 +180,9 @@ public:
             return false;
         }
 
-        // 各Strategyの必須フィールドチェック
+        // 各Strategyの必須フィールドチェック（ヘルパー関数経由でconst参照）
         for (int i = 0; i < config.strategyCount; i++) {
-            StrategyConfig strat = config.strategies[i];  // ローカルコピー
-
-            if (strat.id == "") {
-                SetError("strategies[" + IntegerToString(i) + "].id is required");
-                return false;
-            }
-
-            if (strat.entryRequirement.ruleGroupCount == 0) {
-                SetError("strategies[" + IntegerToString(i) +
-                        "].entryRequirement.ruleGroups[] is empty");
-                return false;
-            }
-
-            // lotModel必須チェック
-            if (strat.lotModel.typeId == "") {
-                SetError("strategies[" + IntegerToString(i) + "].lotModel.type is required");
-                return false;
-            }
-
-            // riskModel必須チェック
-            if (strat.riskModel.typeId == "") {
-                SetError("strategies[" + IntegerToString(i) + "].riskModel.type is required");
+            if (!ValidateStrategyRequiredFields(config.strategies[i], i)) {
                 return false;
             }
         }
@@ -131,20 +196,8 @@ public:
     bool ValidateBlockReferences(const Config &config) {
         // 各Strategyのconditionsが参照するblockIdが存在するか確認
         for (int i = 0; i < config.strategyCount; i++) {
-            StrategyConfig strat = config.strategies[i];  // ローカルコピー
-
-            for (int j = 0; j < strat.entryRequirement.ruleGroupCount; j++) {
-                RuleGroup rg = strat.entryRequirement.ruleGroups[j];  // ローカルコピー
-
-                for (int k = 0; k < rg.conditionCount; k++) {
-                    string blockId = rg.conditions[k].blockId;
-
-                    if (!IsBlockIdExists(config, blockId)) {
-                        SetError("Block not found: " + blockId +
-                                " (referenced in " + strat.id + "." + rg.id + ")");
-                        return false;
-                    }
-                }
+            if (!ValidateStrategyBlockRefs(config.strategies[i], config)) {
+                return false;
             }
         }
 
@@ -222,29 +275,10 @@ public:
             return false;
         }
 
-        // 各Strategyのモデルパラメータチェック
+        // 各Strategyのモデルパラメータチェック（ヘルパー関数経由でconst参照）
         for (int i = 0; i < config.strategyCount; i++) {
-            StrategyConfig strat = config.strategies[i];  // ローカルコピー
-
-            // ロット値
-            if (strat.lotModel.typeId == "lot.fixed" && strat.lotModel.lots <= 0) {
-                SetError("strategies[" + IntegerToString(i) +
-                        "].lotModel.params.lots must be > 0");
+            if (!ValidateStrategyModelParams(config.strategies[i], i)) {
                 return false;
-            }
-
-            // SL/TP値
-            if (strat.riskModel.typeId == "risk.fixedSLTP") {
-                if (strat.riskModel.slPips < 0) {
-                    SetError("strategies[" + IntegerToString(i) +
-                            "].riskModel.params.slPips must be >= 0");
-                    return false;
-                }
-                if (strat.riskModel.tpPips < 0) {
-                    SetError("strategies[" + IntegerToString(i) +
-                            "].riskModel.params.tpPips must be >= 0");
-                    return false;
-                }
             }
         }
 
