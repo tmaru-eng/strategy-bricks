@@ -300,8 +300,7 @@ public:
             return false;
         }
 
-        // globalGuards解析
-        m_parser.SetJson(jsonContent);
+        // globalGuards解析（m_parserは286行目で設定済み）
         string guardsJson = m_parser.ExtractObject("globalGuards");
         if (guardsJson != "") {
             ParseGlobalGuards(guardsJson, config.globalGuards);
