@@ -71,9 +71,9 @@ private:
             StringTrimLeft(dirStr);
             StringTrimRight(dirStr);
             string dirLabel = "不明";
-            if (dirStr == "LONG") {
+            if (dirStr == DirectionToString(DIRECTION_LONG)) {
                 dirLabel = "買い";
-            } else if (dirStr == "SHORT") {
+            } else if (dirStr == DirectionToString(DIRECTION_SHORT)) {
                 dirLabel = "売り";
             }
             return "方向不一致: " + dirLabel;
