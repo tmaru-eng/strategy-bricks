@@ -91,7 +91,8 @@ private:
     }
 
     string LookupBlockTypeId(const string &blockId) {
-        if (m_blockTypeLookupReady && m_blockTypeTableSize > 0) {
+        bool hashLookupAttempted = (m_blockTypeLookupReady && m_blockTypeTableSize > 0);
+        if (hashLookupAttempted) {
             int index = (int)(HashBlockId(blockId) % (long)m_blockTypeTableSize);
             for (int probe = 0; probe < m_blockTypeTableSize; probe++) {
                 int slot = (index + probe) % m_blockTypeTableSize;
@@ -99,6 +100,13 @@ private:
                 if (key == "") break;
                 if (key == blockId) return m_blockTypeValues[slot];
             }
+        }
+
+        if (hashLookupAttempted && m_logger != NULL) {
+            m_logger.LogInfo(
+                "HASHTABLE_MISS",
+                "blockId '" + blockId + "' not found in hash table; falling back to linear scan."
+            );
         }
 
         if (!m_hasConfig) return "unknown";

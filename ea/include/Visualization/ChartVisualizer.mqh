@@ -361,13 +361,12 @@ private:
     bool DrawPanelTextLine(int row, const string &lineText, color textColor) {
         string name = m_nameManager.GetPanelTextLineName(row);
 
-        // 既存オブジェクト削除
-        ObjectDelete(m_chartId, name);
-
-        // ラベル作成
-        if (!ObjectCreate(m_chartId, name, OBJ_LABEL, 0, 0, 0)) {
-            Print("ChartVisualizer: Failed to create panel text line ", row, ": ", GetLastError());
-            return false;
+        if (ObjectFind(m_chartId, name) < 0) {
+            // ラベル作成
+            if (!ObjectCreate(m_chartId, name, OBJ_LABEL, 0, 0, 0)) {
+                Print("ChartVisualizer: Failed to create panel text line ", row, ": ", GetLastError());
+                return false;
+            }
         }
 
         // 位置設定
@@ -395,7 +394,7 @@ private:
     //| パネル全体を描画                                                   |
     //+------------------------------------------------------------------+
     bool DrawPanelObject(const string &text) {
-        // 行に分割（最大40行まで）
+        // 行に分割（最大行数制限）
         string lines[];
         int lineCount = StringSplit(text, '\n', lines);
 
@@ -406,14 +405,6 @@ private:
             lines[MAX_PANEL_LINES - 1] = "... 表示上限 " + IntegerToString(MAX_PANEL_LINES) +
                                    " 行 / 省略 " + IntegerToString(omitted) + " 行";
             lineCount = MAX_PANEL_LINES;
-        }
-
-        // 前回のテキスト行を削除
-        if (m_lastPanelLineCount > 0) {
-            for (int i = 0; i < m_lastPanelLineCount; i++) {
-                string name = m_nameManager.GetPanelTextLineName(i);
-                ObjectDelete(m_chartId, name);
-            }
         }
 
         // パネル幅・高さを計算
@@ -429,6 +420,12 @@ private:
         for (int i = 0; i < lineCount; i++) {
             color lineColor = ResolveLineColor(lines[i]);
             DrawPanelTextLine(i, lines[i], lineColor);
+        }
+
+        // 余剰分の古い行を削除
+        for (int i = lineCount; i < m_lastPanelLineCount; i++) {
+            string name = m_nameManager.GetPanelTextLineName(i);
+            ObjectDelete(m_chartId, name);
         }
 
         // 描画した行数を記録
