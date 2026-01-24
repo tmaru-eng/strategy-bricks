@@ -27,6 +27,19 @@ struct VisualConfig {
     int     panelX;               // パネルX座標
     int     panelY;               // パネルY座標
 
+    // パネルObject表示設定
+    bool    usePanelObject;       // true=Object、false=Comment()
+    color   panelBgColor;         // パネル背景色
+    color   panelBorderColor;     // パネル枠線色
+    int     panelBgAlpha;         // 背景透明度 (0-255)
+    string  panelFontName;        // フォント名
+    int     panelWidth;           // パネル幅（0=自動計算）
+    int     panelPaddingX;        // 水平パディング
+    int     panelPaddingY;        // 垂直パディング
+    int     panelLineHeight;      // 行の高さ
+    ENUM_ANCHOR_POINT panelAnchor;    // アンカーポイント
+    ENUM_BASE_CORNER  panelCorner;    // 基準コーナー
+
     // デフォルト値で初期化
     void Reset() {
         enabled = true;
@@ -37,12 +50,25 @@ struct VisualConfig {
         maxArrowHistory = 100;
         arrowBuyColor = clrDodgerBlue;
         arrowSellColor = clrOrangeRed;
-        panelTextColor = clrWhite;
+        panelTextColor = C'235,235,235';
         passColor = clrLime;
         failColor = clrRed;
-        panelFontSize = 9;
+        panelFontSize = 10;
         panelX = 10;
         panelY = 30;
+
+        // パネルObject表示設定のデフォルト
+        usePanelObject = true;
+        panelBgColor = C'18,18,18';        // ダークグレー
+        panelBorderColor = C'90,90,90';    // グレー
+        panelBgAlpha = 255;                // 不透明
+        panelFontName = "MS Gothic";       // 日本語対応の等幅フォント
+        panelWidth = 0;                    // 自動計算
+        panelPaddingX = 10;
+        panelPaddingY = 8;
+        panelLineHeight = 18;
+        panelAnchor = ANCHOR_LEFT_UPPER;
+        panelCorner = CORNER_LEFT_UPPER;
     }
 
     // コンストラクタ

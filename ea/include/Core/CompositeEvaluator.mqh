@@ -38,6 +38,41 @@ private:
     BlockVisualInfo  m_blockResults[MAX_VISUAL_BLOCKS_PER_STRATEGY];// ブロック評価結果保存
     int              m_blockResultCount;// ブロック評価結果数
 
+    //+------------------------------------------------------------------+
+    //| ブロックIDからtypeIdを取得                                         |
+    //+------------------------------------------------------------------+
+    string LookupBlockTypeId(const string &blockId) {
+        if (!m_hasConfig) return "unknown";
+        for (int i = 0; i < m_config.blockCount; i++) {
+            if (m_config.blocks[i].id == blockId) {
+                return m_config.blocks[i].typeId;
+            }
+        }
+        return "unknown";
+    }
+
+    //+------------------------------------------------------------------+
+    //| 未評価ブロックを可視化用に保存                                      |
+    //+------------------------------------------------------------------+
+    void SaveSkippedBlockResult(const string &blockId, const string &reason) {
+        BlockResult skipped;
+        skipped.Init(BLOCK_STATUS_NEUTRAL, DIRECTION_NEUTRAL, reason);
+        SaveBlockResult(blockId, LookupBlockTypeId(blockId), skipped);
+    }
+
+    //+------------------------------------------------------------------+
+    //| OR短絡で未評価となったRuleGroupを保存                               |
+    //+------------------------------------------------------------------+
+    void AppendSkippedRuleGroups(const EntryRequirement &requirement, int startIndex,
+                                 const string &reason) {
+        for (int rg = startIndex; rg < requirement.ruleGroupCount; rg++) {
+            RuleGroup skipGroup = requirement.ruleGroups[rg];
+            for (int c = 0; c < skipGroup.conditionCount; c++) {
+                SaveSkippedBlockResult(skipGroup.conditions[c].blockId, reason);
+            }
+        }
+    }
+
 public:
     //--- コンストラクタ
     CCompositeEvaluator() {
@@ -197,6 +232,8 @@ public:
             }
 
             if (success) {
+                // 未評価のRuleGroupを可視化用に記録（短絡評価の説明用）
+                AppendSkippedRuleGroups(requirement, i + 1, "未評価 (短絡OR)");
                 // 成立：ORなので即座にtrue（短絡評価）
                 return true;
             }
@@ -217,6 +254,10 @@ public:
             // ブロック評価
             BlockResult result;
             if (!EvaluateBlock(cond.blockId, ctx, result)) {
+                SaveBlockResult(cond.blockId, LookupBlockTypeId(cond.blockId), result);
+                for (int j = i + 1; j < ruleGroup.conditionCount; j++) {
+                    SaveSkippedBlockResult(ruleGroup.conditions[j].blockId, "未評価 (評価失敗)");
+                }
                 return false;  // ブロック取得失敗
             }
 
@@ -228,6 +269,9 @@ public:
             }
 
             if (result.status == BLOCK_STATUS_FAIL) {
+                for (int j = i + 1; j < ruleGroup.conditionCount; j++) {
+                    SaveSkippedBlockResult(ruleGroup.conditions[j].blockId, "未評価 (短絡AND)");
+                }
                 // 失敗：ANDなので即座にfalse（短絡評価）
                 return false;
             }

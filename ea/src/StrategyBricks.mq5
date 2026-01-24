@@ -48,6 +48,18 @@ input bool   InpShowStatusPanel = true;                // 状態パネル表示
 input bool   InpShowBlockDetails = true;               // ブロック詳細表示
 input int    InpMaxArrowHistory = 100;                 // シグナル矢印最大保持数
 
+// パネルObject表示設定
+input bool   InpUsePanelObject = true;                 // Objectでパネル表示
+input color  InpPanelBgColor = C'18,18,18';            // パネル背景色
+input color  InpPanelBorderColor = C'90,90,90';        // パネル枠線色
+input int    InpPanelBgAlpha = 255;                    // 背景透明度（0-255）
+input color  InpPanelTextColor = C'235,235,235';       // パネルテキスト色
+input string InpPanelFontName = "MS Gothic";           // フォント名
+input int    InpPanelFontSize = 10;                    // フォントサイズ
+input int    InpPanelX = 10;                           // パネルX座標
+input int    InpPanelY = 30;                           // パネルY座標
+input int    InpPanelWidth = 0;                        // パネル幅（0=自動）
+
 //+------------------------------------------------------------------+
 //| グローバル変数                                                      |
 //+------------------------------------------------------------------+
@@ -156,6 +168,19 @@ int OnInit() {
         visConfig.showStatusPanel = InpShowStatusPanel;
         visConfig.showBlockDetails = InpShowBlockDetails;
         visConfig.maxArrowHistory = InpMaxArrowHistory;
+
+        // パネルObject表示設定
+        visConfig.usePanelObject = InpUsePanelObject;
+        visConfig.panelBgColor = InpPanelBgColor;
+        visConfig.panelBorderColor = InpPanelBorderColor;
+        visConfig.panelBgAlpha = InpPanelBgAlpha;
+        visConfig.panelTextColor = InpPanelTextColor;
+        visConfig.panelFontName = InpPanelFontName;
+        visConfig.panelFontSize = InpPanelFontSize;
+        visConfig.panelX = InpPanelX;
+        visConfig.panelY = InpPanelY;
+        visConfig.panelWidth = InpPanelWidth;
+
         g_visualizer.Initialize(visConfig, &g_indicatorCache);
         g_logger.LogInfo("VISUALIZER_INIT", "Chart visualizer initialized");
     }
@@ -166,18 +191,79 @@ int OnInit() {
     Print("Config: ", g_config.meta.name, " (v", g_config.meta.formatVersion, ")");
     Print("Strategies: ", g_config.strategyCount, ", Blocks: ", g_config.blockCount);
 
-    //--- 初期化完了メッセージをComment()で表示（閉場中でも確認可能）
+    //--- 初期化完了メッセージを表示（閉場中でも確認可能）
     if (InpEnableVisualization && InpShowStatusPanel) {
         string initMsg = "";
-        initMsg += "=== Strategy Bricks EA ===\n";
-        initMsg += "Version: " + EA_VERSION + "\n";
-        initMsg += "Config: " + g_config.meta.name + "\n";
-        initMsg += "Strategies: " + IntegerToString(g_config.strategyCount) + "\n";
-        initMsg += "Blocks: " + IntegerToString(g_config.blockCount) + "\n";
+        initMsg += "【Strategy Bricks EA】\n";
+        initMsg += "バージョン: " + EA_VERSION + "\n";
+        initMsg += "シンボル: " + Symbol() + " / M1\n";
+        initMsg += "設定: " + g_config.meta.name + " (v" + g_config.meta.formatVersion + ")\n";
+        if (g_config.meta.generatedBy != "" || g_config.meta.generatedAt != "") {
+            string generated = g_config.meta.generatedBy;
+            if (generated != "" && g_config.meta.generatedAt != "") {
+                generated += " @ ";
+            }
+            generated += g_config.meta.generatedAt;
+            initMsg += "生成: " + generated + "\n";
+        }
+        initMsg += "戦略数: " + IntegerToString(g_config.strategyCount) + "\n";
+        initMsg += "ブロック数: " + IntegerToString(g_config.blockCount) + "\n";
+
         initMsg += "---\n";
-        initMsg += "Status: Initialized\n";
-        initMsg += "Waiting for market tick...\n";
-        Comment(initMsg);
+        initMsg += "【ガード設定】\n";
+        initMsg += "時間足: " + g_config.globalGuards.timeframe + "\n";
+        initMsg += "確定足のみ: " + (g_config.globalGuards.useClosedBarOnly ? "はい" : "いいえ") + "\n";
+        initMsg += "同一足再エントリー: " + (g_config.globalGuards.noReentrySameBar ? "禁止" : "許可") + "\n";
+        initMsg += "最大ポジション: 合計 " + IntegerToString(g_config.globalGuards.maxPositionsTotal) +
+                   ", シンボル " + IntegerToString(g_config.globalGuards.maxPositionsPerSymbol) + "\n";
+        initMsg += "最大スプレッド: " + DoubleToString(g_config.globalGuards.maxSpreadPips, 1) + " pips\n";
+        if (g_config.globalGuards.session.enabled) {
+            initMsg += "セッション: 有効\n";
+            if (g_config.globalGuards.session.windowCount > 0) {
+                string windows = "";
+                for (int i = 0; i < g_config.globalGuards.session.windowCount; i++) {
+                    if (i > 0) {
+                        windows += ", ";
+                    }
+                    windows += g_config.globalGuards.session.windows[i].start +
+                               "-" + g_config.globalGuards.session.windows[i].end;
+                }
+                initMsg += "  時間帯: " + windows + "\n";
+            }
+        } else {
+            initMsg += "セッション: 無効\n";
+        }
+
+        // ブロック詳細表示
+        if (InpShowBlockDetails && g_config.blockCount > 0) {
+            initMsg += "---\n";
+            initMsg += "【ブロック詳細】\n";
+            for (int i = 0; i < g_config.blockCount; i++) {
+                BlockDefinition block = g_config.blocks[i];
+                initMsg += "- [" + IntegerToString(i + 1) + "] " + block.typeId +
+                           " (" + block.id + ")\n";
+
+                // paramsJsonを整形して表示
+                if (block.paramsJson != "") {
+                    string params = block.paramsJson;
+                    // JSON記号を削除して読みやすくする
+                    StringReplace(params, "{", "");
+                    StringReplace(params, "}", "");
+                    StringReplace(params, "\"", "");
+                    StringReplace(params, ",", "\n      ");
+                    StringReplace(params, ":", ": ");
+                    initMsg += "    パラメータ:\n";
+                    initMsg += "      " + params + "\n";
+                }
+            }
+        }
+
+        initMsg += "---\n";
+        initMsg += "状態: 初期化完了\n";
+        initMsg += "ティック待ち...\n";
+
+        // Object表示 or Comment表示（設定に応じて自動切り替え）
+        g_visualizer.DisplayText(initMsg);
     }
 
     return INIT_SUCCEEDED;

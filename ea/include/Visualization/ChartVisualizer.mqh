@@ -24,6 +24,93 @@ private:
     long                m_chartId;        // チャートID
     bool                m_initialized;    // 初期化済みフラグ
     EvalVisualInfo      m_lastEvalInfo;   // 最後の評価情報
+    int                 m_lastPanelLineCount;  // 最後に描画した行数（削除用）
+
+    //+------------------------------------------------------------------+
+    //| 表示用ラベル変換                                                  |
+    //+------------------------------------------------------------------+
+    string DirectionToJapanese(TradeDirection direction) {
+        switch (direction) {
+            case DIRECTION_LONG:    return "買い";
+            case DIRECTION_SHORT:   return "売り";
+            case DIRECTION_NEUTRAL: return "なし";
+            default:                return "不明";
+        }
+    }
+
+    string BlockStatusToJapanese(BlockStatus status) {
+        switch (status) {
+            case BLOCK_STATUS_PASS:    return "通過";
+            case BLOCK_STATUS_FAIL:    return "失敗";
+            case BLOCK_STATUS_NEUTRAL: return "未評価";
+            default:                   return "不明";
+        }
+    }
+
+    string TranslateStrategyReason(const string &reason) {
+        if (reason == "") return "";
+        if (reason == "disabled") return "無効";
+        if (reason == "not matched") return "未成立";
+        if (reason == "adopted") return "採用";
+        if (StringFind(reason, "direction mismatch:") == 0) {
+            string dirLabel = "不明";
+            if (StringFind(reason, "LONG") >= 0) {
+                dirLabel = "買い";
+            } else if (StringFind(reason, "SHORT") >= 0) {
+                dirLabel = "売り";
+            }
+            return "方向不一致: " + dirLabel;
+        }
+        return reason;
+    }
+
+    string TranslateBlockReason(const string &reason) {
+        if (reason == "") return "";
+        if (StringFind(reason, "未評価") == 0) return reason;
+        return reason;
+    }
+
+    string BlockStatusTag(const BlockVisualInfo &block) {
+        if (block.status == BLOCK_STATUS_PASS) return "[OK]";
+        if (block.status == BLOCK_STATUS_FAIL) return "[NG]";
+        if (block.status == BLOCK_STATUS_NEUTRAL) {
+            if (StringFind(block.reason, "未評価") == 0) return "[SKIP]";
+            return "[--]";
+        }
+        return "[--]";
+    }
+
+    int MeasureLineWidth(const string &text) {
+        int length = StringLen(text);
+        int width = 0;
+        for (int i = 0; i < length; i++) {
+            int code = StringGetCharacter(text, i);
+            if (code > 255 || code < 0) {
+                width += 2;
+            } else {
+                width += 1;
+            }
+        }
+        return width;
+    }
+
+    color ResolveLineColor(const string &lineText) {
+        if (StringFind(lineText, "条件:") >= 0) {
+            return m_config.panelTextColor;
+        }
+        if (StringFind(lineText, "[NG]") >= 0 ||
+            StringFind(lineText, "不成立") >= 0 ||
+            StringFind(lineText, "未成立") >= 0 ||
+            StringFind(lineText, "失敗") >= 0) {
+            return m_config.failColor;
+        }
+        if (StringFind(lineText, "[OK]") >= 0 ||
+            StringFind(lineText, "成立") >= 0 ||
+            StringFind(lineText, "通過") >= 0) {
+            return m_config.passColor;
+        }
+        return m_config.panelTextColor;
+    }
 
     //+------------------------------------------------------------------+
     //| 状態パネルのテキストを生成                                          |
@@ -32,44 +119,71 @@ private:
         string text = "";
 
         // ヘッダー
-        text += "=== Strategy Bricks ===\n";
+        text += "【Strategy Bricks】\n";
+        text += "  シンボル: " + Symbol() + " / M1\n";
+        text += "  バー時刻: ";
+        if (info.barTime > 0) {
+            text += TimeToString(info.barTime, TIME_DATE | TIME_MINUTES);
+        } else {
+            text += "-";
+        }
+        text += "\n";
 
-        // バー時刻
-        text += "Bar: " + TimeToString(info.barTime, TIME_DATE | TIME_MINUTES) + "\n";
-
-        // スプレッド
-        string spreadStatus = info.spreadOk ? "OK" : "NG";
-        text += "Spread: " + DoubleToString(info.spreadPips, 1) + " pips [" + spreadStatus + "]\n";
-
-        // ポジション制限
-        string posLimitStatus = info.positionLimitOk ? "OK" : "NG";
-        text += "Position Limit: [" + posLimitStatus + "]\n";
-
-        // セパレータ
+        // ガード状態
         text += "---\n";
+        text += "【ガード】\n";
+        string spreadStatus = info.spreadOk ? "OK" : "NG";
+        text += "  スプレッド: " + DoubleToString(info.spreadPips, 1) +
+                " pips [" + spreadStatus + "]\n";
+        string posLimitStatus = info.positionLimitOk ? "OK" : "NG";
+        text += "  ポジション制限: [" + posLimitStatus + "]\n";
+        text += "  保有数: " + IntegerToString(PositionsTotal()) + "\n";
 
         // シグナル状態
+        text += "---\n";
+        text += "【シグナル】\n";
         if (info.signalGenerated) {
-            string dir = DirectionToString(info.signalDirection);
-            text += "Signal: " + dir + " (" + info.adoptedStrategyId + ")\n";
+            string dir = DirectionToJapanese(info.signalDirection);
+            text += "  シグナル: " + dir + "\n";
+            text += "  採用戦略: " + info.adoptedStrategyId + "\n";
         } else {
-            text += "Signal: NONE\n";
+            text += "  シグナル: なし\n";
         }
 
         // Strategy評価結果
         text += "---\n";
-        text += "Strategies Evaluated: " + IntegerToString(info.strategyCount) + "\n";
+        text += "【戦略評価】\n";
+        int matchedCount = 0;
+        for (int i = 0; i < info.strategyCount; i++) {
+            if (info.strategies[i].matched) {
+                matchedCount++;
+            }
+        }
+        text += "  評価数: " + IntegerToString(info.strategyCount) +
+                " (成立 " + IntegerToString(matchedCount) +
+                " / 不成立 " + IntegerToString(info.strategyCount - matchedCount) + ")\n";
 
-        // 最大MAX_VISUAL_STRATEGIES個まで表示（EvalVisualInfoの最大値に合わせる）
         int displayCount = MathMin(info.strategyCount, MAX_VISUAL_STRATEGIES);
         for (int i = 0; i < displayCount; i++) {
-            string matched = info.strategies[i].matched ? "MATCH" : "---";
-            text += "  " + info.strategies[i].strategyId + ": " + matched + "\n";
+            StrategyVisualInfo strat = info.strategies[i];
+            string status = strat.matched ? "成立" : "不成立";
+            string direction = strat.matched ? " (" + DirectionToJapanese(strat.direction) + ")" : "";
+            string label = strat.strategyId;
+            if (strat.strategyName != "") {
+                label += " (" + strat.strategyName + ")";
+            }
+            string reasonSuffix = "";
+            if (strat.reason != "") {
+                string reasonLabel = TranslateStrategyReason(strat.reason);
+                if (reasonLabel != "" && !(!strat.matched && reasonLabel == "未成立")) {
+                    reasonSuffix = " / " + reasonLabel;
+                }
+            }
+            text += "  - " + label + ": " + status + direction + reasonSuffix + "\n";
         }
 
-        // 表示しきれない場合は残り数を表示
         if (info.strategyCount > MAX_VISUAL_STRATEGIES) {
-            text += "  ... and " + IntegerToString(info.strategyCount - MAX_VISUAL_STRATEGIES) + " more\n";
+            text += "  ... 他 " + IntegerToString(info.strategyCount - MAX_VISUAL_STRATEGIES) + " 件\n";
         }
 
         return text;
@@ -80,23 +194,240 @@ private:
     //+------------------------------------------------------------------+
     string BuildBlockDetailText(const EvalVisualInfo &info) {
         string text = "";
+        text += "【条件詳細】\n";
 
-        // 各Strategyのブロック評価結果（最大MAX_VISUAL_STRATEGIES個まで表示）
         int stratDisplayCount = MathMin(info.strategyCount, MAX_VISUAL_STRATEGIES);
         for (int s = 0; s < stratDisplayCount; s++) {
-            text += "[" + info.strategies[s].strategyId + "]\n";
+            StrategyVisualInfo strat = info.strategies[s];
+            string stratLabel = strat.strategyId;
+            if (strat.strategyName != "") {
+                stratLabel += " (" + strat.strategyName + ")";
+            }
+            string stratStatus = strat.matched ? "成立" : "不成立";
+            string stratDirection = strat.matched ? " (" + DirectionToJapanese(strat.direction) + ")" : "";
+            string stratReason = "";
+            if (strat.reason != "") {
+                string reasonLabel = TranslateStrategyReason(strat.reason);
+                if (reasonLabel != "" && !(!strat.matched && reasonLabel == "未成立")) {
+                    stratReason = " / " + reasonLabel;
+                }
+            }
+            text += "  [" + stratLabel + "] " + stratStatus + stratDirection + stratReason + "\n";
 
-            // 最大MAX_VISUAL_BLOCKS_PER_STRATEGYブロックまで表示
-            int blockDisplayCount = MathMin(info.strategies[s].blockResultCount, MAX_VISUAL_BLOCKS_PER_STRATEGY);
+            int blockDisplayCount = MathMin(strat.blockResultCount, MAX_VISUAL_BLOCKS_PER_STRATEGY);
+            int passCount = 0;
+            int failCount = 0;
+            int skipCount = 0;
             for (int b = 0; b < blockDisplayCount; b++) {
-                BlockVisualInfo block = info.strategies[s].blockResults[b];
-                string status = BlockStatusToString(block.status);
-                text += "  " + block.typeId + ": " + status + "\n";
+                BlockVisualInfo block = strat.blockResults[b];
+                if (block.status == BLOCK_STATUS_PASS) {
+                    passCount++;
+                } else if (block.status == BLOCK_STATUS_FAIL) {
+                    failCount++;
+                } else {
+                    skipCount++;
+                }
+            }
+
+            if (blockDisplayCount > 0) {
+                string countLine = "    条件: 通過 " + IntegerToString(passCount) +
+                                   " / 失敗 " + IntegerToString(failCount) +
+                                   " / 未評価 " + IntegerToString(skipCount);
+                if (strat.blockResultCount > blockDisplayCount) {
+                    countLine += " (表示 " + IntegerToString(blockDisplayCount) +
+                                 "/" + IntegerToString(strat.blockResultCount) + ")";
+                }
+                text += countLine + "\n";
+
+                for (int b = 0; b < blockDisplayCount; b++) {
+                    BlockVisualInfo block = strat.blockResults[b];
+                    string tag = BlockStatusTag(block);
+                    string line = "    " + tag + " " + block.typeId;
+                    if (block.blockId != "") {
+                        line += " (" + block.blockId + ")";
+                    }
+                    string reason = TranslateBlockReason(block.reason);
+                    if (reason != "") {
+                        line += " - " + reason;
+                    }
+                    text += line + "\n";
+                }
+            } else {
+                text += "    条件: なし\n";
             }
             text += "\n";
         }
 
         return text;
+    }
+
+    //+------------------------------------------------------------------+
+    //| パネル幅を計算（行配列から計算）                                    |
+    //+------------------------------------------------------------------+
+    int CalculatePanelWidthFromLines(const string &lines[], int lineCount) {
+        // 固定幅が指定されていればそれを使用
+        if (m_config.panelWidth > 0) {
+            return m_config.panelWidth;
+        }
+
+        int maxLength = 0;
+        int actualCount = MathMin(lineCount, ArraySize(lines));
+        for (int i = 0; i < actualCount; i++) {
+            int len = MeasureLineWidth(lines[i]);
+            if (len > maxLength) {
+                maxLength = len;
+            }
+        }
+
+        // フォントサイズに基づいて幅を計算（等幅フォント想定）
+        int charWidth = (m_config.panelFontSize * 8) / 9;
+        if (charWidth < 1) {
+            charWidth = 1;
+        }
+        int width = maxLength * charWidth + m_config.panelPaddingX * 2 + charWidth;
+
+        return width;
+    }
+
+    //+------------------------------------------------------------------+
+    //| パネル幅を計算                                                     |
+    //+------------------------------------------------------------------+
+    int CalculatePanelWidth(const string &text) {
+        string lines[];
+        int lineCount = StringSplit(text, '\n', lines);
+        return CalculatePanelWidthFromLines(lines, lineCount);
+    }
+
+    //+------------------------------------------------------------------+
+    //| パネル高さを計算                                                   |
+    //+------------------------------------------------------------------+
+    int CalculatePanelHeight(int lineCount) {
+        return lineCount * m_config.panelLineHeight + m_config.panelPaddingY * 2;
+    }
+
+    //+------------------------------------------------------------------+
+    //| パネル背景を描画                                                   |
+    //+------------------------------------------------------------------+
+    bool DrawPanelBackground(int width, int height) {
+        string name = m_nameManager.GetPanelBackgroundName();
+
+        // 既存オブジェクト削除
+        ObjectDelete(m_chartId, name);
+
+        // 背景矩形作成
+        if (!ObjectCreate(m_chartId, name, OBJ_RECTANGLE_LABEL, 0, 0, 0)) {
+            Print("ChartVisualizer: Failed to create panel background: ", GetLastError());
+            return false;
+        }
+
+        // 位置とサイズ設定
+        ObjectSetInteger(m_chartId, name, OBJPROP_XDISTANCE, m_config.panelX);
+        ObjectSetInteger(m_chartId, name, OBJPROP_YDISTANCE, m_config.panelY);
+        ObjectSetInteger(m_chartId, name, OBJPROP_XSIZE, width);
+        ObjectSetInteger(m_chartId, name, OBJPROP_YSIZE, height);
+
+        // 色と透明度設定
+        int alpha = m_config.panelBgAlpha;
+        if (alpha < 0) {
+            alpha = 0;
+        } else if (alpha > 255) {
+            alpha = 255;
+        }
+        color bgColor = ColorToARGB(m_config.panelBgColor, (uchar)alpha);
+        ObjectSetInteger(m_chartId, name, OBJPROP_BGCOLOR, bgColor);
+        ObjectSetInteger(m_chartId, name, OBJPROP_BORDER_COLOR, m_config.panelBorderColor);
+        ObjectSetInteger(m_chartId, name, OBJPROP_BORDER_TYPE, BORDER_FLAT);
+
+        // 表示設定
+        ObjectSetInteger(m_chartId, name, OBJPROP_CORNER, m_config.panelCorner);
+        ObjectSetInteger(m_chartId, name, OBJPROP_BACK, false);  // 前面に表示
+        ObjectSetInteger(m_chartId, name, OBJPROP_SELECTABLE, false);
+        ObjectSetInteger(m_chartId, name, OBJPROP_HIDDEN, true);
+
+        return true;
+    }
+
+    //+------------------------------------------------------------------+
+    //| パネルテキスト行を描画                                             |
+    //+------------------------------------------------------------------+
+    bool DrawPanelTextLine(int row, const string &lineText, color textColor) {
+        string name = m_nameManager.GetPanelTextLineName(row);
+
+        // 既存オブジェクト削除
+        ObjectDelete(m_chartId, name);
+
+        // ラベル作成
+        if (!ObjectCreate(m_chartId, name, OBJ_LABEL, 0, 0, 0)) {
+            Print("ChartVisualizer: Failed to create panel text line ", row, ": ", GetLastError());
+            return false;
+        }
+
+        // 位置設定
+        int xPos = m_config.panelX + m_config.panelPaddingX;
+        int yPos = m_config.panelY + m_config.panelPaddingY + row * m_config.panelLineHeight;
+        ObjectSetInteger(m_chartId, name, OBJPROP_XDISTANCE, xPos);
+        ObjectSetInteger(m_chartId, name, OBJPROP_YDISTANCE, yPos);
+
+        // テキスト設定
+        ObjectSetString(m_chartId, name, OBJPROP_TEXT, lineText);
+        ObjectSetString(m_chartId, name, OBJPROP_FONT, m_config.panelFontName);
+        ObjectSetInteger(m_chartId, name, OBJPROP_FONTSIZE, m_config.panelFontSize);
+        ObjectSetInteger(m_chartId, name, OBJPROP_COLOR, textColor);
+
+        // 表示設定
+        ObjectSetInteger(m_chartId, name, OBJPROP_CORNER, m_config.panelCorner);
+        ObjectSetInteger(m_chartId, name, OBJPROP_ANCHOR, m_config.panelAnchor);
+        ObjectSetInteger(m_chartId, name, OBJPROP_SELECTABLE, false);
+        ObjectSetInteger(m_chartId, name, OBJPROP_HIDDEN, true);
+
+        return true;
+    }
+
+    //+------------------------------------------------------------------+
+    //| パネル全体を描画                                                   |
+    //+------------------------------------------------------------------+
+    bool DrawPanelObject(const string &text) {
+        // 行に分割（最大40行まで）
+        string lines[];
+        int lineCount = StringSplit(text, '\n', lines);
+
+        // 行数制限
+        const int MAX_LINES = 60;
+        if (lineCount > MAX_LINES) {
+            int omitted = lineCount - (MAX_LINES - 1);
+            ArrayResize(lines, MAX_LINES);
+            lines[MAX_LINES - 1] = "... 表示上限 " + IntegerToString(MAX_LINES) +
+                                   " 行 / 省略 " + IntegerToString(omitted) + " 行";
+            lineCount = MAX_LINES;
+        }
+
+        // 前回のテキスト行を削除
+        if (m_lastPanelLineCount > 0) {
+            for (int i = 0; i < m_lastPanelLineCount; i++) {
+                string name = m_nameManager.GetPanelTextLineName(i);
+                ObjectDelete(m_chartId, name);
+            }
+        }
+
+        // パネル幅・高さを計算
+        int width = CalculatePanelWidthFromLines(lines, lineCount);
+        int height = CalculatePanelHeight(lineCount);
+
+        // 背景描画
+        if (!DrawPanelBackground(width, height)) {
+            return false;
+        }
+
+        // テキスト行描画
+        for (int i = 0; i < lineCount; i++) {
+            color lineColor = ResolveLineColor(lines[i]);
+            DrawPanelTextLine(i, lines[i], lineColor);
+        }
+
+        // 描画した行数を記録
+        m_lastPanelLineCount = lineCount;
+
+        return true;
     }
 
 public:
@@ -107,6 +438,7 @@ public:
         m_chartId = 0;
         m_initialized = false;
         m_lastEvalInfo.Reset();
+        m_lastPanelLineCount = 0;
     }
 
     //--- デストラクタ
@@ -143,6 +475,7 @@ public:
             ChartRedraw(m_chartId);
         }
         Comment("");  // Comment表示クリア
+        m_lastPanelLineCount = 0;
         m_initialized = false;
     }
 
@@ -200,7 +533,7 @@ public:
     }
 
     //+------------------------------------------------------------------+
-    //| 状態パネルを更新（Comment()使用）                                   |
+    //| 状態パネルを更新（Object/Comment()切り替え）                        |
     //+------------------------------------------------------------------+
     void UpdateStatusPanel(const EvalVisualInfo &info) {
         if (!m_initialized || !m_config.enabled || !m_config.showStatusPanel) {
@@ -215,7 +548,18 @@ public:
             panelText += BuildBlockDetailText(info);
         }
 
-        Comment(panelText);
+        // Object表示 or Comment表示
+        if (m_config.usePanelObject) {
+            // Object表示
+            DrawPanelObject(panelText);
+            Comment("");  // Comment()をクリア
+        } else {
+            // Comment表示
+            Comment(panelText);
+            // パネルObjectを削除
+            m_nameManager.DeleteAllPanelObjects(m_chartId);
+            m_lastPanelLineCount = 0;
+        }
     }
 
     //+------------------------------------------------------------------+
@@ -385,6 +729,28 @@ public:
     //+------------------------------------------------------------------+
     bool IsInitialized() const {
         return m_initialized;
+    }
+
+    //+------------------------------------------------------------------+
+    //| 任意のテキストを表示（Object/Comment切り替え対応）                   |
+    //+------------------------------------------------------------------+
+    void DisplayText(const string &text) {
+        if (!m_initialized || !m_config.enabled) {
+            return;
+        }
+
+        // Object表示 or Comment表示
+        if (m_config.usePanelObject) {
+            // Object表示
+            DrawPanelObject(text);
+            Comment("");  // Comment()をクリア
+        } else {
+            // Comment表示
+            Comment(text);
+        }
+
+        // チャート更新
+        ChartRedraw(m_chartId);
     }
 };
 
