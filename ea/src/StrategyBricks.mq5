@@ -166,6 +166,20 @@ int OnInit() {
     Print("Config: ", g_config.meta.name, " (v", g_config.meta.formatVersion, ")");
     Print("Strategies: ", g_config.strategyCount, ", Blocks: ", g_config.blockCount);
 
+    //--- 初期化完了メッセージをComment()で表示（閉場中でも確認可能）
+    if (InpEnableVisualization && InpShowStatusPanel) {
+        string initMsg = "";
+        initMsg += "=== Strategy Bricks EA ===\n";
+        initMsg += "Version: " + EA_VERSION + "\n";
+        initMsg += "Config: " + g_config.meta.name + "\n";
+        initMsg += "Strategies: " + IntegerToString(g_config.strategyCount) + "\n";
+        initMsg += "Blocks: " + IntegerToString(g_config.blockCount) + "\n";
+        initMsg += "---\n";
+        initMsg += "Status: Initialized\n";
+        initMsg += "Waiting for market tick...\n";
+        Comment(initMsg);
+    }
+
     return INIT_SUCCEEDED;
 }
 
