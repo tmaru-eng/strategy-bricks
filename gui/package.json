@@ -12,7 +12,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "e2e": "E2E=1 E2E_EXPORT_DIR=/tmp/strategy-bricks-e2e E2E_PROFILE_NAME=e2e-profile npm run build && node e2e/run.mjs"
+    "e2e": "cross-env E2E=1 E2E_PROFILE_NAME=e2e-profile npm run build && node e2e/run.mjs"
   },
   "dependencies": {
     "@rjsf/core": "^5.15.0",
@@ -24,22 +24,23 @@
     "zustand": "^4.4.7"
   },
   "devDependencies": {
-    "@playwright/test": "^1.58.0",
+    "@playwright/test": "^1.55.0",
     "@testing-library/jest-dom": "^6.9.1",
-    "@testing-library/react": "^16.3.2",
+    "@testing-library/react": "^15.0.0",
     "@testing-library/user-event": "^14.6.1",
     "@types/node": "^20.10.0",
     "@types/react": "^18.2.45",
     "@types/react-dom": "^18.2.18",
     "@vitejs/plugin-react": "^4.2.1",
     "autoprefixer": "^10.4.16",
+    "cross-env": "^7.0.3",
     "electron": "^28.0.0",
     "electron-vite": "^2.0.0",
-    "jsdom": "^27.4.0",
+    "jsdom": "^24.1.0",
     "postcss": "^8.4.32",
     "tailwindcss": "^3.4.0",
     "typescript": "^5.3.3",
     "vite": "^5.0.8",
-    "vitest": "^4.0.18"
+    "vitest": "^1.6.0"
   }
 }

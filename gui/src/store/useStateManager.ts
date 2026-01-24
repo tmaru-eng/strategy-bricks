@@ -1,5 +1,12 @@
 import { create } from 'zustand'
-import type { Edge, Node } from 'reactflow'
+import {
+  applyEdgeChanges,
+  applyNodeChanges,
+  type Edge,
+  type EdgeChange,
+  type Node,
+  type NodeChange
+} from 'reactflow'
 import type { BlockCatalog } from '../models/catalog'
 import defaultCatalog from '../resources/block_catalog.default.json'
 import { exportConfig } from '../services/Exporter'
@@ -12,6 +19,8 @@ type FlowState = {
   validationIssues: ValidationIssue[]
   updateNodes: (nodes: Node[]) => void
   updateEdges: (edges: Edge[]) => void
+  onNodesChange: (changes: NodeChange[]) => void
+  onEdgesChange: (changes: EdgeChange[]) => void
   selectNode: (nodeId: string | null) => void
   addRuleGroup: () => void
   updateNodeData: (nodeId: string, data: Record<string, unknown>) => void
@@ -122,6 +131,10 @@ export const useStateManager = create<CatalogState & FlowState>((set, get) => ({
   validationIssues: [],
   updateNodes: (nodes) => set({ nodes }),
   updateEdges: (edges) => set({ edges }),
+  onNodesChange: (changes) =>
+    set((state) => ({ nodes: applyNodeChanges(changes, state.nodes) })),
+  onEdgesChange: (changes) =>
+    set((state) => ({ edges: applyEdgeChanges(changes, state.edges) })),
   selectNode: (nodeId) => set({ selectedNodeId: nodeId }),
   addRuleGroup: () => {
     const nodes = get().nodes

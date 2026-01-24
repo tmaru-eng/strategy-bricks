@@ -1,12 +1,10 @@
-import React, { useCallback, useMemo, useEffect } from 'react'
+import React, { useCallback, useMemo } from 'react'
 import ReactFlow, {
   addEdge,
   Background,
   Connection,
   Controls,
-  Node,
-  useEdgesState,
-  useNodesState
+  Node
 } from 'reactflow'
 import 'reactflow/dist/style.css'
 import { useStateManager } from '../../store/useStateManager'
@@ -44,18 +42,15 @@ const isValidConnection = (connection: Connection, nodes: Node[]): boolean => {
 }
 
 export const NodeEditor: React.FC = () => {
-  const { nodes: storedNodes, edges: storedEdges, updateNodes, updateEdges, selectNode } =
-    useStateManager()
-  const [nodes, setNodes, onNodesChange] = useNodesState(storedNodes)
-  const [edges, setEdges, onEdgesChange] = useEdgesState(storedEdges)
-
-  useEffect(() => {
-    updateNodes(nodes)
-  }, [nodes, updateNodes])
-
-  useEffect(() => {
-    updateEdges(edges)
-  }, [edges, updateEdges])
+  const {
+    nodes,
+    edges,
+    updateNodes,
+    updateEdges,
+    onNodesChange,
+    onEdgesChange,
+    selectNode
+  } = useStateManager()
 
   const onConnect = useCallback(
     (params: Connection) => {
@@ -64,10 +59,9 @@ export const NodeEditor: React.FC = () => {
       }
 
       const nextEdges = addEdge(params, edges)
-      setEdges(nextEdges)
       updateEdges(nextEdges)
     },
-    [edges, nodes, setEdges, updateEdges]
+    [edges, nodes, updateEdges]
   )
 
   const onDragOver = useCallback((event: React.DragEvent) => {
@@ -83,7 +77,13 @@ export const NodeEditor: React.FC = () => {
 
       if (!payload) return
 
-      const data = JSON.parse(payload) as { typeId: string; displayName: string }
+      let data: { typeId: string; displayName: string }
+      try {
+        data = JSON.parse(payload) as { typeId: string; displayName: string }
+      } catch {
+        console.error('Invalid drag payload:', payload)
+        return
+      }
 
       const position = {
         x: event.clientX - reactFlowBounds.left,
@@ -102,10 +102,9 @@ export const NodeEditor: React.FC = () => {
       }
 
       const nextNodes = [...nodes, newNode]
-      setNodes(nextNodes)
       updateNodes(nextNodes)
     },
-    [nodes, setNodes, updateNodes]
+    [nodes, updateNodes]
   )
 
   const onNodeClick = useCallback(

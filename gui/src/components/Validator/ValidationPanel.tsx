@@ -12,7 +12,7 @@ export const ValidationPanel: React.FC = () => {
     <div className="validation-root">
       {validationIssues.map((issue, index) => (
         <button
-          key={`${issue.message}-${index}`}
+          key={`${issue.nodeId || 'global'}-${index}`}
           className={`validation-item ${issue.type}`}
           onClick={() => issue.nodeId && selectNode(issue.nodeId)}
           type="button"

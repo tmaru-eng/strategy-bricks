@@ -1,4 +1,3 @@
-# 03_design/41_block_catalog_candidates.md
 # ブロック候補一覧（調査メモ）
 
 ## 0. 目的
@@ -33,6 +32,8 @@ GUI（paramsSchema）→ EA（IndicatorCache）への実装順序で利用する
 - iForce: https://www.mql5.com/ja/docs/indicators/iforce / https://www.mql5.com/en/docs/indicators/iforce
 - iDeMarker: https://www.mql5.com/ja/docs/indicators/idemarker / https://www.mql5.com/en/docs/indicators/idemarker
 - iFractals: https://www.mql5.com/ja/docs/indicators/ifractals / https://www.mql5.com/en/docs/indicators/ifractals
+- iBearsPower: https://www.mql5.com/ja/docs/indicators/ibearspower / https://www.mql5.com/en/docs/indicators/ibearspower
+- iBullsPower: https://www.mql5.com/ja/docs/indicators/ibullspower / https://www.mql5.com/en/docs/indicators/ibullspower
 
 ### 2.1 列挙型
 - ENUM_MA_METHOD: https://www.mql5.com/ja/docs/constants/indicatorconstants/enum_ma_method / https://www.mql5.com/en/docs/constants/indicatorconstants/enum_ma_method
@@ -152,4 +153,3 @@ GUI（paramsSchema）→ EA（IndicatorCache）への実装順序で利用する
 - GUI: paramsSchema をこの表に合わせて定義 → Propertyで自動生成。
 - EA: IndicatorCache に iXXX ハンドル生成を追加し、shift=1 で参照。
 - 追加候補は typeId 先行で定義し、block_catalog.json の段階的拡張を想定。
-

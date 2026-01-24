@@ -1,6 +1,12 @@
 import { app, BrowserWindow, dialog, ipcMain } from 'electron'
 import { mkdir, readFile, writeFile } from 'fs/promises'
-import { join } from 'path'
+import { basename, join } from 'path'
+
+const sanitizeProfileName = (name: string): string => {
+  const base = basename(name)
+  const sanitized = base.replace(/[^a-zA-Z0-9._-]/g, '_')
+  return sanitized.length > 0 ? sanitized : 'active'
+}
 
 const createWindow = () => {
   const win = new BrowserWindow({
@@ -46,23 +52,23 @@ app.whenReady().then(() => {
 
     if (!outputDir) {
       if (isE2E) {
-        outputDir = '/tmp/strategy-bricks-e2e'
-      } else {
-        const result = await dialog.showOpenDialog({
-          title: 'Select output directory',
-          properties: ['openDirectory', 'createDirectory']
-        })
-
-        if (result.canceled || result.filePaths.length === 0) {
-          return { ok: false }
-        }
-
-        outputDir = result.filePaths[0]
+        return { ok: false, error: 'E2E export directory is not set' }
       }
+
+      const result = await dialog.showOpenDialog({
+        title: 'Select output directory',
+        properties: ['openDirectory', 'createDirectory']
+      })
+
+      if (result.canceled || result.filePaths.length === 0) {
+        return { ok: false }
+      }
+
+      outputDir = result.filePaths[0]
     }
 
     const profilesDir = join(outputDir, 'profiles')
-    const profileName = payload?.profileName || 'active'
+    const profileName = sanitizeProfileName(payload?.profileName || 'active')
     const content = payload?.content || '{}'
 
     await mkdir(profilesDir, { recursive: true })
