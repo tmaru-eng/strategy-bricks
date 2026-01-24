@@ -18,6 +18,7 @@
 //+------------------------------------------------------------------+
 class CChartVisualizer {
 private:
+    enum { MAX_PANEL_LINES = 60 };
     VisualConfig        m_config;         // 可視化設定
     CObjectNameManager  m_nameManager;    // オブジェクト名管理
     CIndicatorCache*    m_cache;          // インジケータキャッシュ参照
@@ -53,10 +54,13 @@ private:
         if (reason == "not matched") return "未成立";
         if (reason == "adopted") return "採用";
         if (StringFind(reason, "direction mismatch:") == 0) {
+            string dirStr = StringSubstr(reason, StringLen("direction mismatch:"));
+            StringTrimLeft(dirStr);
+            StringTrimRight(dirStr);
             string dirLabel = "不明";
-            if (StringFind(reason, "LONG") >= 0) {
+            if (dirStr == "LONG") {
                 dirLabel = "買い";
-            } else if (StringFind(reason, "SHORT") >= 0) {
+            } else if (dirStr == "SHORT") {
                 dirLabel = "売り";
             }
             return "方向不一致: " + dirLabel;
@@ -392,13 +396,12 @@ private:
         int lineCount = StringSplit(text, '\n', lines);
 
         // 行数制限
-        const int MAX_LINES = 60;
-        if (lineCount > MAX_LINES) {
-            int omitted = lineCount - (MAX_LINES - 1);
-            ArrayResize(lines, MAX_LINES);
-            lines[MAX_LINES - 1] = "... 表示上限 " + IntegerToString(MAX_LINES) +
+        if (lineCount > MAX_PANEL_LINES) {
+            int omitted = lineCount - (MAX_PANEL_LINES - 1);
+            ArrayResize(lines, MAX_PANEL_LINES);
+            lines[MAX_PANEL_LINES - 1] = "... 表示上限 " + IntegerToString(MAX_PANEL_LINES) +
                                    " 行 / 省略 " + IntegerToString(omitted) + " 行";
-            lineCount = MAX_LINES;
+            lineCount = MAX_PANEL_LINES;
         }
 
         // 前回のテキスト行を削除
