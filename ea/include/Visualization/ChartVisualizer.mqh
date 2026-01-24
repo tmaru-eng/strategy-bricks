@@ -89,7 +89,7 @@ private:
         int width = 0;
         for (int i = 0; i < length; i++) {
             int code = StringGetCharacter(text, i);
-            if (code > 255 || code < 0) {
+            if (code > 255) {
                 width += 2;
             } else {
                 width += 1;

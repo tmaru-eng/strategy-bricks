@@ -37,11 +37,71 @@ private:
     // MAX_VISUAL_BLOCKS_PER_STRATEGYはVisualConfig.mqhで定義
     BlockVisualInfo  m_blockResults[MAX_VISUAL_BLOCKS_PER_STRATEGY];// ブロック評価結果保存
     int              m_blockResultCount;// ブロック評価結果数
+    string           m_blockTypeKeys[];  // blockId lookup keys
+    string           m_blockTypeValues[];// typeId lookup values
+    int              m_blockTypeTableSize;
+    bool             m_blockTypeLookupReady;
 
     //+------------------------------------------------------------------+
     //| ブロックIDからtypeIdを取得                                         |
     //+------------------------------------------------------------------+
+    int HashBlockId(const string &blockId) {
+        int hash = 0;
+        int len = StringLen(blockId);
+        for (int i = 0; i < len; i++) {
+            hash = hash * 31 + (int)StringGetCharacter(blockId, i);
+        }
+        if (hash < 0) hash = -hash;
+        return hash;
+    }
+
+    void BuildBlockTypeLookup() {
+        m_blockTypeLookupReady = false;
+        m_blockTypeTableSize = 0;
+
+        if (!m_hasConfig || m_config.blockCount <= 0) return;
+
+        int size = m_config.blockCount * 2 + 1;
+        if (size < 17) size = 17;
+        if ((size % 2) == 0) size++;
+
+        ArrayResize(m_blockTypeKeys, size);
+        ArrayResize(m_blockTypeValues, size);
+        for (int i = 0; i < size; i++) {
+            m_blockTypeKeys[i] = "";
+            m_blockTypeValues[i] = "";
+        }
+
+        m_blockTypeTableSize = size;
+        for (int i = 0; i < m_config.blockCount; i++) {
+            string key = m_config.blocks[i].id;
+            string value = m_config.blocks[i].typeId;
+            if (key == "") continue;
+            int index = HashBlockId(key) % m_blockTypeTableSize;
+            for (int probe = 0; probe < m_blockTypeTableSize; probe++) {
+                int slot = (index + probe) % m_blockTypeTableSize;
+                if (m_blockTypeKeys[slot] == "" || m_blockTypeKeys[slot] == key) {
+                    m_blockTypeKeys[slot] = key;
+                    m_blockTypeValues[slot] = value;
+                    break;
+                }
+            }
+        }
+
+        m_blockTypeLookupReady = true;
+    }
+
     string LookupBlockTypeId(const string &blockId) {
+        if (m_blockTypeLookupReady && m_blockTypeTableSize > 0) {
+            int index = HashBlockId(blockId) % m_blockTypeTableSize;
+            for (int probe = 0; probe < m_blockTypeTableSize; probe++) {
+                int slot = (index + probe) % m_blockTypeTableSize;
+                string key = m_blockTypeKeys[slot];
+                if (key == "") break;
+                if (key == blockId) return m_blockTypeValues[slot];
+            }
+        }
+
         if (!m_hasConfig) return "unknown";
         for (int i = 0; i < m_config.blockCount; i++) {
             if (m_config.blocks[i].id == blockId) {
@@ -82,6 +142,8 @@ public:
         m_cache = NULL;
         m_logger = NULL;
         m_blockResultCount = 0;
+        m_blockTypeTableSize = 0;
+        m_blockTypeLookupReady = false;
         ResetLastValues();
     }
 
@@ -92,6 +154,7 @@ public:
     void SetConfig(const Config &config) {
         m_config = config;
         m_hasConfig = true;
+        BuildBlockTypeLookup();
     }
 
     void SetBlockRegistry(CBlockRegistry* registry) {
