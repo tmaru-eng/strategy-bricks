@@ -123,7 +123,7 @@ GUI（paramsSchema）→ EA（IndicatorCache）への実装順序で利用する
   - params: fastEma (int), slowEma (int), signal (int), appliedPrice (enum)
   - doc: iOsMA
 - osc.mfiLevel
-  - params: period (int), maPeriod (int), appliedVolume (enum), threshold (number), mode (overbought/oversold)
+  - params: symbol (string), period (ENUM_TIMEFRAMES), maPeriod (int), appliedVolume (ENUM_APPLIED_VOLUME), threshold (number), mode (overbought/oversold)
   - doc: iMFI
 - osc.obvTrend
   - params: appliedVolume (enum), direction (up/down)

@@ -91,7 +91,7 @@ export const NodeEditor: React.FC = () => {
       }
 
       const newNode: Node = {
-        id: `condition-${Date.now()}`,
+        id: `condition-${crypto.randomUUID()}`,
         type: 'conditionNode',
         position,
         data: {

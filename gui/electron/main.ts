@@ -32,50 +32,58 @@ app.whenReady().then(() => {
 
   ipcMain.handle('app:ping', () => ({ ok: true }))
   ipcMain.handle('catalog:open', async () => {
-    const result = await dialog.showOpenDialog({
-      title: 'Open block_catalog.json',
-      properties: ['openFile'],
-      filters: [{ name: 'JSON', extensions: ['json'] }]
-    })
-
-    if (result.canceled || result.filePaths.length === 0) {
-      return null
-    }
-
-    const filePath = result.filePaths[0]
-    const content = await readFile(filePath, 'utf-8')
-    return { path: filePath, content }
-  })
-  ipcMain.handle('config:export', async (_event, payload) => {
-    const isE2E = process.env.E2E === '1'
-    let outputDir = process.env.E2E_EXPORT_DIR
-
-    if (!outputDir) {
-      if (isE2E) {
-        return { ok: false, error: 'E2E export directory is not set' }
-      }
-
+    try {
       const result = await dialog.showOpenDialog({
-        title: 'Select output directory',
-        properties: ['openDirectory', 'createDirectory']
+        title: 'Open block_catalog.json',
+        properties: ['openFile'],
+        filters: [{ name: 'JSON', extensions: ['json'] }]
       })
 
       if (result.canceled || result.filePaths.length === 0) {
-        return { ok: false }
+        return null
       }
 
-      outputDir = result.filePaths[0]
+      const filePath = result.filePaths[0]
+      const content = await readFile(filePath, 'utf-8')
+      return { path: filePath, content }
+    } catch (error) {
+      return { ok: false, error: String(error) }
     }
+  })
+  ipcMain.handle('config:export', async (_event, payload) => {
+    try {
+      const isE2E = process.env.E2E === '1'
+      let outputDir = process.env.E2E_EXPORT_DIR
 
-    const profilesDir = join(outputDir, 'profiles')
-    const profileName = sanitizeProfileName(payload?.profileName || 'active')
-    const content = payload?.content || '{}'
+      if (!outputDir) {
+        if (isE2E) {
+          return { ok: false, error: 'E2E export directory is not set' }
+        }
 
-    await mkdir(profilesDir, { recursive: true })
-    await writeFile(join(profilesDir, `${profileName}.json`), content, 'utf-8')
-    await writeFile(join(outputDir, 'active.json'), content, 'utf-8')
+        const result = await dialog.showOpenDialog({
+          title: 'Select output directory',
+          properties: ['openDirectory', 'createDirectory']
+        })
 
-    return { ok: true, path: outputDir }
+        if (result.canceled || result.filePaths.length === 0) {
+          return { ok: false }
+        }
+
+        outputDir = result.filePaths[0]
+      }
+
+      const profilesDir = join(outputDir, 'profiles')
+      const profileName = sanitizeProfileName(payload?.profileName || 'active')
+      const content = payload?.content || '{}'
+
+      await mkdir(profilesDir, { recursive: true })
+      await writeFile(join(profilesDir, `${profileName}.json`), content, 'utf-8')
+      await writeFile(join(outputDir, 'active.json'), content, 'utf-8')
+
+      return { ok: true, path: outputDir }
+    } catch (error) {
+      return { ok: false, error: String(error) }
+    }
   })
 
   app.on('activate', () => {

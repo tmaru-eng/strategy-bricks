@@ -1,0 +1,8 @@
+{"author":"coderabbitai","id":"PRRT_kwDOQ-1uis5q4HeD","path":"gui/package.json"}
+{"author":"coderabbitai","id":"PRRT_kwDOQ-1uis5q4HeG","path":"gui/src/services/CatalogLoader.ts"}
+{"author":"coderabbitai","id":"PRRT_kwDOQ-1uis5q4HeJ","path":"gui/src/services/Exporter.ts"}
+{"author":"gemini-code-assist","id":"PRRT_kwDOQ-1uis5q4NVk","path":"gui/src/components/Canvas/NodeEditor.tsx"}
+{"author":"gemini-code-assist","id":"PRRT_kwDOQ-1uis5q4NVo","path":"gui/src/models/catalog.ts"}
+{"author":"gemini-code-assist","id":"PRRT_kwDOQ-1uis5q4NVq","path":"gui/src/store/useStateManager.ts"}
+{"author":"coderabbitai","id":"PRRT_kwDOQ-1uis5q4NYI","path":"docs/03_design/41_block_catalog_candidates.md"}
+{"author":"coderabbitai","id":"PRRT_kwDOQ-1uis5q4NYJ","path":"gui/electron/main.ts"}
