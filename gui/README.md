@@ -25,11 +25,11 @@ gui/
 
 ## 実装状況
 
-**現在の状態**: 未実装（Phase 0完了後に開始予定）
+**現在の状態**: GUIのMVP導線（Palette/Canvas/Property/Validate/Export）まで実装済み
 
 **次のステップ**:
-1. GUI技術検証（Phase 0）
-2. Palette/Canvas/Property実装（Phase 2）
+1. 条件ブロックの拡充（block_catalog.jsonの拡張）
+2. Exportの設定詳細（strategies/globalGuards）の実装
 
 ## 設計ドキュメント
 
@@ -46,16 +46,26 @@ gui/
 - Node.js (v18以上推奨)
 - npm または yarn
 
-**セットアップ**（将来）:
+**セットアップ**:
 ```bash
 cd gui
 npm install
 npm run dev
 ```
 
-**ビルド**（将来）:
+**ビルド**:
 ```bash
 npm run build
+```
+
+**テスト**:
+```bash
+npm run test
+```
+
+**E2E**:
+```bash
+npm run e2e
 ```
 
 ## 技術スタック（予定）
@@ -69,7 +79,7 @@ npm run build
 ## 主要機能
 
 ### 1. Palette（パレット）
-- block_catalog.jsonからブロック一覧を表示
+- デフォルトカタログ（`src/resources/block_catalog.default.json`）からブロック一覧を表示
 - カテゴリ別に整理（filter/env/trend/trigger/lot/risk/exit/nanpin）
 - ドラッグ&ドロップでCanvasに配置
 
@@ -114,4 +124,4 @@ npm run build
 
 ---
 
-**最終更新**: 2026-01-22
+**最終更新**: 2026-01-24
