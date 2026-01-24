@@ -175,7 +175,7 @@ private:
             string reasonSuffix = "";
             if (strat.reason != "") {
                 string reasonLabel = TranslateStrategyReason(strat.reason);
-                if (reasonLabel != "" && !(!strat.matched && reasonLabel == "未成立")) {
+                if (reasonLabel != "" && (strat.matched || reasonLabel != "未成立")) {
                     reasonSuffix = " / " + reasonLabel;
                 }
             }
@@ -208,7 +208,7 @@ private:
             string stratReason = "";
             if (strat.reason != "") {
                 string reasonLabel = TranslateStrategyReason(strat.reason);
-                if (reasonLabel != "" && !(!strat.matched && reasonLabel == "未成立")) {
+                if (reasonLabel != "" && (strat.matched || reasonLabel != "未成立")) {
                     stratReason = " / " + reasonLabel;
                 }
             }
