@@ -266,8 +266,8 @@ public:
             return false;
         }
 
-        // ファイル読込（UTF-8対応 - 互換性のため）
-        int handle = FileOpen(path, FILE_READ | FILE_TXT | FILE_UTF8);
+        // ファイル読込（ANSI - MT5互換性のため）
+        int handle = FileOpen(path, FILE_READ | FILE_TXT | FILE_ANSI);
         if (handle == INVALID_HANDLE) {
             if (m_logger != NULL) {
                 m_logger.LogError("CONFIG_ERROR", "Cannot open file: " + path);
