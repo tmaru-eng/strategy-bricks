@@ -96,6 +96,9 @@ private:
                             pos++;
                             break;
                         }
+                        if (depth < 0) {
+                            break;
+                        }
                     }
                 }
                 pos++;

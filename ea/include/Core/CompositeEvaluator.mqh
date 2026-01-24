@@ -62,7 +62,6 @@ private:
 
         int size = m_config.blockCount * 2 + 1;
         if (size < 17) size = 17;
-        if ((size % 2) == 0) size++;
 
         ArrayResize(m_blockTypeKeys, size);
         ArrayResize(m_blockTypeValues, size);
