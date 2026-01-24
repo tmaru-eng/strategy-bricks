@@ -76,13 +76,21 @@ private:
             string value = m_config.blocks[i].typeId;
             if (key == "") continue;
             int index = (int)(HashBlockId(key) % (ulong)m_blockTypeTableSize);
+            bool inserted = false;
             for (int probe = 0; probe < m_blockTypeTableSize; probe++) {
                 int slot = (index + probe) % m_blockTypeTableSize;
                 if (m_blockTypeKeys[slot] == "" || m_blockTypeKeys[slot] == key) {
                     m_blockTypeKeys[slot] = key;
                     m_blockTypeValues[slot] = value;
+                    inserted = true;
                     break;
                 }
+            }
+            if (!inserted && m_logger != NULL) {
+                m_logger.LogError(
+                    "HASHTABLE_FULL",
+                    "Failed to insert key '" + key + "' into block type lookup table. Table is full."
+                );
             }
         }
 
