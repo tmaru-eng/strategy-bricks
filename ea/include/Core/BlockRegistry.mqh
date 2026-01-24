@@ -126,7 +126,7 @@ public:
             CEnvSessionTimeWindow* sessionBlock = new CEnvSessionTimeWindow(blockId);
             // グローバルセッション設定を適用（NULLチェック追加）
             if (m_hasGlobalSession && sessionBlock != NULL) {
-                sessionBlock->ApplyGlobalSession(m_globalSession);
+                sessionBlock.ApplyGlobalSession(m_globalSession);
             }
             block = sessionBlock;
         }
@@ -155,7 +155,7 @@ public:
 
         // パラメータ設定
         if (block != NULL) {
-            block->SetParams(paramsJson);
+            block.SetParams(paramsJson);
             // キャッシュに追加
             AddToCache(blockId, block);
             Print("BlockRegistry: Created block - ", blockId, " (", typeId, ")");

@@ -13,6 +13,7 @@
 #include "BlockRegistry.mqh"
 #include "../Indicators/IndicatorCache.mqh"
 #include "../Support/Logger.mqh"
+#include "../Visualization/VisualConfig.mqh"
 
 //+------------------------------------------------------------------+
 //| CompositeEvaluatorクラス                                           |
@@ -31,6 +32,12 @@ private:
     double           m_lastSlPips;      // 最後のSL pips
     double           m_lastTpPips;      // 最後のTP pips
 
+    // 可視化用ブロック評価結果
+    // 注: 固定サイズ配列。MAX_VISUAL_BLOCKS_PER_STRATEGY個を超えるブロックがある場合は警告が出力される
+    // MAX_VISUAL_BLOCKS_PER_STRATEGYはVisualConfig.mqhで定義
+    BlockVisualInfo  m_blockResults[MAX_VISUAL_BLOCKS_PER_STRATEGY];// ブロック評価結果保存
+    int              m_blockResultCount;// ブロック評価結果数
+
 public:
     //--- コンストラクタ
     CCompositeEvaluator() {
@@ -39,6 +46,7 @@ public:
         m_registry = NULL;
         m_cache = NULL;
         m_logger = NULL;
+        m_blockResultCount = 0;
         ResetLastValues();
     }
 
@@ -71,6 +79,58 @@ public:
         m_lastLot = 0;
         m_lastSlPips = 0;
         m_lastTpPips = 0;
+    }
+
+    //+------------------------------------------------------------------+
+    //| ブロック評価結果をリセット                                          |
+    //+------------------------------------------------------------------+
+    void ResetBlockResults() {
+        m_blockResultCount = 0;
+    }
+
+    //+------------------------------------------------------------------+
+    //| ブロック評価結果を保存                                              |
+    //+------------------------------------------------------------------+
+    void SaveBlockResult(string blockId, string typeId, const BlockResult &result) {
+        if (m_blockResultCount >= MAX_VISUAL_BLOCKS_PER_STRATEGY) {
+            // 最大数を超えた場合は警告を出力
+            Print("WARNING: CompositeEvaluator - Block result storage full (",
+                  MAX_VISUAL_BLOCKS_PER_STRATEGY, "). Additional results will be truncated.");
+            return;
+        }
+
+        m_blockResults[m_blockResultCount].blockId = blockId;
+        m_blockResults[m_blockResultCount].typeId = typeId;
+        m_blockResults[m_blockResultCount].status = result.status;
+        m_blockResults[m_blockResultCount].reason = result.reason;
+        m_blockResultCount++;
+    }
+
+    //+------------------------------------------------------------------+
+    //| ブロック評価結果を取得                                              |
+    //+------------------------------------------------------------------+
+    int GetBlockResults(BlockVisualInfo &results[]) {
+        ArrayResize(results, m_blockResultCount);
+        for (int i = 0; i < m_blockResultCount; i++) {
+            results[i] = m_blockResults[i];
+        }
+        return m_blockResultCount;
+    }
+
+    //+------------------------------------------------------------------+
+    //| ブロック評価結果数を取得                                            |
+    //+------------------------------------------------------------------+
+    int GetBlockResultCount() const {
+        return m_blockResultCount;
+    }
+
+    //+------------------------------------------------------------------+
+    //| ブロック評価結果を個別取得                                          |
+    //+------------------------------------------------------------------+
+    bool GetBlockResult(int index, BlockVisualInfo &info) {
+        if (index < 0 || index >= m_blockResultCount) return false;
+        info = m_blockResults[index];
+        return true;
     }
 
     //+------------------------------------------------------------------+
@@ -120,6 +180,7 @@ public:
     //+------------------------------------------------------------------+
     bool EvaluateOR(const EntryRequirement &requirement, const Context &ctx) {
         ResetLastValues();
+        ResetBlockResults();  // ブロック結果もリセット
 
         for (int i = 0; i < requirement.ruleGroupCount; i++) {
             RuleGroup rg = requirement.ruleGroups[i];  // ローカルコピー
@@ -211,6 +272,10 @@ public:
 
         // 評価実行（パラメータはSetParams経由でブロックに事前設定済み）
         block.Evaluate(ctx, result);
+
+        // 可視化用に結果を保存
+        SaveBlockResult(blockId, block.GetTypeId(), result);
+
         return true;
     }
 

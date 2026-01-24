@@ -266,7 +266,7 @@ public:
             return false;
         }
 
-        // ファイル読込（UTF-8対応）
+        // ファイル読込（UTF-8対応 - 互換性のため）
         int handle = FileOpen(path, FILE_READ | FILE_TXT | FILE_UTF8);
         if (handle == INVALID_HANDLE) {
             if (m_logger != NULL) {

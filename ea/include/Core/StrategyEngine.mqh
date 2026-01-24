@@ -14,6 +14,7 @@
 #include "../Execution/PositionManager.mqh"
 #include "../Support/Logger.mqh"
 #include "../Support/StateStore.mqh"
+#include "../Visualization/VisualConfig.mqh"
 
 //+------------------------------------------------------------------+
 //| StrategyEngineクラス                                               |
@@ -32,6 +33,9 @@ private:
     // ソート済みStrategy配列
     int                 m_sortedIndices[];
     int                 m_sortedCount;
+
+    // 可視化用評価情報
+    EvalVisualInfo      m_lastEvalInfo;     // 最後の評価情報
 
     //+------------------------------------------------------------------+
     //| Strategyをpriority順にソート（降順）                                |
@@ -87,6 +91,7 @@ public:
         m_logger = NULL;
         m_stateStore = NULL;
         m_sortedCount = 0;
+        m_lastEvalInfo.Reset();
     }
 
     //--- デストラクタ
@@ -136,31 +141,59 @@ public:
             return;
         }
 
+        // 評価情報をリセット
+        m_lastEvalInfo.Reset();
+        m_lastEvalInfo.barTime = currentBarTime;
+
         // Context構築
         Context ctx;
         m_evaluator.BuildContext(ctx);
         ctx.state.barTime = currentBarTime;
 
+        // スプレッド情報を評価情報に記録
+        m_lastEvalInfo.spreadPips = ctx.market.spreadPips;
+        m_lastEvalInfo.spreadOk = true;  // スプレッドチェックは呼び出し元で実施済み
+
         // ポジション情報を追加
         if (m_positionManager != NULL) {
             m_positionManager.BuildStateInfo(ctx.state);
         }
+        m_lastEvalInfo.positionLimitOk = true;  // ポジション制限チェックは呼び出し元で実施済み
 
         // priority降順で評価
         for (int i = 0; i < m_sortedCount; i++) {
             int idx = m_sortedIndices[i];
             StrategyConfig strat = m_config.strategies[idx];  // ローカルコピー
 
+            // Strategy評価情報を準備
+            StrategyVisualInfo stratInfo;
+            stratInfo.Reset();
+            stratInfo.strategyId = strat.id;
+            stratInfo.strategyName = strat.name;
+
             // enabled確認
             if (!strat.enabled) {
                 if (m_logger != NULL) {
                     m_logger.LogStrategyEval(strat.id, false, "disabled");
                 }
+                stratInfo.matched = false;
+                stratInfo.reason = "disabled";
+                m_lastEvalInfo.AddStrategyResult(stratInfo);
                 continue;
             }
 
             // OR評価（RuleGroup）
             bool success = m_evaluator.EvaluateOR(strat.entryRequirement, ctx);
+
+            // ブロック評価結果を取得して保存
+            // 注: GetBlockResultCount()のみで制御し、ハードコードされた値は使用しない
+            int blockCount = m_evaluator.GetBlockResultCount();
+            for (int b = 0; b < blockCount; b++) {
+                BlockVisualInfo blockInfo;
+                if (m_evaluator.GetBlockResult(b, blockInfo)) {
+                    stratInfo.AddBlockResult(blockInfo);
+                }
+            }
 
             if (success) {
                 // 方向取得
@@ -172,6 +205,9 @@ public:
                         m_logger.LogStrategyEval(strat.id, false,
                             "direction mismatch: " + DirectionToString(direction));
                     }
+                    stratInfo.matched = false;
+                    stratInfo.reason = "direction mismatch: " + DirectionToString(direction);
+                    m_lastEvalInfo.AddStrategyResult(stratInfo);
                     continue;
                 }
 
@@ -179,6 +215,16 @@ public:
                 if (m_logger != NULL) {
                     m_logger.LogStrategyEval(strat.id, true, "adopted");
                 }
+
+                stratInfo.matched = true;
+                stratInfo.direction = direction;
+                stratInfo.reason = "adopted";
+                m_lastEvalInfo.AddStrategyResult(stratInfo);
+
+                // シグナル情報を記録
+                m_lastEvalInfo.signalGenerated = true;
+                m_lastEvalInfo.signalDirection = direction;
+                m_lastEvalInfo.adoptedStrategyId = strat.id;
 
                 // エントリー実行
                 ExecuteStrategy(strat, ctx, direction, currentBarTime);
@@ -193,8 +239,39 @@ public:
                 if (m_logger != NULL) {
                     m_logger.LogStrategyEval(strat.id, false, "not matched");
                 }
+                stratInfo.matched = false;
+                stratInfo.reason = "not matched";
+                m_lastEvalInfo.AddStrategyResult(stratInfo);
             }
         }
+    }
+
+    //+------------------------------------------------------------------+
+    //| 最後の評価情報を取得                                               |
+    //+------------------------------------------------------------------+
+    EvalVisualInfo GetLastEvalInfo() const {
+        return m_lastEvalInfo;
+    }
+
+    //+------------------------------------------------------------------+
+    //| スプレッド超過を評価情報に記録                                       |
+    //| 注: 既存のStrategy評価情報を保持し、スプレッド関連フィールドのみ更新    |
+    //+------------------------------------------------------------------+
+    void SetSpreadExceeded(double spreadPips) {
+        // Reset()は呼ばない - 既存の評価情報を保持
+        m_lastEvalInfo.barTime = iTime(Symbol(), EA_TIMEFRAME, 0);
+        m_lastEvalInfo.spreadPips = spreadPips;
+        m_lastEvalInfo.spreadOk = false;
+    }
+
+    //+------------------------------------------------------------------+
+    //| ポジション制限超過を評価情報に記録                                   |
+    //| 注: 既存のStrategy評価情報を保持し、ポジション制限フィールドのみ更新   |
+    //+------------------------------------------------------------------+
+    void SetPositionLimitExceeded() {
+        // Reset()は呼ばない - 既存の評価情報を保持
+        m_lastEvalInfo.barTime = iTime(Symbol(), EA_TIMEFRAME, 0);
+        m_lastEvalInfo.positionLimitOk = false;
     }
 
     //+------------------------------------------------------------------+
