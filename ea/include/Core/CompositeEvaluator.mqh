@@ -37,6 +37,115 @@ private:
     // MAX_VISUAL_BLOCKS_PER_STRATEGYはVisualConfig.mqhで定義
     BlockVisualInfo  m_blockResults[MAX_VISUAL_BLOCKS_PER_STRATEGY];// ブロック評価結果保存
     int              m_blockResultCount;// ブロック評価結果数
+    string           m_blockTypeKeys[];  // blockId lookup keys
+    string           m_blockTypeValues[];// typeId lookup values
+    int              m_blockTypeTableSize;
+    bool             m_blockTypeLookupReady;
+
+    //+------------------------------------------------------------------+
+    //| ブロックIDからtypeIdを取得                                         |
+    //+------------------------------------------------------------------+
+    ulong HashBlockId(const string &blockId) {
+        ulong hash = 0;
+        int len = StringLen(blockId);
+        for (int i = 0; i < len; i++) {
+            hash = hash * 31 + (ulong)StringGetCharacter(blockId, i);
+        }
+        return hash;
+    }
+
+    void BuildBlockTypeLookup() {
+        m_blockTypeLookupReady = false;
+        m_blockTypeTableSize = 0;
+
+        if (!m_hasConfig || m_config.blockCount <= 0) return;
+
+        int size = m_config.blockCount * 2 + 1;
+        if (size < 17) size = 17;
+
+        ArrayResize(m_blockTypeKeys, size);
+        ArrayResize(m_blockTypeValues, size);
+        for (int i = 0; i < size; i++) {
+            m_blockTypeKeys[i] = "";
+            m_blockTypeValues[i] = "";
+        }
+
+        m_blockTypeTableSize = size;
+        for (int i = 0; i < m_config.blockCount; i++) {
+            string key = m_config.blocks[i].id;
+            string value = m_config.blocks[i].typeId;
+            if (key == "") continue;
+            int index = (int)(HashBlockId(key) % (ulong)m_blockTypeTableSize);
+            bool inserted = false;
+            for (int probe = 0; probe < m_blockTypeTableSize; probe++) {
+                int slot = (index + probe) % m_blockTypeTableSize;
+                if (m_blockTypeKeys[slot] == "" || m_blockTypeKeys[slot] == key) {
+                    m_blockTypeKeys[slot] = key;
+                    m_blockTypeValues[slot] = value;
+                    inserted = true;
+                    break;
+                }
+            }
+            if (!inserted && m_logger != NULL) {
+                m_logger.LogError(
+                    "HASHTABLE_FULL",
+                    "Failed to insert key '" + key + "' into block type lookup table. Table is full."
+                );
+            }
+        }
+
+        m_blockTypeLookupReady = true;
+    }
+
+    string LookupBlockTypeId(const string &blockId) {
+        bool hashLookupAttempted = (m_blockTypeLookupReady && m_blockTypeTableSize > 0);
+        if (hashLookupAttempted) {
+            int index = (int)(HashBlockId(blockId) % (ulong)m_blockTypeTableSize);
+            for (int probe = 0; probe < m_blockTypeTableSize; probe++) {
+                int slot = (index + probe) % m_blockTypeTableSize;
+                string key = m_blockTypeKeys[slot];
+                if (key == "") break;
+                if (key == blockId) return m_blockTypeValues[slot];
+            }
+        }
+
+        if (hashLookupAttempted && m_logger != NULL) {
+            m_logger.LogInfo(
+                "HASHTABLE_MISS",
+                "blockId '" + blockId + "' not found in hash table; falling back to linear scan."
+            );
+        }
+
+        if (!m_hasConfig) return "unknown";
+        for (int i = 0; i < m_config.blockCount; i++) {
+            if (m_config.blocks[i].id == blockId) {
+                return m_config.blocks[i].typeId;
+            }
+        }
+        return "unknown";
+    }
+
+    //+------------------------------------------------------------------+
+    //| 未評価ブロックを可視化用に保存                                      |
+    //+------------------------------------------------------------------+
+    void SaveSkippedBlockResult(const string &blockId, const string &reason) {
+        BlockResult skipped;
+        skipped.Init(BLOCK_STATUS_NEUTRAL, DIRECTION_NEUTRAL, reason);
+        SaveBlockResult(blockId, LookupBlockTypeId(blockId), skipped);
+    }
+
+    //+------------------------------------------------------------------+
+    //| OR短絡で未評価となったRuleGroupを保存                               |
+    //+------------------------------------------------------------------+
+    void AppendSkippedRuleGroups(const EntryRequirement &requirement, int startIndex,
+                                 const string &reason) {
+        for (int rg = startIndex; rg < requirement.ruleGroupCount; rg++) {
+            RuleGroup skipGroup = requirement.ruleGroups[rg];
+            for (int c = 0; c < skipGroup.conditionCount; c++) {
+                SaveSkippedBlockResult(skipGroup.conditions[c].blockId, reason);
+            }
+        }
+    }
 
 public:
     //--- コンストラクタ
@@ -47,6 +156,8 @@ public:
         m_cache = NULL;
         m_logger = NULL;
         m_blockResultCount = 0;
+        m_blockTypeTableSize = 0;
+        m_blockTypeLookupReady = false;
         ResetLastValues();
     }
 
@@ -57,6 +168,7 @@ public:
     void SetConfig(const Config &config) {
         m_config = config;
         m_hasConfig = true;
+        BuildBlockTypeLookup();
     }
 
     void SetBlockRegistry(CBlockRegistry* registry) {
@@ -197,6 +309,8 @@ public:
             }
 
             if (success) {
+                // 未評価のRuleGroupを可視化用に記録（短絡評価の説明用）
+                AppendSkippedRuleGroups(requirement, i + 1, "未評価 (短絡OR)");
                 // 成立：ORなので即座にtrue（短絡評価）
                 return true;
             }
@@ -217,6 +331,10 @@ public:
             // ブロック評価
             BlockResult result;
             if (!EvaluateBlock(cond.blockId, ctx, result)) {
+                SaveBlockResult(cond.blockId, LookupBlockTypeId(cond.blockId), result);
+                for (int j = i + 1; j < ruleGroup.conditionCount; j++) {
+                    SaveSkippedBlockResult(ruleGroup.conditions[j].blockId, "未評価 (評価失敗)");
+                }
                 return false;  // ブロック取得失敗
             }
 
@@ -228,6 +346,9 @@ public:
             }
 
             if (result.status == BLOCK_STATUS_FAIL) {
+                for (int j = i + 1; j < ruleGroup.conditionCount; j++) {
+                    SaveSkippedBlockResult(ruleGroup.conditions[j].blockId, "未評価 (短絡AND)");
+                }
                 // 失敗：ANDなので即座にfalse（短絡評価）
                 return false;
             }

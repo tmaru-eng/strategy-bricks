@@ -20,6 +20,7 @@
 #include "../include/Support/Logger.mqh"
 #include "../include/Support/StateStore.mqh"
 #include "../include/Support/JsonParser.mqh"
+#include "../include/Support/JsonFormatter.mqh"
 
 #include "../include/Config/ConfigLoader.mqh"
 #include "../include/Config/ConfigValidator.mqh"
@@ -47,6 +48,18 @@ input bool   InpShowSignalArrows = true;               // シグナル矢印表�
 input bool   InpShowStatusPanel = true;                // 状態パネル表示
 input bool   InpShowBlockDetails = true;               // ブロック詳細表示
 input int    InpMaxArrowHistory = 100;                 // シグナル矢印最大保持数
+
+// パネルObject表示設定
+input bool   InpUsePanelObject = true;                 // Objectでパネル表示
+input color  InpPanelBgColor = C'18,18,18';            // パネル背景色
+input color  InpPanelBorderColor = C'90,90,90';        // パネル枠線色
+input int    InpPanelBgAlpha = 255;                    // 背景透明度（0-255）
+input color  InpPanelTextColor = C'235,235,235';       // パネルテキスト色
+input string InpPanelFontName = "MS Gothic";           // フォント名
+input int    InpPanelFontSize = 10;                    // フォントサイズ
+input int    InpPanelX = 10;                           // パネルX座標
+input int    InpPanelY = 30;                           // パネルY座標
+input int    InpPanelWidth = 0;                        // パネル幅（0=自動）
 
 //+------------------------------------------------------------------+
 //| グローバル変数                                                      |
@@ -156,6 +169,19 @@ int OnInit() {
         visConfig.showStatusPanel = InpShowStatusPanel;
         visConfig.showBlockDetails = InpShowBlockDetails;
         visConfig.maxArrowHistory = InpMaxArrowHistory;
+
+        // パネルObject表示設定
+        visConfig.usePanelObject = InpUsePanelObject;
+        visConfig.panelBgColor = InpPanelBgColor;
+        visConfig.panelBorderColor = InpPanelBorderColor;
+        visConfig.panelBgAlpha = InpPanelBgAlpha;
+        visConfig.panelTextColor = InpPanelTextColor;
+        visConfig.panelFontName = InpPanelFontName;
+        visConfig.panelFontSize = InpPanelFontSize;
+        visConfig.panelX = InpPanelX;
+        visConfig.panelY = InpPanelY;
+        visConfig.panelWidth = InpPanelWidth;
+
         g_visualizer.Initialize(visConfig, &g_indicatorCache);
         g_logger.LogInfo("VISUALIZER_INIT", "Chart visualizer initialized");
     }
@@ -166,18 +192,10 @@ int OnInit() {
     Print("Config: ", g_config.meta.name, " (v", g_config.meta.formatVersion, ")");
     Print("Strategies: ", g_config.strategyCount, ", Blocks: ", g_config.blockCount);
 
-    //--- 初期化完了メッセージをComment()で表示（閉場中でも確認可能）
+    //--- 初期化完了メッセージを表示（閉場中でも確認可能）
     if (InpEnableVisualization && InpShowStatusPanel) {
-        string initMsg = "";
-        initMsg += "=== Strategy Bricks EA ===\n";
-        initMsg += "Version: " + EA_VERSION + "\n";
-        initMsg += "Config: " + g_config.meta.name + "\n";
-        initMsg += "Strategies: " + IntegerToString(g_config.strategyCount) + "\n";
-        initMsg += "Blocks: " + IntegerToString(g_config.blockCount) + "\n";
-        initMsg += "---\n";
-        initMsg += "Status: Initialized\n";
-        initMsg += "Waiting for market tick...\n";
-        Comment(initMsg);
+        string initMsg = g_visualizer.BuildInitializationReport(g_config, InpShowBlockDetails);
+        g_visualizer.DisplayText(initMsg);
     }
 
     return INIT_SUCCEEDED;
