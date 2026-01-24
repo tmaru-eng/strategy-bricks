@@ -112,7 +112,11 @@ private:
     }
 
     void AppendPanelLine(PanelLine &lines[], int &lineCount, const string &text, color lineColor) {
-        ArrayResize(lines, lineCount + 1);
+        int capacity = ArraySize(lines);
+        if (lineCount >= capacity) {
+            int newCapacity = (capacity == 0) ? 16 : capacity * 2;
+            ArrayResize(lines, newCapacity);
+        }
         lines[lineCount].text = text;
         lines[lineCount].lineColor = lineColor;
         lineCount++;
