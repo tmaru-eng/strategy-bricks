@@ -194,72 +194,7 @@ int OnInit() {
 
     //--- 初期化完了メッセージを表示（閉場中でも確認可能）
     if (InpEnableVisualization && InpShowStatusPanel) {
-        string initMsg = "";
-        initMsg += "【Strategy Bricks EA】\n";
-        initMsg += "バージョン: " + EA_VERSION + "\n";
-        initMsg += "シンボル: " + Symbol() + " / M1\n";
-        initMsg += "設定: " + g_config.meta.name + " (v" + g_config.meta.formatVersion + ")\n";
-        if (g_config.meta.generatedBy != "" || g_config.meta.generatedAt != "") {
-            string generated = g_config.meta.generatedBy;
-            if (generated != "" && g_config.meta.generatedAt != "") {
-                generated += " @ ";
-            }
-            generated += g_config.meta.generatedAt;
-            initMsg += "生成: " + generated + "\n";
-        }
-        initMsg += "戦略数: " + IntegerToString(g_config.strategyCount) + "\n";
-        initMsg += "ブロック数: " + IntegerToString(g_config.blockCount) + "\n";
-
-        initMsg += "---\n";
-        initMsg += "【ガード設定】\n";
-        initMsg += "時間足: " + g_config.globalGuards.timeframe + "\n";
-        initMsg += "確定足のみ: " + (g_config.globalGuards.useClosedBarOnly ? "はい" : "いいえ") + "\n";
-        initMsg += "同一足再エントリー: " + (g_config.globalGuards.noReentrySameBar ? "禁止" : "許可") + "\n";
-        initMsg += "最大ポジション: 合計 " + IntegerToString(g_config.globalGuards.maxPositionsTotal) +
-                   ", シンボル " + IntegerToString(g_config.globalGuards.maxPositionsPerSymbol) + "\n";
-        initMsg += "最大スプレッド: " + DoubleToString(g_config.globalGuards.maxSpreadPips, 1) + " pips\n";
-        if (g_config.globalGuards.session.enabled) {
-            initMsg += "セッション: 有効\n";
-            if (g_config.globalGuards.session.windowCount > 0) {
-                string windows = "";
-                for (int i = 0; i < g_config.globalGuards.session.windowCount; i++) {
-                    if (i > 0) {
-                        windows += ", ";
-                    }
-                    windows += g_config.globalGuards.session.windows[i].start +
-                               "-" + g_config.globalGuards.session.windows[i].end;
-                }
-                initMsg += "  時間帯: " + windows + "\n";
-            }
-        } else {
-            initMsg += "セッション: 無効\n";
-        }
-
-        // ブロック詳細表示
-        if (InpShowBlockDetails && g_config.blockCount > 0) {
-            initMsg += "---\n";
-            initMsg += "【ブロック詳細】\n";
-            CJsonFormatter formatter;
-            for (int i = 0; i < g_config.blockCount; i++) {
-                BlockDefinition block = g_config.blocks[i];
-                initMsg += "- [" + IntegerToString(i + 1) + "] " + block.typeId +
-                           " (" + block.id + ")\n";
-
-                // paramsJsonを整形して表示
-                if (block.paramsJson != "") {
-                    string params = formatter.FormatParamsJsonForDisplay(block.paramsJson);
-                    StringReplace(params, "\n", "\n      ");
-                    initMsg += "    パラメータ:\n";
-                    initMsg += "      " + params + "\n";
-                }
-            }
-        }
-
-        initMsg += "---\n";
-        initMsg += "状態: 初期化完了\n";
-        initMsg += "ティック待ち...\n";
-
-        // Object表示 or Comment表示（設定に応じて自動切り替え）
+        string initMsg = g_visualizer.BuildInitializationReport(g_config, InpShowBlockDetails);
         g_visualizer.DisplayText(initMsg);
     }
 

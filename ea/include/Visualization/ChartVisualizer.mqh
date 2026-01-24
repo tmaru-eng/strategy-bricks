@@ -10,7 +10,16 @@
 #include "ObjectNameManager.mqh"
 #include "../Common/Constants.mqh"
 #include "../Common/Enums.mqh"
+#include "../Common/Structures.mqh"
 #include "../Indicators/IndicatorCache.mqh"
+#include "../Support/JsonFormatter.mqh"
+
+#define DIRECTION_MISMATCH_PREFIX "direction mismatch:"
+
+struct PanelLine {
+    string text;
+    color lineColor;
+};
 
 //+------------------------------------------------------------------+
 //| ChartVisualizerクラス                                              |
@@ -57,8 +66,8 @@ private:
         if (reason == "disabled") return "無効";
         if (reason == "not matched") return "未成立";
         if (reason == "adopted") return "採用";
-        if (StringFind(reason, "direction mismatch:") == 0) {
-            string dirStr = StringSubstr(reason, StringLen("direction mismatch:"));
+        if (StringFind(reason, DIRECTION_MISMATCH_PREFIX) == 0) {
+            string dirStr = StringSubstr(reason, StringLen(DIRECTION_MISMATCH_PREFIX));
             StringTrimLeft(dirStr);
             StringTrimRight(dirStr);
             string dirLabel = "不明";
@@ -102,74 +111,96 @@ private:
         return width;
     }
 
-    color ResolveLineColor(const string &lineText) {
-        if (StringFind(lineText, "条件:") >= 0) {
-            return m_config.panelTextColor;
-        }
-        if (StringFind(lineText, "[NG]") >= 0 ||
-            StringFind(lineText, "不成立") >= 0 ||
-            StringFind(lineText, "未成立") >= 0 ||
-            StringFind(lineText, "失敗") >= 0) {
-            return m_config.failColor;
-        }
-        if (StringFind(lineText, "[OK]") >= 0 ||
-            StringFind(lineText, "成立") >= 0 ||
-            StringFind(lineText, "通過") >= 0) {
-            return m_config.passColor;
-        }
-        return m_config.panelTextColor;
+    void AppendPanelLine(PanelLine &lines[], int &lineCount, const string &text, color lineColor) {
+        ArrayResize(lines, lineCount + 1);
+        lines[lineCount].text = text;
+        lines[lineCount].lineColor = lineColor;
+        lineCount++;
     }
 
-    //+------------------------------------------------------------------+
-    //| 状態パネルのテキストを生成                                          |
-    //+------------------------------------------------------------------+
-    string BuildStatusPanelText(const EvalVisualInfo &info) {
+    string BuildPanelTextFromLines(const PanelLine &lines[], int lineCount) {
         string text = "";
-
-        // ヘッダー
-        text += "【Strategy Bricks】\n";
-        text += "  シンボル: " + Symbol() + " / M1\n";
-        text += "  バー時刻: ";
-        if (info.barTime > 0) {
-            text += TimeToString(info.barTime, TIME_DATE | TIME_MINUTES);
-        } else {
-            text += "-";
+        for (int i = 0; i < lineCount; i++) {
+            text += lines[i].text;
+            if (i < lineCount - 1) {
+                text += "\n";
+            }
         }
-        text += "\n";
+        return text;
+    }
 
-        // ガード状態
-        text += "---\n";
-        text += "【ガード】\n";
+    int BuildPanelLinesFromText(const string &text, PanelLine &lines[]) {
+        string rawLines[];
+        int lineCount = StringSplit(text, '\n', rawLines);
+        if (lineCount <= 0) {
+            ArrayResize(lines, 1);
+            lines[0].text = text;
+            lines[0].lineColor = m_config.panelTextColor;
+            return 1;
+        }
+        ArrayResize(lines, lineCount);
+        for (int i = 0; i < lineCount; i++) {
+            lines[i].text = rawLines[i];
+            lines[i].lineColor = m_config.panelTextColor;
+        }
+        return lineCount;
+    }
+
+    void AppendStatusPanelLines(const EvalVisualInfo &info, PanelLine &lines[], int &lineCount) {
+        AppendPanelLine(lines, lineCount, "【Strategy Bricks】", m_config.panelTextColor);
+        AppendPanelLine(lines, lineCount, "  シンボル: " + Symbol() + " / M1", m_config.panelTextColor);
+        string barTimeLine = "  バー時刻: ";
+        if (info.barTime > 0) {
+            barTimeLine += TimeToString(info.barTime, TIME_DATE | TIME_MINUTES);
+        } else {
+            barTimeLine += "-";
+        }
+        AppendPanelLine(lines, lineCount, barTimeLine, m_config.panelTextColor);
+
+        AppendPanelLine(lines, lineCount, "---", m_config.panelTextColor);
+        AppendPanelLine(lines, lineCount, "【ガード】", m_config.panelTextColor);
         string spreadStatus = info.spreadOk ? "OK" : "NG";
-        text += "  スプレッド: " + DoubleToString(info.spreadPips, 1) +
-                " pips [" + spreadStatus + "]\n";
+        AppendPanelLine(
+            lines,
+            lineCount,
+            "  スプレッド: " + DoubleToString(info.spreadPips, 1) + " pips [" + spreadStatus + "]",
+            info.spreadOk ? m_config.passColor : m_config.failColor
+        );
         string posLimitStatus = info.positionLimitOk ? "OK" : "NG";
-        text += "  ポジション制限: [" + posLimitStatus + "]\n";
-        text += "  保有数: " + IntegerToString(PositionsTotal()) + "\n";
+        AppendPanelLine(
+            lines,
+            lineCount,
+            "  ポジション制限: [" + posLimitStatus + "]",
+            info.positionLimitOk ? m_config.passColor : m_config.failColor
+        );
+        AppendPanelLine(lines, lineCount, "  保有数: " + IntegerToString(PositionsTotal()), m_config.panelTextColor);
 
-        // シグナル状態
-        text += "---\n";
-        text += "【シグナル】\n";
+        AppendPanelLine(lines, lineCount, "---", m_config.panelTextColor);
+        AppendPanelLine(lines, lineCount, "【シグナル】", m_config.panelTextColor);
         if (info.signalGenerated) {
             string dir = DirectionToJapanese(info.signalDirection);
-            text += "  シグナル: " + dir + "\n";
-            text += "  採用戦略: " + info.adoptedStrategyId + "\n";
+            AppendPanelLine(lines, lineCount, "  シグナル: " + dir, m_config.panelTextColor);
+            AppendPanelLine(lines, lineCount, "  採用戦略: " + info.adoptedStrategyId, m_config.panelTextColor);
         } else {
-            text += "  シグナル: なし\n";
+            AppendPanelLine(lines, lineCount, "  シグナル: なし", m_config.panelTextColor);
         }
 
-        // Strategy評価結果
-        text += "---\n";
-        text += "【戦略評価】\n";
+        AppendPanelLine(lines, lineCount, "---", m_config.panelTextColor);
+        AppendPanelLine(lines, lineCount, "【戦略評価】", m_config.panelTextColor);
         int matchedCount = 0;
         for (int i = 0; i < info.strategyCount; i++) {
             if (info.strategies[i].matched) {
                 matchedCount++;
             }
         }
-        text += "  評価数: " + IntegerToString(info.strategyCount) +
-                " (成立 " + IntegerToString(matchedCount) +
-                " / 不成立 " + IntegerToString(info.strategyCount - matchedCount) + ")\n";
+        AppendPanelLine(
+            lines,
+            lineCount,
+            "  評価数: " + IntegerToString(info.strategyCount) +
+            " (成立 " + IntegerToString(matchedCount) +
+            " / 不成立 " + IntegerToString(info.strategyCount - matchedCount) + ")",
+            m_config.panelTextColor
+        );
 
         int displayCount = MathMin(info.strategyCount, MAX_VISUAL_STRATEGIES);
         for (int i = 0; i < displayCount; i++) {
@@ -187,22 +218,26 @@ private:
                     reasonSuffix = " / " + reasonLabel;
                 }
             }
-            text += "  - " + label + ": " + status + direction + reasonSuffix + "\n";
+            AppendPanelLine(
+                lines,
+                lineCount,
+                "  - " + label + ": " + status + direction + reasonSuffix,
+                strat.matched ? m_config.passColor : m_config.failColor
+            );
         }
 
         if (info.strategyCount > MAX_VISUAL_STRATEGIES) {
-            text += "  ... 他 " + IntegerToString(info.strategyCount - MAX_VISUAL_STRATEGIES) + " 件\n";
+            AppendPanelLine(
+                lines,
+                lineCount,
+                "  ... 他 " + IntegerToString(info.strategyCount - MAX_VISUAL_STRATEGIES) + " 件",
+                m_config.panelTextColor
+            );
         }
-
-        return text;
     }
 
-    //+------------------------------------------------------------------+
-    //| ブロック詳細パネルテキストを生成                                    |
-    //+------------------------------------------------------------------+
-    string BuildBlockDetailText(const EvalVisualInfo &info) {
-        string text = "";
-        text += "【条件詳細】\n";
+    void AppendBlockDetailLines(const EvalVisualInfo &info, PanelLine &lines[], int &lineCount) {
+        AppendPanelLine(lines, lineCount, "【条件詳細】", m_config.panelTextColor);
 
         int stratDisplayCount = MathMin(info.strategyCount, MAX_VISUAL_STRATEGIES);
         for (int s = 0; s < stratDisplayCount; s++) {
@@ -220,7 +255,12 @@ private:
                     stratReason = " / " + reasonLabel;
                 }
             }
-            text += "  [" + stratLabel + "] " + stratStatus + stratDirection + stratReason + "\n";
+            AppendPanelLine(
+                lines,
+                lineCount,
+                "  [" + stratLabel + "] " + stratStatus + stratDirection + stratReason,
+                strat.matched ? m_config.passColor : m_config.failColor
+            );
 
             int blockDisplayCount = MathMin(strat.blockResultCount, MAX_VISUAL_BLOCKS_PER_STRATEGY);
             int passCount = 0;
@@ -245,7 +285,7 @@ private:
                     countLine += " (表示 " + IntegerToString(blockDisplayCount) +
                                  "/" + IntegerToString(strat.blockResultCount) + ")";
                 }
-                text += countLine + "\n";
+                AppendPanelLine(lines, lineCount, countLine, m_config.panelTextColor);
 
                 for (int b = 0; b < blockDisplayCount; b++) {
                     BlockVisualInfo block = strat.blockResults[b];
@@ -258,15 +298,19 @@ private:
                     if (reason != "") {
                         line += " - " + reason;
                     }
-                    text += line + "\n";
+                    color lineColor = m_config.panelTextColor;
+                    if (block.status == BLOCK_STATUS_PASS) {
+                        lineColor = m_config.passColor;
+                    } else if (block.status == BLOCK_STATUS_FAIL) {
+                        lineColor = m_config.failColor;
+                    }
+                    AppendPanelLine(lines, lineCount, line, lineColor);
                 }
             } else {
-                text += "    条件: なし\n";
+                AppendPanelLine(lines, lineCount, "    条件: なし", m_config.panelTextColor);
             }
-            text += "\n";
+            AppendPanelLine(lines, lineCount, "", m_config.panelTextColor);
         }
-
-        return text;
     }
 
     //+------------------------------------------------------------------+
@@ -282,6 +326,31 @@ private:
         int actualCount = MathMin(lineCount, ArraySize(lines));
         for (int i = 0; i < actualCount; i++) {
             int len = MeasureLineWidth(lines[i]);
+            if (len > maxLength) {
+                maxLength = len;
+            }
+        }
+
+        // フォントサイズに基づいて幅を計算（等幅フォント想定）
+        int charWidth = (m_config.panelFontSize * PANEL_FONT_WIDTH_NUMERATOR) / PANEL_FONT_WIDTH_DENOMINATOR;
+        if (charWidth < 1) {
+            charWidth = 1;
+        }
+        int width = maxLength * charWidth + m_config.panelPaddingX * 2 + charWidth;
+
+        return width;
+    }
+
+    int CalculatePanelWidthFromPanelLines(const PanelLine &lines[], int lineCount) {
+        // 固定幅が指定されていればそれを使用
+        if (m_config.panelWidth > 0) {
+            return m_config.panelWidth;
+        }
+
+        int maxLength = 0;
+        int actualCount = MathMin(lineCount, ArraySize(lines));
+        for (int i = 0; i < actualCount; i++) {
+            int len = MeasureLineWidth(lines[i].text);
             if (len > maxLength) {
                 maxLength = len;
             }
@@ -393,22 +462,19 @@ private:
     //+------------------------------------------------------------------+
     //| パネル全体を描画                                                   |
     //+------------------------------------------------------------------+
-    bool DrawPanelObject(const string &text) {
-        // 行に分割（最大行数制限）
-        string lines[];
-        int lineCount = StringSplit(text, '\n', lines);
-
+    bool DrawPanelObject(PanelLine &lines[], int lineCount) {
         // 行数制限
         if (lineCount > MAX_PANEL_LINES) {
             int omitted = lineCount - (MAX_PANEL_LINES - 1);
             ArrayResize(lines, MAX_PANEL_LINES);
-            lines[MAX_PANEL_LINES - 1] = "... 表示上限 " + IntegerToString(MAX_PANEL_LINES) +
-                                   " 行 / 省略 " + IntegerToString(omitted) + " 行";
+            lines[MAX_PANEL_LINES - 1].text = "... 表示上限 " + IntegerToString(MAX_PANEL_LINES) +
+                                              " 行 / 省略 " + IntegerToString(omitted) + " 行";
+            lines[MAX_PANEL_LINES - 1].lineColor = m_config.panelTextColor;
             lineCount = MAX_PANEL_LINES;
         }
 
         // パネル幅・高さを計算
-        int width = CalculatePanelWidthFromLines(lines, lineCount);
+        int width = CalculatePanelWidthFromPanelLines(lines, lineCount);
         int height = CalculatePanelHeight(lineCount);
 
         // 背景描画
@@ -418,8 +484,7 @@ private:
 
         // テキスト行描画
         for (int i = 0; i < lineCount; i++) {
-            color lineColor = ResolveLineColor(lines[i]);
-            DrawPanelTextLine(i, lines[i], lineColor);
+            DrawPanelTextLine(i, lines[i].text, lines[i].lineColor);
         }
 
         // 余剰分の古い行を削除
@@ -544,21 +609,24 @@ public:
             return;
         }
 
-        string panelText = BuildStatusPanelText(info);
+        PanelLine lines[];
+        int lineCount = 0;
+        AppendStatusPanelLines(info, lines, lineCount);
 
         // ブロック詳細も追加
         if (m_config.showBlockDetails) {
-            panelText += "---\n";
-            panelText += BuildBlockDetailText(info);
+            AppendPanelLine(lines, lineCount, "---", m_config.panelTextColor);
+            AppendBlockDetailLines(info, lines, lineCount);
         }
 
         // Object表示 or Comment表示
         if (m_config.usePanelObject) {
             // Object表示
-            DrawPanelObject(panelText);
+            DrawPanelObject(lines, lineCount);
             Comment("");  // Comment()をクリア
         } else {
             // Comment表示
+            string panelText = BuildPanelTextFromLines(lines, lineCount);
             Comment(panelText);
             // パネルObjectを削除
             m_nameManager.DeleteAllPanelObjects(m_chartId);
@@ -736,6 +804,75 @@ public:
     }
 
     //+------------------------------------------------------------------+
+    //| 初期化完了メッセージを生成                                        |
+    //+------------------------------------------------------------------+
+    string BuildInitializationReport(const Config &config, bool showBlockDetails) {
+        string initMsg = "";
+        initMsg += "【Strategy Bricks EA】\n";
+        initMsg += "バージョン: " + EA_VERSION + "\n";
+        initMsg += "シンボル: " + Symbol() + " / M1\n";
+        initMsg += "設定: " + config.meta.name + " (v" + config.meta.formatVersion + ")\n";
+        if (config.meta.generatedBy != "" || config.meta.generatedAt != "") {
+            string generated = config.meta.generatedBy;
+            if (generated != "" && config.meta.generatedAt != "") {
+                generated += " @ ";
+            }
+            generated += config.meta.generatedAt;
+            initMsg += "生成: " + generated + "\n";
+        }
+        initMsg += "戦略数: " + IntegerToString(config.strategyCount) + "\n";
+        initMsg += "ブロック数: " + IntegerToString(config.blockCount) + "\n";
+
+        initMsg += "---\n";
+        initMsg += "【ガード設定】\n";
+        initMsg += "時間足: " + config.globalGuards.timeframe + "\n";
+        initMsg += "確定足のみ: " + (config.globalGuards.useClosedBarOnly ? "はい" : "いいえ") + "\n";
+        initMsg += "同一足再エントリー: " + (config.globalGuards.noReentrySameBar ? "禁止" : "許可") + "\n";
+        initMsg += "最大ポジション: 合計 " + IntegerToString(config.globalGuards.maxPositionsTotal) +
+                   ", シンボル " + IntegerToString(config.globalGuards.maxPositionsPerSymbol) + "\n";
+        initMsg += "最大スプレッド: " + DoubleToString(config.globalGuards.maxSpreadPips, 1) + " pips\n";
+        if (config.globalGuards.session.enabled) {
+            initMsg += "セッション: 有効\n";
+            if (config.globalGuards.session.windowCount > 0) {
+                string windows = "";
+                for (int i = 0; i < config.globalGuards.session.windowCount; i++) {
+                    if (i > 0) {
+                        windows += ", ";
+                    }
+                    windows += config.globalGuards.session.windows[i].start +
+                               "-" + config.globalGuards.session.windows[i].end;
+                }
+                initMsg += "  時間帯: " + windows + "\n";
+            }
+        } else {
+            initMsg += "セッション: 無効\n";
+        }
+
+        if (showBlockDetails && config.blockCount > 0) {
+            initMsg += "---\n";
+            initMsg += "【ブロック詳細】\n";
+            CJsonFormatter formatter;
+            for (int i = 0; i < config.blockCount; i++) {
+                BlockDefinition block = config.blocks[i];
+                initMsg += "- [" + IntegerToString(i + 1) + "] " + block.typeId +
+                           " (" + block.id + ")\n";
+                if (block.paramsJson != "") {
+                    string params = formatter.FormatParamsJsonForDisplay(block.paramsJson);
+                    StringReplace(params, "\n", "\n      ");
+                    initMsg += "    パラメータ:\n";
+                    initMsg += "      " + params + "\n";
+                }
+            }
+        }
+
+        initMsg += "---\n";
+        initMsg += "状態: 初期化完了\n";
+        initMsg += "ティック待ち...\n";
+
+        return initMsg;
+    }
+
+    //+------------------------------------------------------------------+
     //| 任意のテキストを表示（Object/Comment切り替え対応）                   |
     //+------------------------------------------------------------------+
     void DisplayText(const string &text) {
@@ -746,7 +883,9 @@ public:
         // Object表示 or Comment表示
         if (m_config.usePanelObject) {
             // Object表示
-            DrawPanelObject(text);
+            PanelLine lines[];
+            int lineCount = BuildPanelLinesFromText(text, lines);
+            DrawPanelObject(lines, lineCount);
             Comment("");  // Comment()をクリア
         } else {
             // Comment表示
