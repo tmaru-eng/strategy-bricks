@@ -45,14 +45,13 @@ private:
     //+------------------------------------------------------------------+
     //| ブロックIDからtypeIdを取得                                         |
     //+------------------------------------------------------------------+
-    int HashBlockId(const string &blockId) {
-        int hash = 0;
+    long HashBlockId(const string &blockId) {
+        long hash = 0;
         int len = StringLen(blockId);
         for (int i = 0; i < len; i++) {
-            hash = hash * 31 + (int)StringGetCharacter(blockId, i);
+            hash = hash * 31 + (long)StringGetCharacter(blockId, i);
         }
-        if (hash < 0) hash = -hash;
-        return hash;
+        return MathAbs(hash);
     }
 
     void BuildBlockTypeLookup() {
@@ -77,7 +76,7 @@ private:
             string key = m_config.blocks[i].id;
             string value = m_config.blocks[i].typeId;
             if (key == "") continue;
-            int index = HashBlockId(key) % m_blockTypeTableSize;
+            int index = (int)(HashBlockId(key) % (long)m_blockTypeTableSize);
             for (int probe = 0; probe < m_blockTypeTableSize; probe++) {
                 int slot = (index + probe) % m_blockTypeTableSize;
                 if (m_blockTypeKeys[slot] == "" || m_blockTypeKeys[slot] == key) {
@@ -93,7 +92,7 @@ private:
 
     string LookupBlockTypeId(const string &blockId) {
         if (m_blockTypeLookupReady && m_blockTypeTableSize > 0) {
-            int index = HashBlockId(blockId) % m_blockTypeTableSize;
+            int index = (int)(HashBlockId(blockId) % (long)m_blockTypeTableSize);
             for (int probe = 0; probe < m_blockTypeTableSize; probe++) {
                 int slot = (index + probe) % m_blockTypeTableSize;
                 string key = m_blockTypeKeys[slot];

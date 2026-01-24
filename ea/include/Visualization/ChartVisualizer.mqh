@@ -18,7 +18,11 @@
 //+------------------------------------------------------------------+
 class CChartVisualizer {
 private:
-    enum { MAX_PANEL_LINES = 60 };
+    enum {
+        MAX_PANEL_LINES = 60,
+        PANEL_FONT_WIDTH_NUMERATOR = 8,   // MS Gothic width approximation
+        PANEL_FONT_WIDTH_DENOMINATOR = 9
+    };
     VisualConfig        m_config;         // 可視化設定
     CObjectNameManager  m_nameManager;    // オブジェクト名管理
     CIndicatorCache*    m_cache;          // インジケータキャッシュ参照
@@ -284,7 +288,7 @@ private:
         }
 
         // フォントサイズに基づいて幅を計算（等幅フォント想定）
-        int charWidth = (m_config.panelFontSize * 8) / 9;
+        int charWidth = (m_config.panelFontSize * PANEL_FONT_WIDTH_NUMERATOR) / PANEL_FONT_WIDTH_DENOMINATOR;
         if (charWidth < 1) {
             charWidth = 1;
         }
