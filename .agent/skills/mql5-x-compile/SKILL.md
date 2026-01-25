@@ -192,7 +192,7 @@ X: drive mapping is persistent and git-safe:
 
 ## Security Notes
 
-- X: drive はコンパイルで .ex5 / .log を生成するため書き込みが発生する
+- X: drive is used for compilation, which generates .ex5 / .log files, resulting in write operations.
 - No execution of compiled files during compilation
 - MetaEditor runs in sandboxed Wine environment
 - No network access during compilation

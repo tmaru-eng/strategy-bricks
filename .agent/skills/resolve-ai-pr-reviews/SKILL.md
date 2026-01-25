@@ -94,7 +94,7 @@ done
 
 - Commit and push if appropriate for the repo workflow.
 - Post `/gemini review` on the PR after push.
-- `/gemini review` の後は時間がかかるため、ユーザーが確認してから再度スキルを実行する。
+- After posting `/gemini review`, it takes time to process, so run the skill again after the user confirms completion.
 
 ```bash
 gh pr comment $PR --body "/gemini review"

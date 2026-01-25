@@ -138,11 +138,8 @@ export const useStateManager = create<CatalogState & FlowState>((set, get) => ({
   selectNode: (nodeId) => set({ selectedNodeId: nodeId }),
   addRuleGroup: () => {
     const nodes = get().nodes
-    const ruleGroupNodes = nodes.filter((node) => node.type === 'ruleGroupNode')
     const maxY =
-      ruleGroupNodes.length > 0
-        ? Math.max(...ruleGroupNodes.map((node) => node.position.y))
-        : 100
+      nodes.length > 0 ? Math.max(...nodes.map((node) => node.position.y)) : 100
 
     const nextNode: Node = {
       id: `rulegroup-${crypto.randomUUID()}`,

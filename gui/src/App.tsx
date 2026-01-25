@@ -17,9 +17,14 @@ const App: React.FC = () => {
     const profileName = window.electron?.env?.isE2E
       ? window.electron.env.profileName
       : window.prompt('プロファイル名', 'active') || 'active'
-    const result = await exportCurrentConfig(profileName)
-    if (!result.ok) {
-      window.alert('エクスポートがキャンセルされたか失敗しました。')
+    try {
+      const result = await exportCurrentConfig(profileName)
+      if (!result.ok) {
+        window.alert('エクスポートがキャンセルされたか失敗しました。')
+      }
+    } catch (error) {
+      console.error('エクスポートに失敗しました:', error)
+      window.alert(`エクスポートに失敗しました: ${error instanceof Error ? error.message : String(error)}`)
     }
   }
 
