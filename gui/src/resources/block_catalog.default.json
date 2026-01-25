@@ -431,7 +431,8 @@
         "required": [
           "period",
           "deviation",
-          "appliedPrice"
+          "appliedPrice",
+          "direction"
         ],
         "properties": {
           "period": {

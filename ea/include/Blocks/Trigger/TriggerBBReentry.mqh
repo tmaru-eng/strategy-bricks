@@ -37,7 +37,7 @@ public:
 
         m_period = GetParamInt(paramsJson, "period", 20);
         m_deviation = GetParamDouble(paramsJson, "deviation", 2.0);
-        m_side = GetParamString(paramsJson, "side", "lowerToInside");
+        m_side = GetParamString(paramsJson, "direction", "lowerToInside");
     }
 
     //+------------------------------------------------------------------+

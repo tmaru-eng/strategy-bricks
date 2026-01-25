@@ -29,7 +29,12 @@ public:
         m_appliedPrice = PRICE_CLOSE; // Simply default or parse
         string p = GetParamString(paramsJson, "appliedPrice", "CLOSE");
         if(p=="OPEN") m_appliedPrice=PRICE_OPEN;
-        // ... (simplified) ...
+        else if(p=="HIGH") m_appliedPrice=PRICE_HIGH;
+        else if(p=="LOW") m_appliedPrice=PRICE_LOW;
+        else if(p=="MEDIAN") m_appliedPrice=PRICE_MEDIAN;
+        else if(p=="TYPICAL") m_appliedPrice=PRICE_TYPICAL;
+        else if(p=="WEIGHTED") m_appliedPrice=PRICE_WEIGHTED;
+        else m_appliedPrice=PRICE_CLOSE;
     }
 
     virtual void Evaluate(const Context &ctx, BlockResult &result) override {

@@ -11,6 +11,7 @@
 class CTriggerCCILevel : public CBlockBase {
 private:
     int    m_period;
+    ENUM_APPLIED_PRICE m_appliedPrice;
     double m_threshold;
     string m_mode;
     int    m_handle;
@@ -23,13 +24,23 @@ public:
     virtual void SetParams(string paramsJson) override {
         CBlockBase::SetParams(paramsJson);
         m_period = GetParamInt(paramsJson, "period", 14);
+        
+        string p = GetParamString(paramsJson, "appliedPrice", "CLOSE");
+        if(p=="OPEN") m_appliedPrice=PRICE_OPEN;
+        else if(p=="HIGH") m_appliedPrice=PRICE_HIGH;
+        else if(p=="LOW") m_appliedPrice=PRICE_LOW;
+        else if(p=="MEDIAN") m_appliedPrice=PRICE_MEDIAN;
+        else if(p=="TYPICAL") m_appliedPrice=PRICE_TYPICAL;
+        else if(p=="WEIGHTED") m_appliedPrice=PRICE_WEIGHTED;
+        else m_appliedPrice=PRICE_CLOSE;
+
         m_threshold = GetParamDouble(paramsJson, "threshold", 100);
         m_mode = GetParamString(paramsJson, "mode", "overbought");
     }
 
     virtual void Evaluate(const Context &ctx, BlockResult &result) override {
         if (m_handle == INVALID_HANDLE && ctx.cache != NULL) {
-            m_handle = ctx.cache.GetCCIHandle(ctx.market.symbol, EA_TIMEFRAME, m_period, PRICE_CLOSE); // Simplified price
+            m_handle = ctx.cache.GetCCIHandle(ctx.market.symbol, EA_TIMEFRAME, m_period, m_appliedPrice);
         }
 
         if (m_handle == INVALID_HANDLE) {
