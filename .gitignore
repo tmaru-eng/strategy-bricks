@@ -36,6 +36,7 @@ logs/
 tmp/
 temp/
 *.tmp
+_pr_threads*.json
 
 # Build artifacts
 *.o
