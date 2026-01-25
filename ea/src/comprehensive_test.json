@@ -1,0 +1,183 @@
+{
+    "meta": {
+        "formatVersion": "1.0",
+        "name": "Comprehensive Test Strategy",
+        "generatedBy": "Antigravity",
+        "generatedAt": "2026-01-25T15:55:00"
+    },
+    "globalGuards": {
+        "timeframe": "M1",
+        "useClosedBarOnly": true,
+        "maxPositionsTotal": 5,
+        "maxSpreadPips": 3.0,
+        "session": {
+            "enabled": true,
+            "windows": [
+                {
+                    "start": "09:00",
+                    "end": "11:00"
+                },
+                {
+                    "start": "13:00",
+                    "end": "15:00"
+                }
+            ],
+            "weekDays": {
+                "mon": true,
+                "tue": true,
+                "wed": true,
+                "thu": true,
+                "fri": true
+            }
+        }
+    },
+    "strategies": [
+        {
+            "id": "strat-trend-follow",
+            "name": "Moving Average Cross with ADX",
+            "enabled": true,
+            "priority": 1,
+            "entryRequirement": {
+                "ruleGroups": [
+                    {
+                        "id": "rg-trend-long",
+                        "conditions": [
+                            {
+                                "blockId": "blk-ma-cross-gold"
+                            },
+                            {
+                                "blockId": "blk-adx-filter"
+                            },
+                            {
+                                "blockId": "blk-atr-filter"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "lotModel": {
+                "type": "lot.fixed",
+                "params": {
+                    "lots": 0.1
+                }
+            },
+            "riskModel": {
+                "type": "risk.fixedSLTP",
+                "params": {
+                    "slPips": 20,
+                    "tpPips": 40
+                }
+            }
+        },
+        {
+            "id": "strat-reversal",
+            "name": "RSI Reversal with BB",
+            "enabled": true,
+            "priority": 2,
+            "entryRequirement": {
+                "ruleGroups": [
+                    {
+                        "id": "rg-rev-short",
+                        "conditions": [
+                            {
+                                "blockId": "blk-rsi-overbought"
+                            },
+                            {
+                                "blockId": "blk-bb-reentry-down"
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "id": "strat-bill",
+            "name": "Bill Williams Breakout",
+            "enabled": true,
+            "entryRequirement": {
+                "ruleGroups": [
+                    {
+                        "id": "rg-bill-up",
+                        "conditions": [
+                            {
+                                "blockId": "blk-alligator-trend"
+                            },
+                            {
+                                "blockId": "blk-fractal-break-up"
+                            }
+                        ]
+                    }
+                ]
+            }
+        }
+    ],
+    "blocks": [
+        {
+            "id": "blk-ma-cross-gold",
+            "typeId": "trend.maCross",
+            "params": {
+                "fastPeriod": 10,
+                "slowPeriod": 30,
+                "maMethod": "EMA",
+                "appliedPrice": "CLOSE",
+                "direction": "golden"
+            }
+        },
+        {
+            "id": "blk-adx-filter",
+            "typeId": "trend.adxThreshold",
+            "params": {
+                "period": 14,
+                "minAdx": 25.0
+            }
+        },
+        {
+            "id": "blk-atr-filter",
+            "typeId": "filter.volatility.atrRange",
+            "params": {
+                "period": 14,
+                "minAtr": 0.001,
+                "maxAtr": 0.05
+            }
+        },
+        {
+            "id": "blk-rsi-overbought",
+            "typeId": "trigger.rsiLevel",
+            "params": {
+                "period": 14,
+                "appliedPrice": "CLOSE",
+                "threshold": 70,
+                "mode": "overbought"
+            }
+        },
+        {
+            "id": "blk-bb-reentry-down",
+            "typeId": "trigger.bbReentry",
+            "params": {
+                "period": 20,
+                "deviation": 2.0,
+                "appliedPrice": "CLOSE",
+                "direction": "upperToInside"
+            }
+        },
+        {
+            "id": "blk-alligator-trend",
+            "typeId": "bill.alligator",
+            "params": {
+                "jawPeriod": 13,
+                "teethPeriod": 8,
+                "lipsPeriod": 5,
+                "maMethod": "SMMA",
+                "appliedPrice": "MEDIAN",
+                "trend": "uptrend"
+            }
+        },
+        {
+            "id": "blk-fractal-break-up",
+            "typeId": "bill.fractals",
+            "params": {
+                "direction": "up"
+            }
+        }
+    ]
+}
