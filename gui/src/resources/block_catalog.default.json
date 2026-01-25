@@ -10,19 +10,29 @@
       "description": "スプレッドが指定値以下のときのみ通過",
       "paramsSchema": {
         "type": "object",
-        "required": ["maxSpreadPips"],
+        "required": [
+          "maxSpreadPips"
+        ],
         "properties": {
           "maxSpreadPips": {
             "type": "number",
             "minimum": 0,
             "maximum": 50,
             "default": 2,
-            "ui": { "control": "number" }
+            "ui": {
+              "control": "number"
+            }
           }
         }
       },
-      "io": { "direction": "none", "score": "none" },
-      "runtimeHints": { "timeframe": "M1", "useClosedBarOnly": true }
+      "io": {
+        "direction": "none",
+        "score": "none"
+      },
+      "runtimeHints": {
+        "timeframe": "M1",
+        "useClosedBarOnly": true
+      }
     },
     {
       "typeId": "filter.session.timeWindow",
@@ -31,7 +41,10 @@
       "description": "指定時間帯のみ通過",
       "paramsSchema": {
         "type": "object",
-        "required": ["start", "end"],
+        "required": [
+          "start",
+          "end"
+        ],
         "properties": {
           "start": {
             "type": "string",
@@ -45,8 +58,14 @@
           }
         }
       },
-      "io": { "direction": "none", "score": "none" },
-      "runtimeHints": { "timeframe": "M1", "useClosedBarOnly": true }
+      "io": {
+        "direction": "none",
+        "score": "none"
+      },
+      "runtimeHints": {
+        "timeframe": "M1",
+        "useClosedBarOnly": true
+      }
     },
     {
       "typeId": "filter.session.daysOfWeek",
@@ -55,21 +74,80 @@
       "description": "選択した曜日のみ通過 (0=日曜, 6=土曜)",
       "paramsSchema": {
         "type": "object",
-        "required": ["days"],
+        "required": [
+          "days"
+        ],
         "properties": {
           "days": {
             "type": "array",
             "items": {
               "type": "integer",
-              "enum": [0, 1, 2, 3, 4, 5, 6]
+              "enum": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6
+              ]
             },
             "uniqueItems": true,
-            "default": [1, 2, 3, 4, 5]
+            "default": [
+              1,
+              2,
+              3,
+              4,
+              5
+            ]
           }
         }
       },
-      "io": { "direction": "none", "score": "none" },
-      "runtimeHints": { "timeframe": "M1", "useClosedBarOnly": true }
+      "io": {
+        "direction": "none",
+        "score": "none"
+      },
+      "runtimeHints": {
+        "timeframe": "M1",
+        "useClosedBarOnly": true
+      }
+    },
+    {
+      "typeId": "filter.volatility.atrRange",
+      "category": "filter",
+      "displayName": "ATR範囲",
+      "description": "ATRが指定範囲内のときのみ通過",
+      "paramsSchema": {
+        "type": "object",
+        "required": [
+          "period",
+          "minAtr",
+          "maxAtr"
+        ],
+        "properties": {
+          "period": {
+            "type": "integer",
+            "default": 14,
+            "minimum": 1
+          },
+          "minAtr": {
+            "type": "number",
+            "default": 0
+          },
+          "maxAtr": {
+            "type": "number",
+            "default": 100
+          }
+        }
+      },
+      "io": {
+        "direction": "none",
+        "score": "none"
+      },
+      "runtimeHints": {
+        "timeframe": "M1",
+        "useClosedBarOnly": true
+      }
     },
     {
       "typeId": "trend.maRelation",
@@ -78,44 +156,81 @@
       "description": "終値がMAより上/下",
       "paramsSchema": {
         "type": "object",
-        "required": ["period", "maMethod", "appliedPrice", "relation"],
+        "required": [
+          "period",
+          "maMethod",
+          "appliedPrice",
+          "relation"
+        ],
         "properties": {
           "period": {
             "type": "integer",
             "minimum": 2,
             "maximum": 200,
             "default": 20,
-            "ui": { "control": "number" }
+            "ui": {
+              "control": "number"
+            }
           },
           "maShift": {
             "type": "integer",
             "minimum": 0,
             "maximum": 50,
             "default": 0,
-            "ui": { "control": "number" }
+            "ui": {
+              "control": "number"
+            }
           },
           "maMethod": {
             "type": "string",
-            "enum": ["SMA", "EMA", "SMMA", "LWMA"],
+            "enum": [
+              "SMA",
+              "EMA",
+              "SMMA",
+              "LWMA"
+            ],
             "default": "SMA",
-            "ui": { "control": "select" }
+            "ui": {
+              "control": "select"
+            }
           },
           "appliedPrice": {
             "type": "string",
-            "enum": ["CLOSE", "OPEN", "HIGH", "LOW", "MEDIAN", "TYPICAL", "WEIGHTED"],
+            "enum": [
+              "CLOSE",
+              "OPEN",
+              "HIGH",
+              "LOW",
+              "MEDIAN",
+              "TYPICAL",
+              "WEIGHTED"
+            ],
             "default": "CLOSE",
-            "ui": { "control": "select" }
+            "ui": {
+              "control": "select"
+            }
           },
           "relation": {
             "type": "string",
-            "enum": ["above", "below"],
+            "enum": [
+              "above",
+              "below"
+            ],
             "default": "above",
-            "ui": { "control": "select" }
+            "ui": {
+              "control": "select"
+            }
           }
         }
       },
-      "io": { "direction": "both", "score": "none" },
-      "runtimeHints": { "timeframe": "M1", "useClosedBarOnly": true }
+      "io": {
+        "direction": "both",
+        "score": "none"
+      },
+      "runtimeHints": {
+        "timeframe": "M1",
+        "useClosedBarOnly": true
+      }
     },
     {
       "typeId": "trend.maCross",
@@ -124,44 +239,187 @@
       "description": "短期MAと長期MAのクロス",
       "paramsSchema": {
         "type": "object",
-        "required": ["fastPeriod", "slowPeriod", "maMethod", "appliedPrice", "direction"],
+        "required": [
+          "fastPeriod",
+          "slowPeriod",
+          "maMethod",
+          "appliedPrice",
+          "direction"
+        ],
         "properties": {
           "fastPeriod": {
             "type": "integer",
             "minimum": 2,
             "maximum": 200,
             "default": 5,
-            "ui": { "control": "number" }
+            "ui": {
+              "control": "number"
+            }
           },
           "slowPeriod": {
             "type": "integer",
             "minimum": 2,
             "maximum": 200,
             "default": 20,
-            "ui": { "control": "number" }
+            "ui": {
+              "control": "number"
+            }
           },
           "maMethod": {
             "type": "string",
-            "enum": ["SMA", "EMA", "SMMA", "LWMA"],
+            "enum": [
+              "SMA",
+              "EMA",
+              "SMMA",
+              "LWMA"
+            ],
             "default": "EMA",
-            "ui": { "control": "select" }
+            "ui": {
+              "control": "select"
+            }
           },
           "appliedPrice": {
             "type": "string",
-            "enum": ["CLOSE", "OPEN", "HIGH", "LOW", "MEDIAN", "TYPICAL", "WEIGHTED"],
+            "enum": [
+              "CLOSE",
+              "OPEN",
+              "HIGH",
+              "LOW",
+              "MEDIAN",
+              "TYPICAL",
+              "WEIGHTED"
+            ],
             "default": "CLOSE",
-            "ui": { "control": "select" }
+            "ui": {
+              "control": "select"
+            }
           },
           "direction": {
             "type": "string",
-            "enum": ["golden", "dead"],
+            "enum": [
+              "golden",
+              "dead"
+            ],
             "default": "golden",
-            "ui": { "control": "select" }
+            "ui": {
+              "control": "select"
+            }
           }
         }
       },
-      "io": { "direction": "both", "score": "none" },
-      "runtimeHints": { "timeframe": "M1", "useClosedBarOnly": true }
+      "io": {
+        "direction": "both",
+        "score": "none"
+      },
+      "runtimeHints": {
+        "timeframe": "M1",
+        "useClosedBarOnly": true
+      }
+    },
+    {
+      "typeId": "trend.adxThreshold",
+      "category": "trend",
+      "displayName": "ADX閾値",
+      "description": "ADXが指定値以上でトレンド発生とみなす",
+      "paramsSchema": {
+        "type": "object",
+        "required": [
+          "period",
+          "minAdx"
+        ],
+        "properties": {
+          "period": {
+            "type": "integer",
+            "default": 14
+          },
+          "minAdx": {
+            "type": "number",
+            "default": 25
+          }
+        }
+      },
+      "io": {
+        "direction": "none",
+        "score": "none"
+      }
+    },
+    {
+      "typeId": "trend.ichimokuCloud",
+      "category": "trend",
+      "displayName": "一目均衡表（雲）",
+      "description": "価格と雲の位置関係",
+      "paramsSchema": {
+        "type": "object",
+        "required": [
+          "tenkan",
+          "kijun",
+          "senkouB",
+          "position"
+        ],
+        "properties": {
+          "tenkan": {
+            "type": "integer",
+            "default": 9
+          },
+          "kijun": {
+            "type": "integer",
+            "default": 26
+          },
+          "senkouB": {
+            "type": "integer",
+            "default": 52
+          },
+          "position": {
+            "type": "string",
+            "enum": [
+              "above",
+              "below",
+              "inside"
+            ],
+            "default": "above"
+          }
+        }
+      },
+      "io": {
+        "direction": "both",
+        "score": "none"
+      }
+    },
+    {
+      "typeId": "trend.sarDirection",
+      "category": "trend",
+      "displayName": "パラボリックSAR方向",
+      "description": "SARの位置によるトレンド判定",
+      "paramsSchema": {
+        "type": "object",
+        "required": [
+          "step",
+          "maximum",
+          "direction"
+        ],
+        "properties": {
+          "step": {
+            "type": "number",
+            "default": 0.02
+          },
+          "maximum": {
+            "type": "number",
+            "default": 0.2
+          },
+          "direction": {
+            "type": "string",
+            "enum": [
+              "bullish",
+              "bearish"
+            ],
+            "default": "bullish"
+          }
+        }
+      },
+      "io": {
+        "direction": "both",
+        "score": "none"
+      }
     },
     {
       "typeId": "trigger.bbReentry",
@@ -170,39 +428,112 @@
       "description": "バンド外→内への回帰",
       "paramsSchema": {
         "type": "object",
-        "required": ["period", "deviation", "appliedPrice"],
+        "required": [
+          "period",
+          "deviation",
+          "appliedPrice"
+        ],
         "properties": {
           "period": {
             "type": "integer",
             "minimum": 2,
             "maximum": 200,
             "default": 20,
-            "ui": { "control": "number" }
+            "ui": {
+              "control": "number"
+            }
           },
           "deviation": {
             "type": "number",
             "minimum": 0.1,
             "maximum": 5,
             "default": 2,
-            "ui": { "control": "number" }
+            "ui": {
+              "control": "number"
+            }
           },
           "bandsShift": {
             "type": "integer",
             "minimum": 0,
             "maximum": 50,
             "default": 0,
-            "ui": { "control": "number" }
+            "ui": {
+              "control": "number"
+            }
           },
           "appliedPrice": {
             "type": "string",
-            "enum": ["CLOSE", "OPEN", "HIGH", "LOW", "MEDIAN", "TYPICAL", "WEIGHTED"],
+            "enum": [
+              "CLOSE",
+              "OPEN",
+              "HIGH",
+              "LOW",
+              "MEDIAN",
+              "TYPICAL",
+              "WEIGHTED"
+            ],
             "default": "CLOSE",
-            "ui": { "control": "select" }
+            "ui": {
+              "control": "select"
+            }
           }
         }
       },
-      "io": { "direction": "both", "score": "none" },
-      "runtimeHints": { "timeframe": "M1", "useClosedBarOnly": true }
+      "io": {
+        "direction": "both",
+        "score": "none"
+      },
+      "runtimeHints": {
+        "timeframe": "M1",
+        "useClosedBarOnly": true
+      }
+    },
+    {
+      "typeId": "trigger.bbBreakout",
+      "category": "trigger",
+      "displayName": "ボリンジャーブレイク",
+      "description": "バンド内→外へのブレイク",
+      "paramsSchema": {
+        "type": "object",
+        "required": [
+          "period",
+          "deviation",
+          "direction"
+        ],
+        "properties": {
+          "period": {
+            "type": "integer",
+            "default": 20
+          },
+          "deviation": {
+            "type": "number",
+            "default": 2.0
+          },
+          "bandsShift": {
+            "type": "integer",
+            "default": 0
+          },
+          "appliedPrice": {
+            "type": "string",
+            "enum": [
+              "CLOSE"
+            ],
+            "default": "CLOSE"
+          },
+          "direction": {
+            "type": "string",
+            "enum": [
+              "upper",
+              "lower"
+            ],
+            "default": "upper"
+          }
+        }
+      },
+      "io": {
+        "direction": "both",
+        "score": "none"
+      }
     },
     {
       "typeId": "trigger.macdCross",
@@ -211,45 +542,137 @@
       "description": "MACDラインとシグナルのクロス",
       "paramsSchema": {
         "type": "object",
-        "required": ["fastEma", "slowEma", "signal", "appliedPrice", "direction"],
+        "required": [
+          "fastEma",
+          "slowEma",
+          "signal",
+          "appliedPrice",
+          "direction"
+        ],
         "properties": {
           "fastEma": {
             "type": "integer",
             "minimum": 2,
             "maximum": 200,
             "default": 12,
-            "ui": { "control": "number" }
+            "ui": {
+              "control": "number"
+            }
           },
           "slowEma": {
             "type": "integer",
             "minimum": 2,
             "maximum": 200,
             "default": 26,
-            "ui": { "control": "number" }
+            "ui": {
+              "control": "number"
+            }
           },
           "signal": {
             "type": "integer",
             "minimum": 1,
             "maximum": 100,
             "default": 9,
-            "ui": { "control": "number" }
+            "ui": {
+              "control": "number"
+            }
           },
           "appliedPrice": {
             "type": "string",
-            "enum": ["CLOSE", "OPEN", "HIGH", "LOW", "MEDIAN", "TYPICAL", "WEIGHTED"],
+            "enum": [
+              "CLOSE",
+              "OPEN",
+              "HIGH",
+              "LOW",
+              "MEDIAN",
+              "TYPICAL",
+              "WEIGHTED"
+            ],
             "default": "CLOSE",
-            "ui": { "control": "select" }
+            "ui": {
+              "control": "select"
+            }
           },
           "direction": {
             "type": "string",
-            "enum": ["golden", "dead"],
+            "enum": [
+              "golden",
+              "dead"
+            ],
             "default": "golden",
-            "ui": { "control": "select" }
+            "ui": {
+              "control": "select"
+            }
           }
         }
       },
-      "io": { "direction": "both", "score": "none" },
-      "runtimeHints": { "timeframe": "M1", "useClosedBarOnly": true }
+      "io": {
+        "direction": "both",
+        "score": "none"
+      },
+      "runtimeHints": {
+        "timeframe": "M1",
+        "useClosedBarOnly": true
+      }
+    },
+    {
+      "typeId": "trigger.stochCross",
+      "category": "trigger",
+      "displayName": "ストキャス・クロス",
+      "description": "メイン線とシグナル線のクロス",
+      "paramsSchema": {
+        "type": "object",
+        "required": [
+          "kPeriod",
+          "dPeriod",
+          "slowing",
+          "maMethod",
+          "priceField",
+          "direction"
+        ],
+        "properties": {
+          "kPeriod": {
+            "type": "integer",
+            "default": 5
+          },
+          "dPeriod": {
+            "type": "integer",
+            "default": 3
+          },
+          "slowing": {
+            "type": "integer",
+            "default": 3
+          },
+          "maMethod": {
+            "type": "string",
+            "enum": [
+              "SMA",
+              "EMA"
+            ],
+            "default": "SMA"
+          },
+          "priceField": {
+            "type": "string",
+            "enum": [
+              "LOWHIGH",
+              "CLOSECLOSE"
+            ],
+            "default": "LOWHIGH"
+          },
+          "direction": {
+            "type": "string",
+            "enum": [
+              "golden",
+              "dead"
+            ],
+            "default": "golden"
+          }
+        }
+      },
+      "io": {
+        "direction": "both",
+        "score": "none"
+      }
     },
     {
       "typeId": "trigger.rsiLevel",
@@ -258,38 +681,68 @@
       "description": "RSIが閾値を超える/下回る",
       "paramsSchema": {
         "type": "object",
-        "required": ["period", "appliedPrice", "threshold", "mode"],
+        "required": [
+          "period",
+          "appliedPrice",
+          "threshold",
+          "mode"
+        ],
         "properties": {
           "period": {
             "type": "integer",
             "minimum": 2,
             "maximum": 200,
             "default": 14,
-            "ui": { "control": "number" }
+            "ui": {
+              "control": "number"
+            }
           },
           "appliedPrice": {
             "type": "string",
-            "enum": ["CLOSE", "OPEN", "HIGH", "LOW", "MEDIAN", "TYPICAL", "WEIGHTED"],
+            "enum": [
+              "CLOSE",
+              "OPEN",
+              "HIGH",
+              "LOW",
+              "MEDIAN",
+              "TYPICAL",
+              "WEIGHTED"
+            ],
             "default": "CLOSE",
-            "ui": { "control": "select" }
+            "ui": {
+              "control": "select"
+            }
           },
           "threshold": {
             "type": "number",
             "minimum": 0,
             "maximum": 100,
             "default": 70,
-            "ui": { "control": "number" }
+            "ui": {
+              "control": "number"
+            }
           },
           "mode": {
             "type": "string",
-            "enum": ["overbought", "oversold"],
+            "enum": [
+              "overbought",
+              "oversold"
+            ],
             "default": "overbought",
-            "ui": { "control": "select" }
+            "ui": {
+              "control": "select"
+            }
           }
         }
       },
-      "io": { "direction": "both", "score": "none" },
-      "runtimeHints": { "timeframe": "M1", "useClosedBarOnly": true }
+      "io": {
+        "direction": "both",
+        "score": "none"
+      },
+      "runtimeHints": {
+        "timeframe": "M1",
+        "useClosedBarOnly": true
+      }
     },
     {
       "typeId": "trigger.cciLevel",
@@ -298,38 +751,68 @@
       "description": "CCIが閾値を超える/下回る",
       "paramsSchema": {
         "type": "object",
-        "required": ["period", "appliedPrice", "threshold", "mode"],
+        "required": [
+          "period",
+          "appliedPrice",
+          "threshold",
+          "mode"
+        ],
         "properties": {
           "period": {
             "type": "integer",
             "minimum": 2,
             "maximum": 200,
             "default": 14,
-            "ui": { "control": "number" }
+            "ui": {
+              "control": "number"
+            }
           },
           "appliedPrice": {
             "type": "string",
-            "enum": ["CLOSE", "OPEN", "HIGH", "LOW", "MEDIAN", "TYPICAL", "WEIGHTED"],
+            "enum": [
+              "CLOSE",
+              "OPEN",
+              "HIGH",
+              "LOW",
+              "MEDIAN",
+              "TYPICAL",
+              "WEIGHTED"
+            ],
             "default": "CLOSE",
-            "ui": { "control": "select" }
+            "ui": {
+              "control": "select"
+            }
           },
           "threshold": {
             "type": "number",
             "minimum": 0,
             "maximum": 300,
             "default": 100,
-            "ui": { "control": "number" }
+            "ui": {
+              "control": "number"
+            }
           },
           "mode": {
             "type": "string",
-            "enum": ["overbought", "oversold"],
+            "enum": [
+              "overbought",
+              "oversold"
+            ],
             "default": "overbought",
-            "ui": { "control": "select" }
+            "ui": {
+              "control": "select"
+            }
           }
         }
       },
-      "io": { "direction": "both", "score": "none" },
-      "runtimeHints": { "timeframe": "M1", "useClosedBarOnly": true }
+      "io": {
+        "direction": "both",
+        "score": "none"
+      },
+      "runtimeHints": {
+        "timeframe": "M1",
+        "useClosedBarOnly": true
+      }
     },
     {
       "typeId": "trigger.sarFlip",
@@ -338,53 +821,362 @@
       "description": "SARの位置が反転したとき",
       "paramsSchema": {
         "type": "object",
-        "required": ["step", "maximum"],
+        "required": [
+          "step",
+          "maximum"
+        ],
         "properties": {
           "step": {
             "type": "number",
             "minimum": 0.001,
             "maximum": 1,
             "default": 0.02,
-            "ui": { "control": "number" }
+            "ui": {
+              "control": "number"
+            }
           },
           "maximum": {
             "type": "number",
             "minimum": 0.01,
             "maximum": 2,
             "default": 0.2,
-            "ui": { "control": "number" }
+            "ui": {
+              "control": "number"
+            }
           }
         }
       },
-      "io": { "direction": "both", "score": "none" },
-      "runtimeHints": { "timeframe": "M1", "useClosedBarOnly": true }
+      "io": {
+        "direction": "both",
+        "score": "none"
+      },
+      "runtimeHints": {
+        "timeframe": "M1",
+        "useClosedBarOnly": true
+      }
+    },
+    {
+      "typeId": "trigger.wprLevel",
+      "category": "trigger",
+      "displayName": "WPRレベル",
+      "description": "WPRが閾値到達",
+      "paramsSchema": {
+        "type": "object",
+        "required": [
+          "period",
+          "threshold",
+          "mode"
+        ],
+        "properties": {
+          "period": {
+            "type": "integer",
+            "default": 14
+          },
+          "threshold": {
+            "type": "number",
+            "default": -20
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "overbought",
+              "oversold"
+            ],
+            "default": "overbought"
+          }
+        }
+      },
+      "io": {
+        "direction": "both",
+        "score": "none"
+      }
+    },
+    {
+      "typeId": "trigger.mfiLevel",
+      "category": "trigger",
+      "displayName": "MFIレベル",
+      "description": "MFIが閾値到達 (Volume)",
+      "paramsSchema": {
+        "type": "object",
+        "required": [
+          "period",
+          "ma_period",
+          "appliedVolume",
+          "threshold",
+          "mode"
+        ],
+        "properties": {
+          "period": {
+            "type": "integer",
+            "default": 14
+          },
+          "ma_period": {
+            "type": "integer",
+            "default": 0
+          },
+          "appliedVolume": {
+            "type": "string",
+            "enum": [
+              "TICK",
+              "REAL"
+            ],
+            "default": "TICK"
+          },
+          "threshold": {
+            "type": "number",
+            "default": 80
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "overbought",
+              "oversold"
+            ],
+            "default": "overbought"
+          }
+        }
+      },
+      "io": {
+        "direction": "both",
+        "score": "none"
+      }
+    },
+    {
+      "typeId": "trigger.rviCross",
+      "category": "trigger",
+      "displayName": "RVIクロス",
+      "description": "RVIシグナルクロス",
+      "paramsSchema": {
+        "type": "object",
+        "required": [
+          "period",
+          "direction"
+        ],
+        "properties": {
+          "period": {
+            "type": "integer",
+            "default": 10
+          },
+          "direction": {
+            "type": "string",
+            "enum": [
+              "golden",
+              "dead"
+            ],
+            "default": "golden"
+          }
+        }
+      },
+      "io": {
+        "direction": "both",
+        "score": "none"
+      }
     },
     {
       "typeId": "osc.momentum",
       "category": "trigger",
       "displayName": "モメンタム",
-      "description": "モメンタム値の判定",
+      "description": "モメンタム値の判定(100基準)",
       "paramsSchema": {
         "type": "object",
-        "required": ["period", "appliedPrice"],
+        "required": [
+          "period",
+          "appliedPrice",
+          "comparison",
+          "threshold"
+        ],
         "properties": {
           "period": {
             "type": "integer",
-            "minimum": 2,
-            "maximum": 200,
-            "default": 14,
-            "ui": { "control": "number" }
+            "default": 14
           },
           "appliedPrice": {
             "type": "string",
-            "enum": ["CLOSE", "OPEN", "HIGH", "LOW", "MEDIAN", "TYPICAL", "WEIGHTED"],
-            "default": "CLOSE",
-            "ui": { "control": "select" }
+            "enum": [
+              "CLOSE"
+            ],
+            "default": "CLOSE"
+          },
+          "comparison": {
+            "type": "string",
+            "enum": [
+              "above",
+              "below"
+            ],
+            "default": "above"
+          },
+          "threshold": {
+            "type": "number",
+            "default": 100
           }
         }
       },
-      "io": { "direction": "none", "score": "none" },
-      "runtimeHints": { "timeframe": "M1", "useClosedBarOnly": true }
+      "io": {
+        "direction": "none",
+        "score": "none"
+      },
+      "runtimeHints": {
+        "timeframe": "M1",
+        "useClosedBarOnly": true
+      }
+    },
+    {
+      "typeId": "osc.osma",
+      "category": "trigger",
+      "displayName": "OsMA",
+      "description": "OsMAの0ライン交差等",
+      "paramsSchema": {
+        "type": "object",
+        "required": [
+          "fastEma",
+          "slowEma",
+          "signal",
+          "appliedPrice",
+          "comparison"
+        ],
+        "properties": {
+          "fastEma": {
+            "type": "integer",
+            "default": 12
+          },
+          "slowEma": {
+            "type": "integer",
+            "default": 26
+          },
+          "signal": {
+            "type": "integer",
+            "default": 9
+          },
+          "appliedPrice": {
+            "type": "string",
+            "default": "CLOSE"
+          },
+          "comparison": {
+            "type": "string",
+            "enum": [
+              "aboveZero",
+              "belowZero"
+            ],
+            "default": "aboveZero"
+          }
+        }
+      },
+      "io": {
+        "direction": "none",
+        "score": "none"
+      }
+    },
+    {
+      "typeId": "volume.obvTrend",
+      "category": "volume",
+      "displayName": "OBVトレンド",
+      "description": "OBVの方向性",
+      "paramsSchema": {
+        "type": "object",
+        "required": [
+          "appliedVolume",
+          "direction"
+        ],
+        "properties": {
+          "appliedVolume": {
+            "type": "string",
+            "enum": [
+              "TICK",
+              "REAL"
+            ],
+            "default": "TICK"
+          },
+          "direction": {
+            "type": "string",
+            "enum": [
+              "up",
+              "down"
+            ],
+            "default": "up"
+          }
+        }
+      },
+      "io": {
+        "direction": "none",
+        "score": "none"
+      }
+    },
+    {
+      "typeId": "bill.fractals",
+      "category": "bill",
+      "displayName": "フラクタル",
+      "description": "フラクタルブレイク",
+      "paramsSchema": {
+        "type": "object",
+        "required": [
+          "direction"
+        ],
+        "properties": {
+          "direction": {
+            "type": "string",
+            "enum": [
+              "up",
+              "down"
+            ],
+            "default": "up"
+          }
+        }
+      },
+      "io": {
+        "direction": "both",
+        "score": "none"
+      }
+    },
+    {
+      "typeId": "bill.alligator",
+      "category": "bill",
+      "displayName": "アリゲーター",
+      "description": "Jaw/Teeth/Lipsの配列",
+      "paramsSchema": {
+        "type": "object",
+        "required": [
+          "jawPeriod",
+          "teethPeriod",
+          "lipsPeriod",
+          "maMethod",
+          "appliedPrice",
+          "trend"
+        ],
+        "properties": {
+          "jawPeriod": {
+            "type": "integer",
+            "default": 13
+          },
+          "teethPeriod": {
+            "type": "integer",
+            "default": 8
+          },
+          "lipsPeriod": {
+            "type": "integer",
+            "default": 5
+          },
+          "maMethod": {
+            "type": "string",
+            "default": "SMMA"
+          },
+          "appliedPrice": {
+            "type": "string",
+            "default": "MEDIAN"
+          },
+          "trend": {
+            "type": "string",
+            "enum": [
+              "uptrend",
+              "downtrend"
+            ],
+            "default": "uptrend"
+          }
+        }
+      },
+      "io": {
+        "direction": "none",
+        "score": "none"
+      }
     }
   ]
 }

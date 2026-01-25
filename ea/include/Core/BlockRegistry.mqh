@@ -10,11 +10,44 @@
 #include "../Common/Structures.mqh"
 #include "../Blocks/IBlock.mqh"
 
-// MVPブロック
+// Filter
 #include "../Blocks/Filter/FilterSpreadMax.mqh"
+#include "../Blocks/Filter/FilterAtrRange.mqh"
+
+// Env
 #include "../Blocks/Env/EnvSessionTimeWindow.mqh"
+
+// Trend
 #include "../Blocks/Trend/TrendMARelation.mqh"
+#include "../Blocks/Trend/TrendMACross.mqh"
+#include "../Blocks/Trend/TrendADXThreshold.mqh"
+#include "../Blocks/Trend/TrendIchimokuCloud.mqh"
+#include "../Blocks/Trend/TrendSARDirection.mqh"
+
+// Trigger
 #include "../Blocks/Trigger/TriggerBBReentry.mqh"
+#include "../Blocks/Trigger/TriggerBBBreakout.mqh"
+#include "../Blocks/Trigger/TriggerMACDCross.mqh"
+#include "../Blocks/Trigger/TriggerStochCross.mqh"
+#include "../Blocks/Trigger/TriggerRSILevel.mqh"
+#include "../Blocks/Trigger/TriggerCCILevel.mqh"
+#include "../Blocks/Trigger/TriggerSARFlip.mqh"
+#include "../Blocks/Trigger/TriggerWPRLevel.mqh"
+#include "../Blocks/Trigger/TriggerMFILevel.mqh"
+#include "../Blocks/Trigger/TriggerRVICross.mqh"
+
+// Osc
+#include "../Blocks/Osc/OscMomentum.mqh"
+#include "../Blocks/Osc/OscOsMA.mqh"
+
+// Volume
+#include "../Blocks/Volume/VolumeObvTrend.mqh"
+
+// Bill
+#include "../Blocks/Bill/BillFractals.mqh"
+#include "../Blocks/Bill/BillAlligator.mqh"
+
+// Lot/Risk/Exit/Nanpin
 #include "../Blocks/Lot/LotFixed.mqh"
 #include "../Blocks/Risk/RiskFixedSLTP.mqh"
 #include "../Blocks/Exit/ExitNone.mqh"
@@ -119,35 +152,46 @@ public:
         // 新規ブロック生成
         IBlock* block = NULL;
 
-        if (typeId == "filter.spreadMax") {
-            block = new CFilterSpreadMax(blockId);
-        }
-        else if (typeId == "env.session.timeWindow") {
+        if (typeId == "filter.spreadMax") block = new CFilterSpreadMax(blockId);
+        else if (typeId == "filter.volatility.atrRange") block = new CFilterAtrRange(blockId);
+        else if (typeId == "env.session.timeWindow" || typeId == "filter.session.timeWindow") { 
+            // Support both old and new (filter category) naming for robustness? 
+            // Catalog says "filter.session.timeWindow". Code might need update or alias.
+            // Existing was "env.session.timeWindow". I'll support both.
             CEnvSessionTimeWindow* sessionBlock = new CEnvSessionTimeWindow(blockId);
-            // グローバルセッション設定を適用（NULLチェック追加）
-            if (m_hasGlobalSession && sessionBlock != NULL) {
-                sessionBlock.ApplyGlobalSession(m_globalSession);
-            }
+            if (m_hasGlobalSession && sessionBlock != NULL) sessionBlock.ApplyGlobalSession(m_globalSession);
             block = sessionBlock;
         }
-        else if (typeId == "trend.maRelation") {
-            block = new CTrendMARelation(blockId);
-        }
-        else if (typeId == "trigger.bbReentry") {
-            block = new CTriggerBBReentry(blockId);
-        }
-        else if (typeId == "lot.fixed") {
-            block = new CLotFixed(blockId);
-        }
-        else if (typeId == "risk.fixedSLTP") {
-            block = new CRiskFixedSLTP(blockId);
-        }
-        else if (typeId == "exit.none") {
-            block = new CExitNone(blockId);
-        }
-        else if (typeId == "nanpin.off") {
-            block = new CNanpinOff(blockId);
-        }
+        // Trend
+        else if (typeId == "trend.maRelation") block = new CTrendMARelation(blockId);
+        else if (typeId == "trend.maCross") block = new CTrendMACross(blockId);
+        else if (typeId == "trend.adxThreshold") block = new CTrendADXThreshold(blockId);
+        else if (typeId == "trend.ichimokuCloud") block = new CTrendIchimokuCloud(blockId);
+        else if (typeId == "trend.sarDirection") block = new CTrendSARDirection(blockId);
+        // Trigger
+        else if (typeId == "trigger.bbReentry") block = new CTriggerBBReentry(blockId);
+        else if (typeId == "trigger.bbBreakout") block = new CTriggerBBBreakout(blockId);
+        else if (typeId == "trigger.macdCross") block = new CTriggerMACDCross(blockId);
+        else if (typeId == "trigger.stochCross") block = new CTriggerStochCross(blockId);
+        else if (typeId == "trigger.rsiLevel") block = new CTriggerRSILevel(blockId);
+        else if (typeId == "trigger.cciLevel") block = new CTriggerCCILevel(blockId);
+        else if (typeId == "trigger.sarFlip") block = new CTriggerSARFlip(blockId);
+        else if (typeId == "trigger.wprLevel") block = new CTriggerWPRLevel(blockId);
+        else if (typeId == "trigger.mfiLevel") block = new CTriggerMFILevel(blockId);
+        else if (typeId == "trigger.rviCross") block = new CTriggerRVICross(blockId);
+        // Osc
+        else if (typeId == "osc.momentum") block = new COscMomentum(blockId);
+        else if (typeId == "osc.osma") block = new COscOsMA(blockId);
+        // Volume
+        else if (typeId == "volume.obvTrend") block = new CVolumeObvTrend(blockId);
+        // Bill
+        else if (typeId == "bill.fractals") block = new CBillFractals(blockId);
+        else if (typeId == "bill.alligator") block = new CBillAlligator(blockId);
+        // Models (Existing)
+        else if (typeId == "lot.fixed") block = new CLotFixed(blockId);
+        else if (typeId == "risk.fixedSLTP") block = new CRiskFixedSLTP(blockId);
+        else if (typeId == "exit.none") block = new CExitNone(blockId);
+        else if (typeId == "nanpin.off") block = new CNanpinOff(blockId);
         else {
             Print("ERROR: Unknown block typeId: ", typeId);
             return NULL;
@@ -156,7 +200,6 @@ public:
         // パラメータ設定
         if (block != NULL) {
             block.SetParams(paramsJson);
-            // キャッシュに追加
             AddToCache(blockId, block);
             Print("BlockRegistry: Created block - ", blockId, " (", typeId, ")");
         }
