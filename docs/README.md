@@ -95,6 +95,10 @@ docs/
 - BlockResult（PASS/FAIL/NEUTRAL、direction、reason、score）
 - カテゴリ（filter/trend/trigger/lot/risk/exit/nanpin）
 
+### 03_design/41_block_catalog_candidates.md（ブロック候補一覧）
+- MQL5公式ドキュメントを基にした指標/フィルタ候補の洗い出し
+- GUI/EA実装の順序付けメモ
+
 ### 03_design/50_ea_runtime_design.md（EA詳細設計）
 - 新バー検知（M1）
 - shift=1統一（確定足）

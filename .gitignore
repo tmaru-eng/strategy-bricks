@@ -19,6 +19,7 @@ yarn-error.log*
 
 # Electron
 dist/
+dist-electron/
 build/
 out/
 
@@ -35,6 +36,7 @@ logs/
 tmp/
 temp/
 *.tmp
+_pr_threads*.json
 
 # Build artifacts
 *.o
