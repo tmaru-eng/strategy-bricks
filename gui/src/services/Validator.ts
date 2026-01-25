@@ -51,7 +51,10 @@ export const validateNodes = (nodes: Node[], catalog: BlockCatalog | null): Vali
     }
 
     const params = (node.data?.params || {}) as Record<string, unknown>
-    const requiredFields = (blockDef.paramsSchema as { required?: string[] })?.required
+    const requiredFields =
+      'required' in blockDef.paramsSchema && Array.isArray(blockDef.paramsSchema.required)
+        ? (blockDef.paramsSchema.required as string[])
+        : undefined
     if (requiredFields) {
       requiredFields.forEach((field) => {
         if (params[field] === undefined) {

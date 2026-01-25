@@ -52,6 +52,8 @@ gh api repos/$OWNER/$REPO/issues/$PR/comments --paginate --jq \
 
 ### 5) Resolve Gemini review threads
 
+**Note:** This script handles up to 250 review threads with up to 100 comments each. For PRs with more extensive review activity, manual resolution may be required.
+
 - Do not resolve CodeRabbit threads (it auto-closes).
 - Resolve Gemini review threads manually after fixes are complete.
 - Before resolving a Gemini thread, add a short reply comment noting what was fixed

@@ -144,7 +144,7 @@ export const useStateManager = create<CatalogState & FlowState>((set, get) => ({
     const nextNode: Node = {
       id: `rulegroup-${crypto.randomUUID()}`,
       type: 'ruleGroupNode',
-      position: { x: 260, y: maxY + 40 },
+      position: { x: 260, y: maxY + 200 },
       data: {}
     }
     set({ nodes: [...nodes, nextNode] })
