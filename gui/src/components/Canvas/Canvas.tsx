@@ -1,4 +1,5 @@
 import React from 'react'
+import { ReactFlowProvider } from 'reactflow'
 import { NodeEditor } from './NodeEditor'
 import { useStateManager } from '../../store/useStateManager'
 
@@ -13,7 +14,9 @@ export const Canvas: React.FC = () => {
         </button>
       </div>
       <div className="canvas-stage">
-        <NodeEditor />
+        <ReactFlowProvider>
+          <NodeEditor />
+        </ReactFlowProvider>
       </div>
     </div>
   )
