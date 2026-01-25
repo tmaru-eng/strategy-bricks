@@ -4,7 +4,8 @@ import ReactFlow, {
   Background,
   Connection,
   Controls,
-  Node
+  Node,
+  useReactFlow
 } from 'reactflow'
 import 'reactflow/dist/style.css'
 import { useStateManager } from '../../store/useStateManager'
@@ -51,6 +52,7 @@ export const NodeEditor: React.FC = () => {
     onEdgesChange,
     selectNode
   } = useStateManager()
+  const { project } = useReactFlow()
 
   const onConnect = useCallback(
     (params: Connection) => {
@@ -85,10 +87,11 @@ export const NodeEditor: React.FC = () => {
         return
       }
 
-      const position = {
+      // Viewport projection
+      const position = project({
         x: event.clientX - reactFlowBounds.left,
         y: event.clientY - reactFlowBounds.top
-      }
+      })
 
       const newNode: Node = {
         id: `condition-${crypto.randomUUID()}`,
@@ -104,7 +107,7 @@ export const NodeEditor: React.FC = () => {
       const nextNodes = [...nodes, newNode]
       updateNodes(nextNodes)
     },
-    [nodes, updateNodes]
+    [nodes, updateNodes, project]
   )
 
   const onNodeClick = useCallback(

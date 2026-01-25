@@ -34,7 +34,12 @@ export const openCatalog = async (): Promise<CatalogLoadResult> => {
     throw new Error('カタログの選択がキャンセルされました')
   }
 
-  const parsed = JSON.parse(result.content) as BlockCatalog
+  let parsed: BlockCatalog
+  try {
+    parsed = JSON.parse(result.content) as BlockCatalog
+  } catch (e) {
+    throw new Error('カタログのJSONパースに失敗しました')
+  }
   validateCatalog(parsed)
 
   return {

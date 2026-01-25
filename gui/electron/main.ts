@@ -47,7 +47,7 @@ app.whenReady().then(() => {
       const content = await readFile(filePath, 'utf-8')
       return { path: filePath, content }
     } catch (error) {
-      return { ok: false, error: String(error) }
+      throw new Error(error instanceof Error ? error.message : String(error))
     }
   })
   ipcMain.handle('config:export', async (_event, payload) => {
@@ -57,7 +57,7 @@ app.whenReady().then(() => {
 
       if (!outputDir) {
         if (isE2E) {
-          return { ok: false, error: 'E2E export directory is not set' }
+          throw new Error('E2E export directory is not set')
         }
 
         const result = await dialog.showOpenDialog({
@@ -82,7 +82,7 @@ app.whenReady().then(() => {
 
       return { ok: true, path: outputDir }
     } catch (error) {
-      return { ok: false, error: String(error) }
+      throw new Error(error instanceof Error ? error.message : String(error))
     }
   })
 

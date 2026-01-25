@@ -10,30 +10,30 @@ GUI（paramsSchema）→ EA（IndicatorCache）への実装順序で利用する
 - Indicatorパラメータは MQL5 公式 docs の関数シグネチャに準拠する。
 
 ## 2. 参照（公式ドキュメント）
-- iMA: https://www.mql5.com/ja/docs/indicators/ima / https://www.mql5.com/en/docs/indicators/ima
-- iRSI: https://www.mql5.com/ja/docs/indicators/irsi / https://www.mql5.com/en/docs/indicators/irsi
-- iCCI: https://www.mql5.com/ja/docs/indicators/icci / https://www.mql5.com/en/docs/indicators/icci
-- iBands: https://www.mql5.com/ja/docs/indicators/ibands / https://www.mql5.com/en/docs/indicators/ibands
-- iMACD: https://www.mql5.com/ja/docs/indicators/imacd / https://www.mql5.com/en/docs/indicators/imacd
-- iStochastic: https://www.mql5.com/ja/docs/indicators/istochastic / https://www.mql5.com/en/docs/indicators/istochastic
-- iATR: https://www.mql5.com/ja/docs/indicators/iatr / https://www.mql5.com/en/docs/indicators/iatr
-- iADX: https://www.mql5.com/ja/docs/indicators/iadx / https://www.mql5.com/en/docs/indicators/iadx
-- iStdDev: https://www.mql5.com/ja/docs/indicators/istddev / https://www.mql5.com/en/docs/indicators/istddev
-- iEnvelopes: https://www.mql5.com/ja/docs/indicators/ienvelopes / https://www.mql5.com/en/docs/indicators/ienvelopes
-- iMomentum: https://www.mql5.com/ja/docs/indicators/imomentum / https://www.mql5.com/en/docs/indicators/imomentum
-- iOsMA: https://www.mql5.com/ja/docs/indicators/iosma / https://www.mql5.com/en/docs/indicators/iosma
-- iIchimoku: https://www.mql5.com/ja/docs/indicators/iichimoku / https://www.mql5.com/en/docs/indicators/iichimoku
-- iSAR: https://www.mql5.com/ja/docs/indicators/isar / https://www.mql5.com/en/docs/indicators/isar
-- iRVI: https://www.mql5.com/ja/docs/indicators/irvi / https://www.mql5.com/en/docs/indicators/irvi
-- iWPR: https://www.mql5.com/ja/docs/indicators/iwpr / https://www.mql5.com/en/docs/indicators/iwpr
-- iMFI: https://www.mql5.com/ja/docs/indicators/imfi / https://www.mql5.com/en/docs/indicators/imfi
-- iOBV: https://www.mql5.com/ja/docs/indicators/iobv / https://www.mql5.com/en/docs/indicators/iobv
-- iAlligator: https://www.mql5.com/ja/docs/indicators/ialligator / https://www.mql5.com/en/docs/indicators/ialligator
-- iForce: https://www.mql5.com/ja/docs/indicators/iforce / https://www.mql5.com/en/docs/indicators/iforce
-- iDeMarker: https://www.mql5.com/ja/docs/indicators/idemarker / https://www.mql5.com/en/docs/indicators/idemarker
-- iFractals: https://www.mql5.com/ja/docs/indicators/ifractals / https://www.mql5.com/en/docs/indicators/ifractals
-- iBearsPower: https://www.mql5.com/ja/docs/indicators/ibearspower / https://www.mql5.com/en/docs/indicators/ibearspower
-- iBullsPower: https://www.mql5.com/ja/docs/indicators/ibullspower / https://www.mql5.com/en/docs/indicators/ibullspower
+- iMA: [ja](https://www.mql5.com/ja/docs/indicators/ima) / [en](https://www.mql5.com/en/docs/indicators/ima)
+- iRSI: [ja](https://www.mql5.com/ja/docs/indicators/irsi) / [en](https://www.mql5.com/en/docs/indicators/irsi)
+- iCCI: [ja](https://www.mql5.com/ja/docs/indicators/icci) / [en](https://www.mql5.com/en/docs/indicators/icci)
+- iBands: [ja](https://www.mql5.com/ja/docs/indicators/ibands) / [en](https://www.mql5.com/en/docs/indicators/ibands)
+- iMACD: [ja](https://www.mql5.com/ja/docs/indicators/imacd) / [en](https://www.mql5.com/en/docs/indicators/imacd)
+- iStochastic: [ja](https://www.mql5.com/ja/docs/indicators/istochastic) / [en](https://www.mql5.com/en/docs/indicators/istochastic)
+- iATR: [ja](https://www.mql5.com/ja/docs/indicators/iatr) / [en](https://www.mql5.com/en/docs/indicators/iatr)
+- iADX: [ja](https://www.mql5.com/ja/docs/indicators/iadx) / [en](https://www.mql5.com/en/docs/indicators/iadx)
+- iStdDev: [ja](https://www.mql5.com/ja/docs/indicators/istddev) / [en](https://www.mql5.com/en/docs/indicators/istddev)
+- iEnvelopes: [ja](https://www.mql5.com/ja/docs/indicators/ienvelopes) / [en](https://www.mql5.com/en/docs/indicators/ienvelopes)
+- iMomentum: [ja](https://www.mql5.com/ja/docs/indicators/imomentum) / [en](https://www.mql5.com/en/docs/indicators/imomentum)
+- iOsMA: [ja](https://www.mql5.com/ja/docs/indicators/iosma) / [en](https://www.mql5.com/en/docs/indicators/iosma)
+- iIchimoku: [ja](https://www.mql5.com/ja/docs/indicators/iichimoku) / [en](https://www.mql5.com/en/docs/indicators/iichimoku)
+- iSAR: [ja](https://www.mql5.com/ja/docs/indicators/isar) / [en](https://www.mql5.com/en/docs/indicators/isar)
+- iRVI: [ja](https://www.mql5.com/ja/docs/indicators/irvi) / [en](https://www.mql5.com/en/docs/indicators/irvi)
+- iWPR: [ja](https://www.mql5.com/ja/docs/indicators/iwpr) / [en](https://www.mql5.com/en/docs/indicators/iwpr)
+- iMFI: [ja](https://www.mql5.com/ja/docs/indicators/imfi) / [en](https://www.mql5.com/en/docs/indicators/imfi)
+- iOBV: [ja](https://www.mql5.com/ja/docs/indicators/iobv) / [en](https://www.mql5.com/en/docs/indicators/iobv)
+- iAlligator: [ja](https://www.mql5.com/ja/docs/indicators/ialligator) / [en](https://www.mql5.com/en/docs/indicators/ialligator)
+- iForce: [ja](https://www.mql5.com/ja/docs/indicators/iforce) / [en](https://www.mql5.com/en/docs/indicators/iforce)
+- iDeMarker: [ja](https://www.mql5.com/ja/docs/indicators/idemarker) / [en](https://www.mql5.com/en/docs/indicators/idemarker)
+- iFractals: [ja](https://www.mql5.com/ja/docs/indicators/ifractals) / [en](https://www.mql5.com/en/docs/indicators/ifractals)
+- iBearsPower: [ja](https://www.mql5.com/ja/docs/indicators/ibearspower) / [en](https://www.mql5.com/en/docs/indicators/ibearspower)
+- iBullsPower: [ja](https://www.mql5.com/ja/docs/indicators/ibullspower) / [en](https://www.mql5.com/en/docs/indicators/ibullspower)
 
 ### 2.1 列挙型
 - ENUM_MA_METHOD: https://www.mql5.com/ja/docs/constants/indicatorconstants/enum_ma_method / https://www.mql5.com/en/docs/constants/indicatorconstants/enum_ma_method

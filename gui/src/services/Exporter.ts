@@ -30,7 +30,7 @@ const buildConfig = (nodes: Node[], profileName: string) => {
 
 export const exportConfig = async (profileName: string, nodes: Node[]): Promise<ExportResult> => {
   if (!window.electron?.exportConfig) {
-    throw new Error('Electron bridge is not available')
+    return Promise.reject(new Error('Electron bridge is not available'))
   }
 
   const config = buildConfig(nodes, profileName)

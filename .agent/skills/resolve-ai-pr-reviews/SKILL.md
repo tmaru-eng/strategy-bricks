@@ -63,11 +63,11 @@ THREAD_IDS=$(gh api graphql -f query='
 query($owner:String!, $repo:String!, $number:Int!) {
   repository(owner:$owner, name:$repo) {
     pullRequest(number:$number) {
-      reviewThreads(first:100) {
+      reviewThreads(first:250) {
         nodes {
           id
           isResolved
-          comments(first:50) {
+          comments(first:100) {
             nodes { author { login } }
           }
         }
