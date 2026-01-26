@@ -1,79 +1,186 @@
-# Strategy Bricks EA Tests
+# EA Tests
 
-## テスト用設定ファイル
+このディレクトリには、Strategy Bricks EAのテスト設定ファイルが含まれています。
 
-### active.json
+## テストファイル一覧
 
-テスト用の設定ファイルです。以下の配置先にコピーしてください：
+### 1. `active.json` (2.7KB)
+**目的**: 基本動作確認
+- **戦略数**: 1
+- **ブロック数**: 6
+- **期待取引回数**: 10-50回（3ヶ月）
+- **用途**: 基本的な戦略の動作確認
+
+### 2. `test_single_blocks.json` (25KB) ⭐ 最重要
+**目的**: 単体ブロックテスト（問題の切り分け）
+- **戦略数**: 27
+- **ブロック数**: 27
+- **期待取引回数**: 50-200回（3ヶ月）
+- **用途**: 各ブロックが単体で正しく動作するか確認
+- **特徴**: 
+  - 1ブロック = 1戦略
+  - 最もシンプルな条件設定
+  - 取引発生の可能性を最大化
+
+**カバーするブロック**:
+- Filter: spreadMax, atrRange, stddevRange, daysOfWeek
+- Trend: maRelation, maCross, adxThreshold, ichimokuCloud, sarDirection
+- Trigger: bbReentry, bbBreakout, macdCross, stochCross, rsiLevel, cciLevel, sarFlip, wprLevel, mfiLevel, rviCross
+- Osc: momentum, osma, forceIndex
+- Volume: obvTrend
+- Bill: fractals, alligator
+
+### 3. `test_strategy_advanced.json` (8KB)
+**目的**: 高度な戦略の統合テスト
+- **戦略数**: 3
+- **ブロック数**: 19
+- **期待取引回数**: 5-30回（3ヶ月）
+- **用途**: 複数ブロック組み合わせの動作確認
+- **特徴**:
+  - 複数フィルタ・トリガーの組み合わせ
+  - 新ブロック（lot.riskPercent, risk.atrBased, exit.trail等）の使用
+  - 実際の戦略に近い複雑な条件
+
+### 4. `test_strategy_all_blocks.json` (11KB)
+**目的**: 全ブロック網羅テスト
+- **戦略数**: 4
+- **ブロック数**: 30
+- **期待取引回数**: 3-20回（3ヶ月）
+- **用途**: 全36ブロックタイプの動作確認
+- **特徴**:
+  - Bill Williams戦略
+  - マルチオシレーター戦略
+  - SAR + RVI戦略
+  - ボリンジャーバンド複合戦略
+
+## テスト実行手順
+
+### クイックスタート（推奨）
+
+**手動テスト実行**:
+
+```bash
+# 1. MT5を起動
+open "/Applications/MetaTrader 5.app"
+
+# 2. ストラテジーテスターで各テストを実行
+#    詳細手順: docs/04_operations/MT5_MANUAL_TEST_GUIDE.md
+
+# 3. 結果を記録
+python3 scripts/record_test_results.py
+```
+
+### 準備
+
+1. **ファイルをMT5にコピー**:
+
+```bash
+# 通常実行用
+cp ea/tests/*.json "$HOME/Library/Application Support/net.metaquotes.wine.metatrader5/drive_c/Program Files/MetaTrader 5/MQL5/Files/strategy/"
+
+# ストラテジーテスター用
+cp ea/tests/*.json "$HOME/Library/Application Support/net.metaquotes.wine.metatrader5/drive_c/Program Files/MetaTrader 5/Tester/Agent-127.0.0.1-3000/Files/strategy/"
+cp ea/tests/*.json "$HOME/Library/Application Support/net.metaquotes.wine.metatrader5/drive_c/Program Files/MetaTrader 5/Tester/Agent-127.0.0.1-3001/Files/strategy/"
+```
+
+2. **自動テストスクリプト実行**:
+
+```bash
+python3 scripts/automated_tester.py
+```
+
+### MT5ストラテジーテスター設定
+
+1. MT5を起動
+2. ツール > ストラテジーテスター を開く
+3. 以下を設定:
+   - **EA**: `Experts\StrategyBricks\StrategyBricks.ex5`
+   - **シンボル**: `USDJPYm`
+   - **期間**: `M1`
+   - **日付**: `2025.10.01 - 2025.12.31` (3ヶ月)
+   - **初期証拠金**: 1,000,000 JPY
+   - **レバレッジ**: 1:100
+4. **入力パラメータ**: `InpConfigPath=strategy/<test_file>.json`
+5. テスト開始
+
+### 推奨テスト順序
 
 ```
-MQL5/Files/strategy/active.json
+1. test_single_blocks.json    ← 最優先（問題の切り分け）
+   ↓
+2. active.json                ← 基本動作確認
+   ↓
+3. test_strategy_advanced.json ← 複雑な条件確認
+   ↓
+4. test_strategy_all_blocks.json ← 全機能網羅確認
 ```
 
-### 設定内容
+## テスト結果の評価
 
-- **Strategy**: M1 Pullback Basic
-- **ロング条件** (RG1_Long):
-  - スプレッド <= 2.0 pips
-  - セッション時間内
-  - 終値 > EMA(200)
-  - BB下限からの回帰
-- **ショート条件** (RG2_Short):
-  - スプレッド <= 2.0 pips
-  - セッション時間内
-  - 終値 < EMA(200)
-  - BB上限からの回帰
-- **ロット**: 0.1（固定）
-- **SL/TP**: 30 pips / 30 pips
+### ✅ PASS（合格）
+- 初期化成功
+- エラーなし
+- 取引回数 > 0
 
-## MT5 Strategy Tester設定
+### ⚠️ WARNING（警告）
+- 初期化成功
+- エラーなし
+- 取引回数 = 0（条件が厳しすぎる可能性）
 
-1. **モード**: Every tick
-2. **期間**: 2024-01-01 ~ 2024-01-31
-3. **シンボル**: USDJPY
-4. **時間足**: M1
+### ❌ FAIL（不合格）
+- 初期化失敗
+- エラーあり
 
-## 受入基準チェックリスト
+## 問題の診断
 
-- [ ] **AC-01**: `BAR_EVAL_START`が1分間隔で出力される
-- [ ] **AC-02**: 同一足再エントリーで`ORDER_REJECT`が出力される
-- [ ] **AC-03**: OR/AND短絡評価が正しく動作する
-- [ ] **AC-07**: formatVersion非互換でINIT_FAILED
-- [ ] **AC-10**: ブロック判定理由がログに残る
-- [ ] **AC-11**: 発注失敗理由がログに残る
-
-## ログファイル
-
-ログは以下の場所に出力されます：
+### 取引が発生しない場合
 
 ```
-MQL5/Files/strategy/logs/strategy_YYYYMMDD.jsonl
+取引回数 = 0
+  ↓
+単体ブロックテストで確認
+  ↓
+├─ 単体でも0回 → ブロック実装の問題
+│   ├─ ログ確認: ブロック評価結果
+│   ├─ パラメータ確認: 条件が厳しすぎないか
+│   └─ コード確認: Evaluate()ロジック
+│
+└─ 単体では発生 → 組み合わせの問題
+    ├─ 条件が厳しすぎる（AND条件多数）
+    ├─ 方向性の不一致（directionPolicy）
+    └─ グローバルガード（spread, session等）
 ```
 
-## フォルダ構成
+### 初期化失敗の場合
 
-```
-MQL5/
-├── Experts/
-│   └── StrategyBricks/
-│       └── StrategyBricks.mq5  # コンパイル後に配置
-├── Include/
-│   └── StrategyBricks/         # include/*.mqh をコピー
-└── Files/
-    └── strategy/
-        ├── active.json          # 設定ファイル
-        └── logs/                # ログ出力先
-```
+- "File not found" → 設定ファイルパス確認
+- "Unknown block typeId" → BlockRegistry登録確認
+- "Invalid JSON" → JSON構文エラー確認
+- "Parameter error" → パラメータ型・範囲確認
 
-## コンパイル方法
+## テスト結果
 
-1. MetaEditorを開く
-2. `ea/src/StrategyBricks.mq5`を開く
-3. F7でコンパイル
-4. エラーがないことを確認
+テスト結果は `results/` ディレクトリに保存されます：
 
-## 注意事項
+- `test_report_YYYYMMDD_HHMMSS.txt` - 人間が読みやすい形式
+- `test_report_YYYYMMDD_HHMMSS.json` - 機械処理用
 
-- **M1固定**: 他の時間足では動作しません
-- **確定足基準**: shift=1のデータを使用
-- **同一足再エントリー禁止**: 二重ガードで保護
+## 新ブロック追加時の更新
+
+新しいブロックを追加した場合、以下を更新してください：
+
+1. **`test_single_blocks.json`**:
+   - 新ブロック用の戦略追加
+   - ブロック定義追加
+
+2. **`test_strategy_all_blocks.json`**:
+   - 新ブロックを使用する戦略追加
+
+3. **BlockRegistry**:
+   - `ea/include/Core/BlockRegistry.mqh`
+   - CreateBlock()に新ブロック追加
+
+## 詳細ドキュメント
+
+詳細なテスト戦略については、以下を参照してください：
+- `docs/04_operations/80_testing.md` - テスト計画・戦略

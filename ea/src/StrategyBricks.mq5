@@ -13,30 +13,30 @@
 //+------------------------------------------------------------------+
 //| インクルード                                                        |
 //+------------------------------------------------------------------+
-#include "../include/Common/Constants.mqh"
-#include "../include/Common/Enums.mqh"
-#include "../include/Common/Structures.mqh"
+#include <StrategyBricks/Common/Constants.mqh>
+#include <StrategyBricks/Common/Enums.mqh>
+#include <StrategyBricks/Common/Structures.mqh>
 
-#include "../include/Support/Logger.mqh"
-#include "../include/Support/StateStore.mqh"
-#include "../include/Support/JsonParser.mqh"
-#include "../include/Support/JsonFormatter.mqh"
+#include <StrategyBricks/Support/Logger.mqh>
+#include <StrategyBricks/Support/StateStore.mqh>
+#include <StrategyBricks/Support/JsonParser.mqh>
+#include <StrategyBricks/Support/JsonFormatter.mqh>
 
-#include "../include/Config/ConfigLoader.mqh"
-#include "../include/Config/ConfigValidator.mqh"
+#include <StrategyBricks/Config/ConfigLoader.mqh>
+#include <StrategyBricks/Config/ConfigValidator.mqh>
 
-#include "../include/Indicators/IndicatorCache.mqh"
+#include <StrategyBricks/Indicators/IndicatorCache.mqh>
 
-#include "../include/Blocks/IBlock.mqh"
-#include "../include/Core/BlockRegistry.mqh"
+#include <StrategyBricks/Blocks/IBlock.mqh>
+#include <StrategyBricks/Core/BlockRegistry.mqh>
 
-#include "../include/Execution/OrderExecutor.mqh"
-#include "../include/Execution/PositionManager.mqh"
+#include <StrategyBricks/Execution/OrderExecutor.mqh>
+#include <StrategyBricks/Execution/PositionManager.mqh>
 
-#include "../include/Core/NewBarDetector.mqh"
-#include "../include/Core/CompositeEvaluator.mqh"
-#include "../include/Core/StrategyEngine.mqh"
-#include "../include/Visualization/ChartVisualizer.mqh"
+#include <StrategyBricks/Core/NewBarDetector.mqh>
+#include <StrategyBricks/Core/CompositeEvaluator.mqh>
+#include <StrategyBricks/Core/StrategyEngine.mqh>
+#include <StrategyBricks/Visualization/ChartVisualizer.mqh>
 
 //+------------------------------------------------------------------+
 //| 入力パラメータ                                                      |

@@ -90,11 +90,32 @@ struct BlockResult {
     double         score;       // スコア（将来拡張用）
 
     // 拡張フィールド（lot/risk系ブロック用）
-    double lotValue;            // ロット値（lot系ブロックが設定）
+    double lotSize;             // ロット値（lot系ブロックが設定）
+    double lotValue;            // ロット値（互換性のため残す）
     double slPips;              // SLのpips（risk系ブロックが設定）
     double tpPips;              // TPのpips（risk系ブロックが設定）
     double slPrice;             // SL価格（絶対値指定時）
     double tpPrice;             // TP価格（絶対値指定時）
+    
+    // risk.atrBased用
+    double buyTakeProfitPips;   // 買いTP（pips）
+    double buyStopLossPips;     // 買いSL（pips）
+    double sellTakeProfitPips;  // 売りTP（pips）
+    double sellStopLossPips;    // 売りSL（pips）
+    
+    // exit系ブロック用
+    double trailStartPips;      // トレール開始（pips）
+    double trailStopPips;       // トレール幅（pips）
+    double breakEvenTriggerPips;// 建値移動トリガー（pips）
+    double breakEvenOffsetPips; // 建値オフセット（pips）
+    bool   forceClose;          // 強制決済フラグ
+    bool   closeWarning;        // 決済警告フラグ
+    
+    // nanpin系ブロック用
+    bool   nanpinEnabled;       // ナンピン有効フラグ
+    double nanpinIntervalPips;  // ナンピン間隔（pips）
+    int    nanpinMaxCount;      // 最大ナンピン回数
+    int    nanpinLotAdjustMethod; // ロット調整方法
 
     // デフォルトコンストラクタ
     BlockResult() {
@@ -102,11 +123,26 @@ struct BlockResult {
         direction = DIRECTION_NEUTRAL;
         reason = "";
         score = 0.0;
+        lotSize = 0.0;
         lotValue = 0.0;
         slPips = 0.0;
         tpPips = 0.0;
         slPrice = 0.0;
         tpPrice = 0.0;
+        buyTakeProfitPips = 0.0;
+        buyStopLossPips = 0.0;
+        sellTakeProfitPips = 0.0;
+        sellStopLossPips = 0.0;
+        trailStartPips = 0.0;
+        trailStopPips = 0.0;
+        breakEvenTriggerPips = 0.0;
+        breakEvenOffsetPips = 0.0;
+        forceClose = false;
+        closeWarning = false;
+        nanpinEnabled = false;
+        nanpinIntervalPips = 0.0;
+        nanpinMaxCount = 0;
+        nanpinLotAdjustMethod = 0;
     }
 
     // 基本コンストラクタ
@@ -115,11 +151,26 @@ struct BlockResult {
         direction = dir;
         reason = rsn;
         score = 0.0;
+        lotSize = 0.0;
         lotValue = 0.0;
         slPips = 0.0;
         tpPips = 0.0;
         slPrice = 0.0;
         tpPrice = 0.0;
+        buyTakeProfitPips = 0.0;
+        buyStopLossPips = 0.0;
+        sellTakeProfitPips = 0.0;
+        sellStopLossPips = 0.0;
+        trailStartPips = 0.0;
+        trailStopPips = 0.0;
+        breakEvenTriggerPips = 0.0;
+        breakEvenOffsetPips = 0.0;
+        forceClose = false;
+        closeWarning = false;
+        nanpinEnabled = false;
+        nanpinIntervalPips = 0.0;
+        nanpinMaxCount = 0;
+        nanpinLotAdjustMethod = 0;
     }
 
     // スコア付きコンストラクタ
@@ -128,11 +179,26 @@ struct BlockResult {
         direction = dir;
         reason = rsn;
         score = sc;
+        lotSize = 0.0;
         lotValue = 0.0;
         slPips = 0.0;
         tpPips = 0.0;
         slPrice = 0.0;
         tpPrice = 0.0;
+        buyTakeProfitPips = 0.0;
+        buyStopLossPips = 0.0;
+        sellTakeProfitPips = 0.0;
+        sellStopLossPips = 0.0;
+        trailStartPips = 0.0;
+        trailStopPips = 0.0;
+        breakEvenTriggerPips = 0.0;
+        breakEvenOffsetPips = 0.0;
+        forceClose = false;
+        closeWarning = false;
+        nanpinEnabled = false;
+        nanpinIntervalPips = 0.0;
+        nanpinMaxCount = 0;
+        nanpinLotAdjustMethod = 0;
     }
 };
 

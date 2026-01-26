@@ -13,9 +13,11 @@
 // Filter
 #include "../Blocks/Filter/FilterSpreadMax.mqh"
 #include "../Blocks/Filter/FilterAtrRange.mqh"
+#include "../Blocks/Filter/FilterStdDevRange.mqh"
 
 // Env
 #include "../Blocks/Env/EnvSessionTimeWindow.mqh"
+#include "../Blocks/Env/EnvSessionDaysOfWeek.mqh"
 
 // Trend
 #include "../Blocks/Trend/TrendMARelation.mqh"
@@ -39,6 +41,7 @@
 // Osc
 #include "../Blocks/Osc/OscMomentum.mqh"
 #include "../Blocks/Osc/OscOsMA.mqh"
+#include "../Blocks/Osc/OscForceIndex.mqh"
 
 // Volume
 #include "../Blocks/Volume/VolumeObvTrend.mqh"
@@ -49,7 +52,15 @@
 
 // Lot/Risk/Exit/Nanpin
 #include "../Blocks/Lot/LotFixed.mqh"
+#include "../Blocks/Lot/LotRiskPercent.mqh"
 #include "../Blocks/Risk/RiskFixedSLTP.mqh"
+#include "../Blocks/Risk/RiskAtrBased.mqh"
+#include "../Blocks/Exit/ExitNone.mqh"
+#include "../Blocks/Exit/ExitTrail.mqh"
+#include "../Blocks/Exit/ExitBreakEven.mqh"
+#include "../Blocks/Exit/ExitWeekendClose.mqh"
+#include "../Blocks/Nanpin/NanpinOff.mqh"
+#include "../Blocks/Nanpin/NanpinFixed.mqh"
 #include "../Blocks/Exit/ExitNone.mqh"
 #include "../Blocks/Nanpin/NanpinOff.mqh"
 
@@ -154,6 +165,7 @@ public:
 
         if (typeId == "filter.spreadMax") block = new CFilterSpreadMax(blockId);
         else if (typeId == "filter.volatility.atrRange") block = new CFilterAtrRange(blockId);
+        else if (typeId == "filter.volatility.stddevRange") block = new CFilterStdDevRange(blockId);
         else if (typeId == "env.session.timeWindow" || typeId == "filter.session.timeWindow") { 
             // Support both old and new (filter category) naming for robustness? 
             // Catalog says "filter.session.timeWindow". Code might need update or alias.
@@ -162,6 +174,7 @@ public:
             if (m_hasGlobalSession && sessionBlock != NULL) sessionBlock.ApplyGlobalSession(m_globalSession);
             block = sessionBlock;
         }
+        else if (typeId == "filter.session.daysOfWeek") block = new CEnvSessionDaysOfWeek(blockId);
         // Trend
         else if (typeId == "trend.maRelation") block = new CTrendMARelation(blockId);
         else if (typeId == "trend.maCross") block = new CTrendMACross(blockId);
@@ -182,6 +195,7 @@ public:
         // Osc
         else if (typeId == "osc.momentum") block = new COscMomentum(blockId);
         else if (typeId == "osc.osma") block = new COscOsMA(blockId);
+        else if (typeId == "osc.forceIndex") block = new COscForceIndex(blockId);
         // Volume
         else if (typeId == "volume.obvTrend") block = new CVolumeObvTrend(blockId);
         // Bill
@@ -189,9 +203,15 @@ public:
         else if (typeId == "bill.alligator") block = new CBillAlligator(blockId);
         // Models (Existing)
         else if (typeId == "lot.fixed") block = new CLotFixed(blockId);
+        else if (typeId == "lot.riskPercent") block = new CLotRiskPercent(blockId);
         else if (typeId == "risk.fixedSLTP") block = new CRiskFixedSLTP(blockId);
+        else if (typeId == "risk.atrBased") block = new CRiskAtrBased(blockId);
         else if (typeId == "exit.none") block = new CExitNone(blockId);
+        else if (typeId == "exit.trail") block = new CExitTrail(blockId);
+        else if (typeId == "exit.breakEven") block = new CExitBreakEven(blockId);
+        else if (typeId == "exit.weekendClose") block = new CExitWeekendClose(blockId);
         else if (typeId == "nanpin.off") block = new CNanpinOff(blockId);
+        else if (typeId == "nanpin.fixed") block = new CNanpinFixed(blockId);
         else {
             Print("ERROR: Unknown block typeId: ", typeId);
             return NULL;

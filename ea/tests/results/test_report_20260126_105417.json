@@ -1,0 +1,45 @@
+{
+  "timestamp": "20260126_105417",
+  "test_params": {
+    "symbol": "USDJPYm",
+    "timeframe": "M1",
+    "start_date": "2025.10.01",
+    "end_date": "2025.12.31",
+    "deposit": 1000000,
+    "leverage": 100
+  },
+  "results": {
+    "active.json": {
+      "initialized": false,
+      "trades": 0,
+      "errors": [],
+      "warnings": [],
+      "blocks_loaded": 0,
+      "strategies_loaded": 0
+    },
+    "test_single_blocks.json": {
+      "initialized": false,
+      "trades": 0,
+      "errors": [],
+      "warnings": [],
+      "blocks_loaded": 0,
+      "strategies_loaded": 0
+    },
+    "test_strategy_advanced.json": {
+      "initialized": false,
+      "trades": 0,
+      "errors": [],
+      "warnings": [],
+      "blocks_loaded": 0,
+      "strategies_loaded": 0
+    },
+    "test_strategy_all_blocks.json": {
+      "initialized": false,
+      "trades": 0,
+      "errors": [],
+      "warnings": [],
+      "blocks_loaded": 0,
+      "strategies_loaded": 0
+    }
+  }
+}

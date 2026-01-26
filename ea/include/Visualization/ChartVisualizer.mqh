@@ -111,7 +111,7 @@ private:
         return width;
     }
 
-    void AppendPanelLine(PanelLine &lines[], int &lineCount, const string &text, color lineColor) {
+    void AppendPanelLine(PanelLine &lines[], int &lineCount, string text, color lineColor) {
         int capacity = ArraySize(lines);
         if (lineCount >= capacity) {
             int newCapacity = (capacity == 0) ? 16 : capacity * 2;
@@ -414,7 +414,7 @@ private:
         } else if (alpha > 255) {
             alpha = 255;
         }
-        color bgColor = ColorToARGB(m_config.panelBgColor, (uchar)alpha);
+        color bgColor = (color)ColorToARGB(m_config.panelBgColor, (uchar)alpha);
         ObjectSetInteger(m_chartId, name, OBJPROP_BGCOLOR, bgColor);
         ObjectSetInteger(m_chartId, name, OBJPROP_BORDER_COLOR, m_config.panelBorderColor);
         ObjectSetInteger(m_chartId, name, OBJPROP_BORDER_TYPE, BORDER_FLAT);
@@ -423,7 +423,7 @@ private:
         ObjectSetInteger(m_chartId, name, OBJPROP_CORNER, m_config.panelCorner);
         ObjectSetInteger(m_chartId, name, OBJPROP_BACK, false);  // 前面に表示
         ObjectSetInteger(m_chartId, name, OBJPROP_SELECTABLE, false);
-        ObjectSetInteger(m_chartId, name, OBJPROP_HIDDEN, true);
+        ObjectSetInteger(m_chartId, name, OBJPROP_HIDDEN, false);  // 背景も表示する
 
         return true;
     }
@@ -458,7 +458,7 @@ private:
         ObjectSetInteger(m_chartId, name, OBJPROP_CORNER, m_config.panelCorner);
         ObjectSetInteger(m_chartId, name, OBJPROP_ANCHOR, m_config.panelAnchor);
         ObjectSetInteger(m_chartId, name, OBJPROP_SELECTABLE, false);
-        ObjectSetInteger(m_chartId, name, OBJPROP_HIDDEN, true);
+        ObjectSetInteger(m_chartId, name, OBJPROP_HIDDEN, false);  // テキストは表示する
 
         return true;
     }

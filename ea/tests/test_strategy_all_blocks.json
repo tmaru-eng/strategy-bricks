@@ -1,0 +1,338 @@
+{
+  "meta": {
+    "formatVersion": "1.0",
+    "name": "All Blocks Comprehensive Test",
+    "generatedBy": "Strategy Bricks Test Suite",
+    "generatedAt": "2026-01-26T10:30:00Z"
+  },
+  "globalGuards": {
+    "timeframe": "M1",
+    "useClosedBarOnly": true,
+    "noReentrySameBar": true,
+    "maxPositionsTotal": 5,
+    "maxPositionsPerSymbol": 3,
+    "maxSpreadPips": 2.5,
+    "session": {
+      "enabled": true,
+      "windows": [
+        { "start": "00:00", "end": "23:59" }
+      ],
+      "weekDays": { "sun": false, "mon": true, "tue": true, "wed": true, "thu": true, "fri": true, "sat": false }
+    }
+  },
+  "strategies": [
+    {
+      "id": "S1",
+      "name": "Bill Williams Strategy",
+      "enabled": true,
+      "priority": 10,
+      "conflictPolicy": "firstOnly",
+      "directionPolicy": "both",
+      "entryRequirement": {
+        "type": "OR",
+        "ruleGroups": [
+          {
+            "id": "RG1_Long",
+            "type": "AND",
+            "conditions": [
+              { "blockId": "filter.spreadMax#1" },
+              { "blockId": "bill.alligator#1" },
+              { "blockId": "bill.fractals#1" },
+              { "blockId": "osc.momentum#1" }
+            ]
+          },
+          {
+            "id": "RG2_Short",
+            "type": "AND",
+            "conditions": [
+              { "blockId": "filter.spreadMax#1" },
+              { "blockId": "bill.alligator#2" },
+              { "blockId": "bill.fractals#2" },
+              { "blockId": "osc.momentum#2" }
+            ]
+          }
+        ]
+      },
+      "lotModel": { "type": "lot.riskPercent", "params": { "riskPercent": 1.5, "minLot": 0.01, "maxLot": 0.5 } },
+      "riskModel": { "type": "risk.atrBased", "params": { "atrPeriod": 14, "buyTpRatio": 3.0, "buySlRatio": 1.5, "sellTpRatio": 3.0, "sellSlRatio": 1.5 } },
+      "exitModel": { "type": "exit.trail", "params": { "startPips": 30, "trailPips": 15 } },
+      "nanpinModel": { "type": "nanpin.fixed", "params": { "intervalPips": 20, "maxCount": 2, "lotAdjustMethod": 2 } }
+    },
+    {
+      "id": "S2",
+      "name": "Multi-Oscillator Strategy",
+      "enabled": true,
+      "priority": 20,
+      "conflictPolicy": "firstOnly",
+      "directionPolicy": "both",
+      "entryRequirement": {
+        "type": "OR",
+        "ruleGroups": [
+          {
+            "id": "RG3_Long",
+            "type": "AND",
+            "conditions": [
+              { "blockId": "filter.spreadMax#1" },
+              { "blockId": "filter.stddevRange#1" },
+              { "blockId": "trigger.cciLevel#1" },
+              { "blockId": "trigger.wprLevel#1" },
+              { "blockId": "trigger.mfiLevel#1" },
+              { "blockId": "osc.osma#1" }
+            ]
+          },
+          {
+            "id": "RG4_Short",
+            "type": "AND",
+            "conditions": [
+              { "blockId": "filter.spreadMax#1" },
+              { "blockId": "filter.stddevRange#1" },
+              { "blockId": "trigger.cciLevel#2" },
+              { "blockId": "trigger.wprLevel#2" },
+              { "blockId": "trigger.mfiLevel#2" },
+              { "blockId": "osc.osma#2" }
+            ]
+          }
+        ]
+      },
+      "lotModel": { "type": "lot.fixed", "params": { "lots": 0.2 } },
+      "riskModel": { "type": "risk.fixedSLTP", "params": { "slPips": 25, "tpPips": 50 } },
+      "exitModel": { "type": "exit.breakEven", "params": { "triggerPips": 15, "offsetPips": 3 } },
+      "nanpinModel": { "type": "nanpin.off", "params": {} }
+    },
+    {
+      "id": "S3",
+      "name": "SAR and RVI Strategy",
+      "enabled": true,
+      "priority": 30,
+      "conflictPolicy": "firstOnly",
+      "directionPolicy": "both",
+      "entryRequirement": {
+        "type": "OR",
+        "ruleGroups": [
+          {
+            "id": "RG5_Long",
+            "type": "AND",
+            "conditions": [
+              { "blockId": "filter.spreadMax#2" },
+              { "blockId": "filter.atrRange#1" },
+              { "blockId": "trend.sarDirection#1" },
+              { "blockId": "trigger.sarFlip#1" },
+              { "blockId": "trigger.rviCross#1" }
+            ]
+          },
+          {
+            "id": "RG6_Short",
+            "type": "AND",
+            "conditions": [
+              { "blockId": "filter.spreadMax#2" },
+              { "blockId": "filter.atrRange#1" },
+              { "blockId": "trend.sarDirection#2" },
+              { "blockId": "trigger.sarFlip#2" },
+              { "blockId": "trigger.rviCross#2" }
+            ]
+          }
+        ]
+      },
+      "lotModel": { "type": "lot.riskPercent", "params": { "riskPercent": 2.5, "minLot": 0.01, "maxLot": 1.0 } },
+      "riskModel": { "type": "risk.atrBased", "params": { "atrPeriod": 20, "buyTpRatio": 2.5, "buySlRatio": 1.0, "sellTpRatio": 2.5, "sellSlRatio": 1.0 } },
+      "exitModel": { "type": "exit.weekendClose", "params": { "dayOfWeek": 5, "closeTime": "23:00", "warningTime": "22:30" } },
+      "nanpinModel": { "type": "nanpin.fixed", "params": { "intervalPips": 10, "maxCount": 5, "lotAdjustMethod": 0 } }
+    },
+    {
+      "id": "S4",
+      "name": "Bollinger Bands Complex",
+      "enabled": true,
+      "priority": 40,
+      "conflictPolicy": "firstOnly",
+      "directionPolicy": "both",
+      "entryRequirement": {
+        "type": "OR",
+        "ruleGroups": [
+          {
+            "id": "RG7_Long",
+            "type": "AND",
+            "conditions": [
+              { "blockId": "filter.spreadMax#1" },
+              { "blockId": "filter.daysOfWeek#1" },
+              { "blockId": "trend.maRelation#1" },
+              { "blockId": "trigger.bbReentry#1" },
+              { "blockId": "trigger.bbBreakout#1" }
+            ]
+          },
+          {
+            "id": "RG8_Short",
+            "type": "AND",
+            "conditions": [
+              { "blockId": "filter.spreadMax#1" },
+              { "blockId": "filter.daysOfWeek#1" },
+              { "blockId": "trend.maRelation#2" },
+              { "blockId": "trigger.bbReentry#2" },
+              { "blockId": "trigger.bbBreakout#2" }
+            ]
+          }
+        ]
+      },
+      "lotModel": { "type": "lot.fixed", "params": { "lots": 0.15 } },
+      "riskModel": { "type": "risk.fixedSLTP", "params": { "slPips": 20, "tpPips": 40 } },
+      "exitModel": { "type": "exit.none", "params": {} },
+      "nanpinModel": { "type": "nanpin.off", "params": {} }
+    }
+  ],
+  "blocks": [
+    {
+      "id": "filter.spreadMax#1",
+      "typeId": "filter.spreadMax",
+      "params": { "maxSpreadPips": 2.5 }
+    },
+    {
+      "id": "filter.spreadMax#2",
+      "typeId": "filter.spreadMax",
+      "params": { "maxSpreadPips": 2.0 }
+    },
+    {
+      "id": "filter.atrRange#1",
+      "typeId": "filter.volatility.atrRange",
+      "params": { "period": 14, "minAtr": 0.0003, "maxAtr": 0.005 }
+    },
+    {
+      "id": "filter.stddevRange#1",
+      "typeId": "filter.volatility.stddevRange",
+      "params": { "period": 20, "maPeriod": 20, "maMethod": "SMA", "appliedPrice": "CLOSE", "min": 0.00005, "max": 0.002 }
+    },
+    {
+      "id": "filter.daysOfWeek#1",
+      "typeId": "filter.session.daysOfWeek",
+      "params": { "days": [1, 2, 3, 4, 5] }
+    },
+    {
+      "id": "trend.maRelation#1",
+      "typeId": "trend.maRelation",
+      "params": { "period": 100, "maType": "EMA", "relation": "closeAbove" }
+    },
+    {
+      "id": "trend.maRelation#2",
+      "typeId": "trend.maRelation",
+      "params": { "period": 100, "maType": "EMA", "relation": "closeBelow" }
+    },
+    {
+      "id": "trend.sarDirection#1",
+      "typeId": "trend.sarDirection",
+      "params": { "step": 0.02, "maximum": 0.2, "direction": "bullish" }
+    },
+    {
+      "id": "trend.sarDirection#2",
+      "typeId": "trend.sarDirection",
+      "params": { "step": 0.02, "maximum": 0.2, "direction": "bearish" }
+    },
+    {
+      "id": "trigger.bbReentry#1",
+      "typeId": "trigger.bbReentry",
+      "params": { "period": 20, "deviation": 2.0, "side": "lowerToInside" }
+    },
+    {
+      "id": "trigger.bbReentry#2",
+      "typeId": "trigger.bbReentry",
+      "params": { "period": 20, "deviation": 2.0, "side": "upperToInside" }
+    },
+    {
+      "id": "trigger.bbBreakout#1",
+      "typeId": "trigger.bbBreakout",
+      "params": { "period": 20, "deviation": 2.0, "direction": "upper" }
+    },
+    {
+      "id": "trigger.bbBreakout#2",
+      "typeId": "trigger.bbBreakout",
+      "params": { "period": 20, "deviation": 2.0, "direction": "lower" }
+    },
+    {
+      "id": "trigger.cciLevel#1",
+      "typeId": "trigger.cciLevel",
+      "params": { "period": 14, "appliedPrice": "TYPICAL", "threshold": -100, "mode": "oversold" }
+    },
+    {
+      "id": "trigger.cciLevel#2",
+      "typeId": "trigger.cciLevel",
+      "params": { "period": 14, "appliedPrice": "TYPICAL", "threshold": 100, "mode": "overbought" }
+    },
+    {
+      "id": "trigger.wprLevel#1",
+      "typeId": "trigger.wprLevel",
+      "params": { "period": 14, "threshold": -80, "mode": "oversold" }
+    },
+    {
+      "id": "trigger.wprLevel#2",
+      "typeId": "trigger.wprLevel",
+      "params": { "period": 14, "threshold": -20, "mode": "overbought" }
+    },
+    {
+      "id": "trigger.mfiLevel#1",
+      "typeId": "trigger.mfiLevel",
+      "params": { "period": 14, "appliedVolume": "TICK", "threshold": 20, "mode": "oversold" }
+    },
+    {
+      "id": "trigger.mfiLevel#2",
+      "typeId": "trigger.mfiLevel",
+      "params": { "period": 14, "appliedVolume": "TICK", "threshold": 80, "mode": "overbought" }
+    },
+    {
+      "id": "trigger.sarFlip#1",
+      "typeId": "trigger.sarFlip",
+      "params": { "step": 0.02, "maximum": 0.2 }
+    },
+    {
+      "id": "trigger.sarFlip#2",
+      "typeId": "trigger.sarFlip",
+      "params": { "step": 0.02, "maximum": 0.2 }
+    },
+    {
+      "id": "trigger.rviCross#1",
+      "typeId": "trigger.rviCross",
+      "params": { "period": 10, "direction": "golden" }
+    },
+    {
+      "id": "trigger.rviCross#2",
+      "typeId": "trigger.rviCross",
+      "params": { "period": 10, "direction": "dead" }
+    },
+    {
+      "id": "bill.alligator#1",
+      "typeId": "bill.alligator",
+      "params": { "jawPeriod": 13, "jawShift": 8, "teethPeriod": 8, "teethShift": 5, "lipsPeriod": 5, "lipsShift": 3, "maMethod": "SMMA", "appliedPrice": "MEDIAN", "position": "above" }
+    },
+    {
+      "id": "bill.alligator#2",
+      "typeId": "bill.alligator",
+      "params": { "jawPeriod": 13, "jawShift": 8, "teethPeriod": 8, "teethShift": 5, "lipsPeriod": 5, "lipsShift": 3, "maMethod": "SMMA", "appliedPrice": "MEDIAN", "position": "below" }
+    },
+    {
+      "id": "bill.fractals#1",
+      "typeId": "bill.fractals",
+      "params": { "direction": "up" }
+    },
+    {
+      "id": "bill.fractals#2",
+      "typeId": "bill.fractals",
+      "params": { "direction": "down" }
+    },
+    {
+      "id": "osc.momentum#1",
+      "typeId": "osc.momentum",
+      "params": { "period": 14, "appliedPrice": "CLOSE", "comparison": "above", "threshold": 100 }
+    },
+    {
+      "id": "osc.momentum#2",
+      "typeId": "osc.momentum",
+      "params": { "period": 14, "appliedPrice": "CLOSE", "comparison": "below", "threshold": 100 }
+    },
+    {
+      "id": "osc.osma#1",
+      "typeId": "osc.osma",
+      "params": { "fastEma": 12, "slowEma": 26, "signal": 9, "appliedPrice": "CLOSE", "comparison": "above", "threshold": 0 }
+    },
+    {
+      "id": "osc.osma#2",
+      "typeId": "osc.osma",
+      "params": { "fastEma": 12, "slowEma": 26, "signal": 9, "appliedPrice": "CLOSE", "comparison": "below", "threshold": 0 }
+    }
+  ]
+}
