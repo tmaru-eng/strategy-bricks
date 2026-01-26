@@ -1,0 +1,182 @@
+{
+  "nodes": [
+    {
+      "id": "strategy-1",
+      "type": "strategyNode",
+      "position": {
+        "x": 50,
+        "y": 200
+      },
+      "data": {},
+      "width": 160,
+      "height": 61
+    },
+    {
+      "id": "model-lot",
+      "type": "modelNode",
+      "position": {
+        "x": 280,
+        "y": 50
+      },
+      "data": {
+        "label": "ロットモデル"
+      },
+      "width": 160,
+      "height": 61
+    },
+    {
+      "id": "model-risk",
+      "type": "modelNode",
+      "position": {
+        "x": 280,
+        "y": 150
+      },
+      "data": {
+        "label": "リスクモデル"
+      },
+      "width": 160,
+      "height": 61
+    },
+    {
+      "id": "model-exit",
+      "type": "modelNode",
+      "position": {
+        "x": 280,
+        "y": 250
+      },
+      "data": {
+        "label": "エグジットモデル"
+      },
+      "width": 160,
+      "height": 61
+    },
+    {
+      "id": "model-nanpin",
+      "type": "modelNode",
+      "position": {
+        "x": 280,
+        "y": 350
+      },
+      "data": {
+        "label": "ナンピンモデル"
+      },
+      "width": 160,
+      "height": 61
+    },
+    {
+      "id": "rulegroup-1",
+      "type": "ruleGroupNode",
+      "position": {
+        "x": 520,
+        "y": 200
+      },
+      "data": {},
+      "width": 160,
+      "height": 61
+    },
+    {
+      "id": "condition-1",
+      "type": "conditionNode",
+      "position": {
+        "x": 760,
+        "y": 80
+      },
+      "data": {
+        "blockId": "filter.spreadMax#1",
+        "blockTypeId": "filter.spreadMax",
+        "displayName": "最大スプレッド",
+        "params": {
+          "maxSpreadPips": 30
+        }
+      },
+      "width": 160,
+      "height": 61
+    },
+    {
+      "id": "condition-2",
+      "type": "conditionNode",
+      "position": {
+        "x": 760,
+        "y": 200
+      },
+      "data": {
+        "blockId": "trend.maRelation#1",
+        "blockTypeId": "trend.maRelation",
+        "displayName": "MA上下",
+        "params": {
+          "period": 20,
+          "maMethod": "SMA",
+          "appliedPrice": "CLOSE",
+          "relation": "above"
+        }
+      },
+      "width": 160,
+      "height": 61
+    },
+    {
+      "id": "condition-3",
+      "type": "conditionNode",
+      "position": {
+        "x": 760,
+        "y": 320
+      },
+      "data": {
+        "blockId": "trigger.bbReentry#1",
+        "blockTypeId": "trigger.bbReentry",
+        "displayName": "ボリンジャー回帰",
+        "params": {
+          "period": 20,
+          "deviation": 2,
+          "appliedPrice": "CLOSE",
+          "side": "lowerToInside"
+        }
+      },
+      "width": 160,
+      "height": 61
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge-strategy-rulegroup",
+      "source": "strategy-1",
+      "target": "rulegroup-1"
+    },
+    {
+      "id": "edge-rulegroup-1",
+      "source": "rulegroup-1",
+      "target": "condition-1"
+    },
+    {
+      "id": "edge-rulegroup-2",
+      "source": "rulegroup-1",
+      "target": "condition-2"
+    },
+    {
+      "id": "edge-rulegroup-3",
+      "source": "rulegroup-1",
+      "target": "condition-3"
+    },
+    {
+      "id": "edge-strategy-lot",
+      "source": "strategy-1",
+      "target": "model-lot"
+    },
+    {
+      "id": "edge-strategy-risk",
+      "source": "strategy-1",
+      "target": "model-risk"
+    },
+    {
+      "id": "edge-strategy-exit",
+      "source": "strategy-1",
+      "target": "model-exit"
+    },
+    {
+      "id": "edge-strategy-nanpin",
+      "source": "strategy-1",
+      "target": "model-nanpin"
+    }
+  ],
+  "version": "1.0",
+  "timestamp": "2026-01-26T12:04:27.143Z"
+}

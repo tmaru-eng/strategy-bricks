@@ -1,0 +1,231 @@
+{
+  "meta": {
+    "formatVersion": "1.0",
+    "name": "Advanced Multi-Block Strategy",
+    "generatedBy": "Strategy Bricks Test Suite",
+    "generatedAt": "2026-01-26T10:30:00Z"
+  },
+  "globalGuards": {
+    "timeframe": "M1",
+    "useClosedBarOnly": true,
+    "noReentrySameBar": true,
+    "maxPositionsTotal": 3,
+    "maxPositionsPerSymbol": 2,
+    "maxSpreadPips": 3.0,
+    "session": {
+      "enabled": true,
+      "windows": [
+        { "start": "08:00", "end": "12:00" },
+        { "start": "13:00", "end": "17:00" },
+        { "start": "20:00", "end": "23:59" }
+      ],
+      "weekDays": { "sun": false, "mon": true, "tue": true, "wed": true, "thu": true, "fri": true, "sat": false }
+    }
+  },
+  "strategies": [
+    {
+      "id": "S1",
+      "name": "Trend Following with ATR Risk",
+      "enabled": true,
+      "priority": 10,
+      "conflictPolicy": "firstOnly",
+      "directionPolicy": "both",
+      "entryRequirement": {
+        "type": "OR",
+        "ruleGroups": [
+          {
+            "id": "RG1_Long",
+            "type": "AND",
+            "conditions": [
+              { "blockId": "filter.spreadMax#1" },
+              { "blockId": "filter.atrRange#1" },
+              { "blockId": "filter.daysOfWeek#1" },
+              { "blockId": "trend.adxThreshold#1" },
+              { "blockId": "trend.maRelation#1" },
+              { "blockId": "trigger.rsiLevel#1" }
+            ]
+          },
+          {
+            "id": "RG2_Short",
+            "type": "AND",
+            "conditions": [
+              { "blockId": "filter.spreadMax#1" },
+              { "blockId": "filter.atrRange#1" },
+              { "blockId": "filter.daysOfWeek#1" },
+              { "blockId": "trend.adxThreshold#1" },
+              { "blockId": "trend.maRelation#2" },
+              { "blockId": "trigger.rsiLevel#2" }
+            ]
+          }
+        ]
+      },
+      "lotModel": { "type": "lot.riskPercent", "params": { "riskPercent": 2.0, "minLot": 0.01, "maxLot": 1.0 } },
+      "riskModel": { "type": "risk.atrBased", "params": { "atrPeriod": 14, "buyTpRatio": 2.0, "buySlRatio": 1.0, "sellTpRatio": 2.0, "sellSlRatio": 1.0 } },
+      "exitModel": { "type": "exit.trail", "params": { "startPips": 20, "trailPips": 10 } },
+      "nanpinModel": { "type": "nanpin.fixed", "params": { "intervalPips": 15, "maxCount": 3, "lotAdjustMethod": 1 } }
+    },
+    {
+      "id": "S2",
+      "name": "Scalping with Break Even",
+      "enabled": true,
+      "priority": 20,
+      "conflictPolicy": "firstOnly",
+      "directionPolicy": "both",
+      "entryRequirement": {
+        "type": "OR",
+        "ruleGroups": [
+          {
+            "id": "RG3_Long",
+            "type": "AND",
+            "conditions": [
+              { "blockId": "filter.spreadMax#2" },
+              { "blockId": "filter.stddevRange#1" },
+              { "blockId": "trend.maCross#1" },
+              { "blockId": "trigger.stochCross#1" },
+              { "blockId": "osc.forceIndex#1" }
+            ]
+          },
+          {
+            "id": "RG4_Short",
+            "type": "AND",
+            "conditions": [
+              { "blockId": "filter.spreadMax#2" },
+              { "blockId": "filter.stddevRange#1" },
+              { "blockId": "trend.maCross#2" },
+              { "blockId": "trigger.stochCross#2" },
+              { "blockId": "osc.forceIndex#2" }
+            ]
+          }
+        ]
+      },
+      "lotModel": { "type": "lot.fixed", "params": { "lots": 0.1 } },
+      "riskModel": { "type": "risk.fixedSLTP", "params": { "slPips": 15, "tpPips": 15 } },
+      "exitModel": { "type": "exit.breakEven", "params": { "triggerPips": 10, "offsetPips": 2 } },
+      "nanpinModel": { "type": "nanpin.off", "params": {} }
+    },
+    {
+      "id": "S3",
+      "name": "Weekend Close Strategy",
+      "enabled": true,
+      "priority": 30,
+      "conflictPolicy": "firstOnly",
+      "directionPolicy": "longOnly",
+      "entryRequirement": {
+        "type": "OR",
+        "ruleGroups": [
+          {
+            "id": "RG5_Long",
+            "type": "AND",
+            "conditions": [
+              { "blockId": "filter.spreadMax#1" },
+              { "blockId": "trend.ichimokuCloud#1" },
+              { "blockId": "trigger.macdCross#1" },
+              { "blockId": "volume.obvTrend#1" }
+            ]
+          }
+        ]
+      },
+      "lotModel": { "type": "lot.fixed", "params": { "lots": 0.05 } },
+      "riskModel": { "type": "risk.fixedSLTP", "params": { "slPips": 40, "tpPips": 60 } },
+      "exitModel": { "type": "exit.weekendClose", "params": { "dayOfWeek": 5, "closeTime": "22:00", "warningTime": "21:30" } },
+      "nanpinModel": { "type": "nanpin.off", "params": {} }
+    }
+  ],
+  "blocks": [
+    {
+      "id": "filter.spreadMax#1",
+      "typeId": "filter.spreadMax",
+      "params": { "maxSpreadPips": 3.0 }
+    },
+    {
+      "id": "filter.spreadMax#2",
+      "typeId": "filter.spreadMax",
+      "params": { "maxSpreadPips": 1.5 }
+    },
+    {
+      "id": "filter.atrRange#1",
+      "typeId": "filter.volatility.atrRange",
+      "params": { "period": 14, "minAtr": 0.0005, "maxAtr": 0.003 }
+    },
+    {
+      "id": "filter.stddevRange#1",
+      "typeId": "filter.volatility.stddevRange",
+      "params": { "period": 20, "maPeriod": 20, "maMethod": "SMA", "appliedPrice": "CLOSE", "min": 0.0001, "max": 0.001 }
+    },
+    {
+      "id": "filter.daysOfWeek#1",
+      "typeId": "filter.session.daysOfWeek",
+      "params": { "days": [1, 2, 3, 4, 5] }
+    },
+    {
+      "id": "trend.adxThreshold#1",
+      "typeId": "trend.adxThreshold",
+      "params": { "period": 14, "minAdx": 25 }
+    },
+    {
+      "id": "trend.maRelation#1",
+      "typeId": "trend.maRelation",
+      "params": { "period": 200, "maType": "EMA", "relation": "closeAbove" }
+    },
+    {
+      "id": "trend.maRelation#2",
+      "typeId": "trend.maRelation",
+      "params": { "period": 200, "maType": "EMA", "relation": "closeBelow" }
+    },
+    {
+      "id": "trend.maCross#1",
+      "typeId": "trend.maCross",
+      "params": { "fastPeriod": 20, "slowPeriod": 50, "maMethod": "EMA", "appliedPrice": "CLOSE", "crossType": "golden" }
+    },
+    {
+      "id": "trend.maCross#2",
+      "typeId": "trend.maCross",
+      "params": { "fastPeriod": 20, "slowPeriod": 50, "maMethod": "EMA", "appliedPrice": "CLOSE", "crossType": "dead" }
+    },
+    {
+      "id": "trend.ichimokuCloud#1",
+      "typeId": "trend.ichimokuCloud",
+      "params": { "tenkan": 9, "kijun": 26, "senkouB": 52, "position": "above" }
+    },
+    {
+      "id": "trigger.rsiLevel#1",
+      "typeId": "trigger.rsiLevel",
+      "params": { "period": 14, "appliedPrice": "CLOSE", "threshold": 30, "mode": "oversold" }
+    },
+    {
+      "id": "trigger.rsiLevel#2",
+      "typeId": "trigger.rsiLevel",
+      "params": { "period": 14, "appliedPrice": "CLOSE", "threshold": 70, "mode": "overbought" }
+    },
+    {
+      "id": "trigger.stochCross#1",
+      "typeId": "trigger.stochCross",
+      "params": { "kPeriod": 5, "dPeriod": 3, "slowing": 3, "maMethod": "SMA", "priceField": "LOWHIGH", "direction": "golden" }
+    },
+    {
+      "id": "trigger.stochCross#2",
+      "typeId": "trigger.stochCross",
+      "params": { "kPeriod": 5, "dPeriod": 3, "slowing": 3, "maMethod": "SMA", "priceField": "LOWHIGH", "direction": "dead" }
+    },
+    {
+      "id": "trigger.macdCross#1",
+      "typeId": "trigger.macdCross",
+      "params": { "fastEma": 12, "slowEma": 26, "signal": 9, "appliedPrice": "CLOSE", "direction": "golden" }
+    },
+    {
+      "id": "osc.forceIndex#1",
+      "typeId": "osc.forceIndex",
+      "params": { "maPeriod": 13, "maMethod": "SMA", "appliedVolume": "TICK", "comparison": "above", "threshold": 0 }
+    },
+    {
+      "id": "osc.forceIndex#2",
+      "typeId": "osc.forceIndex",
+      "params": { "maPeriod": 13, "maMethod": "SMA", "appliedVolume": "TICK", "comparison": "below", "threshold": 0 }
+    },
+    {
+      "id": "volume.obvTrend#1",
+      "typeId": "volume.obvTrend",
+      "params": { "appliedVolume": "TICK", "direction": "up" }
+    }
+  ]
+}

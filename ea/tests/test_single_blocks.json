@@ -1,0 +1,807 @@
+{
+  "meta": {
+    "formatVersion": "1.0",
+    "name": "Single Block Unit Tests",
+    "description": "各ブロックを単体で動作確認するためのテスト設定",
+    "generatedBy": "Strategy Bricks Test Suite",
+    "generatedAt": "2026-01-26T10:50:00Z"
+  },
+  "globalGuards": {
+    "timeframe": "M1",
+    "useClosedBarOnly": true,
+    "noReentrySameBar": true,
+    "maxPositionsTotal": 50,
+    "maxPositionsPerSymbol": 50,
+    "maxSpreadPips": 10.0,
+    "session": {
+      "enabled": false
+    }
+  },
+  "strategies": [
+    {
+      "id": "test_filter_spreadMax",
+      "name": "Filter: SpreadMax単体",
+      "enabled": true,
+      "priority": 1,
+      "conflictPolicy": "all",
+      "directionPolicy": "both",
+      "entryRequirement": {
+        "type": "OR",
+        "ruleGroups": [
+          {
+            "id": "RG1",
+            "type": "AND",
+            "conditions": [
+              { "blockId": "filter.spreadMax#1" }
+            ]
+          }
+        ]
+      },
+      "lotModel": { "type": "lot.fixed", "params": { "lots": 0.01 } },
+      "riskModel": { "type": "risk.fixedSLTP", "params": { "slPips": 20, "tpPips": 40 } },
+      "exitModel": { "type": "exit.none", "params": {} },
+      "nanpinModel": { "type": "nanpin.off", "params": {} }
+    },
+    {
+      "id": "test_filter_atrRange",
+      "name": "Filter: ATR Range単体",
+      "enabled": true,
+      "priority": 2,
+      "conflictPolicy": "all",
+      "directionPolicy": "both",
+      "entryRequirement": {
+        "type": "OR",
+        "ruleGroups": [
+          {
+            "id": "RG2",
+            "type": "AND",
+            "conditions": [
+              { "blockId": "filter.atrRange#1" }
+            ]
+          }
+        ]
+      },
+      "lotModel": { "type": "lot.fixed", "params": { "lots": 0.01 } },
+      "riskModel": { "type": "risk.fixedSLTP", "params": { "slPips": 20, "tpPips": 40 } },
+      "exitModel": { "type": "exit.none", "params": {} },
+      "nanpinModel": { "type": "nanpin.off", "params": {} }
+    },
+    {
+      "id": "test_filter_stddevRange",
+      "name": "Filter: StdDev Range単体",
+      "enabled": true,
+      "priority": 3,
+      "conflictPolicy": "all",
+      "directionPolicy": "both",
+      "entryRequirement": {
+        "type": "OR",
+        "ruleGroups": [
+          {
+            "id": "RG3",
+            "type": "AND",
+            "conditions": [
+              { "blockId": "filter.stddevRange#1" }
+            ]
+          }
+        ]
+      },
+      "lotModel": { "type": "lot.fixed", "params": { "lots": 0.01 } },
+      "riskModel": { "type": "risk.fixedSLTP", "params": { "slPips": 20, "tpPips": 40 } },
+      "exitModel": { "type": "exit.none", "params": {} },
+      "nanpinModel": { "type": "nanpin.off", "params": {} }
+    },
+    {
+      "id": "test_filter_daysOfWeek",
+      "name": "Filter: Days of Week単体",
+      "enabled": true,
+      "priority": 4,
+      "conflictPolicy": "all",
+      "directionPolicy": "both",
+      "entryRequirement": {
+        "type": "OR",
+        "ruleGroups": [
+          {
+            "id": "RG4",
+            "type": "AND",
+            "conditions": [
+              { "blockId": "filter.daysOfWeek#1" }
+            ]
+          }
+        ]
+      },
+      "lotModel": { "type": "lot.fixed", "params": { "lots": 0.01 } },
+      "riskModel": { "type": "risk.fixedSLTP", "params": { "slPips": 20, "tpPips": 40 } },
+      "exitModel": { "type": "exit.none", "params": {} },
+      "nanpinModel": { "type": "nanpin.off", "params": {} }
+    },
+    {
+      "id": "test_trend_maRelation_long",
+      "name": "Trend: MA Relation Long単体",
+      "enabled": true,
+      "priority": 5,
+      "conflictPolicy": "all",
+      "directionPolicy": "longOnly",
+      "entryRequirement": {
+        "type": "OR",
+        "ruleGroups": [
+          {
+            "id": "RG5",
+            "type": "AND",
+            "conditions": [
+              { "blockId": "trend.maRelation#1" }
+            ]
+          }
+        ]
+      },
+      "lotModel": { "type": "lot.fixed", "params": { "lots": 0.01 } },
+      "riskModel": { "type": "risk.fixedSLTP", "params": { "slPips": 20, "tpPips": 40 } },
+      "exitModel": { "type": "exit.none", "params": {} },
+      "nanpinModel": { "type": "nanpin.off", "params": {} }
+    },
+    {
+      "id": "test_trend_maRelation_short",
+      "name": "Trend: MA Relation Short単体",
+      "enabled": true,
+      "priority": 6,
+      "conflictPolicy": "all",
+      "directionPolicy": "shortOnly",
+      "entryRequirement": {
+        "type": "OR",
+        "ruleGroups": [
+          {
+            "id": "RG6",
+            "type": "AND",
+            "conditions": [
+              { "blockId": "trend.maRelation#2" }
+            ]
+          }
+        ]
+      },
+      "lotModel": { "type": "lot.fixed", "params": { "lots": 0.01 } },
+      "riskModel": { "type": "risk.fixedSLTP", "params": { "slPips": 20, "tpPips": 40 } },
+      "exitModel": { "type": "exit.none", "params": {} },
+      "nanpinModel": { "type": "nanpin.off", "params": {} }
+    },
+    {
+      "id": "test_trend_maCross_golden",
+      "name": "Trend: MA Cross Golden単体",
+      "enabled": true,
+      "priority": 7,
+      "conflictPolicy": "all",
+      "directionPolicy": "longOnly",
+      "entryRequirement": {
+        "type": "OR",
+        "ruleGroups": [
+          {
+            "id": "RG7",
+            "type": "AND",
+            "conditions": [
+              { "blockId": "trend.maCross#1" }
+            ]
+          }
+        ]
+      },
+      "lotModel": { "type": "lot.fixed", "params": { "lots": 0.01 } },
+      "riskModel": { "type": "risk.fixedSLTP", "params": { "slPips": 20, "tpPips": 40 } },
+      "exitModel": { "type": "exit.none", "params": {} },
+      "nanpinModel": { "type": "nanpin.off", "params": {} }
+    },
+    {
+      "id": "test_trend_maCross_dead",
+      "name": "Trend: MA Cross Dead単体",
+      "enabled": true,
+      "priority": 8,
+      "conflictPolicy": "all",
+      "directionPolicy": "shortOnly",
+      "entryRequirement": {
+        "type": "OR",
+        "ruleGroups": [
+          {
+            "id": "RG8",
+            "type": "AND",
+            "conditions": [
+              { "blockId": "trend.maCross#2" }
+            ]
+          }
+        ]
+      },
+      "lotModel": { "type": "lot.fixed", "params": { "lots": 0.01 } },
+      "riskModel": { "type": "risk.fixedSLTP", "params": { "slPips": 20, "tpPips": 40 } },
+      "exitModel": { "type": "exit.none", "params": {} },
+      "nanpinModel": { "type": "nanpin.off", "params": {} }
+    },
+    {
+      "id": "test_trend_adxThreshold",
+      "name": "Trend: ADX Threshold単体",
+      "enabled": true,
+      "priority": 9,
+      "conflictPolicy": "all",
+      "directionPolicy": "both",
+      "entryRequirement": {
+        "type": "OR",
+        "ruleGroups": [
+          {
+            "id": "RG9",
+            "type": "AND",
+            "conditions": [
+              { "blockId": "trend.adxThreshold#1" }
+            ]
+          }
+        ]
+      },
+      "lotModel": { "type": "lot.fixed", "params": { "lots": 0.01 } },
+      "riskModel": { "type": "risk.fixedSLTP", "params": { "slPips": 20, "tpPips": 40 } },
+      "exitModel": { "type": "exit.none", "params": {} },
+      "nanpinModel": { "type": "nanpin.off", "params": {} }
+    },
+    {
+      "id": "test_trend_ichimokuCloud_long",
+      "name": "Trend: Ichimoku Cloud Long単体",
+      "enabled": true,
+      "priority": 10,
+      "conflictPolicy": "all",
+      "directionPolicy": "longOnly",
+      "entryRequirement": {
+        "type": "OR",
+        "ruleGroups": [
+          {
+            "id": "RG10",
+            "type": "AND",
+            "conditions": [
+              { "blockId": "trend.ichimokuCloud#1" }
+            ]
+          }
+        ]
+      },
+      "lotModel": { "type": "lot.fixed", "params": { "lots": 0.01 } },
+      "riskModel": { "type": "risk.fixedSLTP", "params": { "slPips": 20, "tpPips": 40 } },
+      "exitModel": { "type": "exit.none", "params": {} },
+      "nanpinModel": { "type": "nanpin.off", "params": {} }
+    },
+    {
+      "id": "test_trend_sarDirection_bullish",
+      "name": "Trend: SAR Direction Bullish単体",
+      "enabled": true,
+      "priority": 11,
+      "conflictPolicy": "all",
+      "directionPolicy": "longOnly",
+      "entryRequirement": {
+        "type": "OR",
+        "ruleGroups": [
+          {
+            "id": "RG11",
+            "type": "AND",
+            "conditions": [
+              { "blockId": "trend.sarDirection#1" }
+            ]
+          }
+        ]
+      },
+      "lotModel": { "type": "lot.fixed", "params": { "lots": 0.01 } },
+      "riskModel": { "type": "risk.fixedSLTP", "params": { "slPips": 20, "tpPips": 40 } },
+      "exitModel": { "type": "exit.none", "params": {} },
+      "nanpinModel": { "type": "nanpin.off", "params": {} }
+    },
+    {
+      "id": "test_trigger_bbReentry_long",
+      "name": "Trigger: BB Reentry Long単体",
+      "enabled": true,
+      "priority": 12,
+      "conflictPolicy": "all",
+      "directionPolicy": "longOnly",
+      "entryRequirement": {
+        "type": "OR",
+        "ruleGroups": [
+          {
+            "id": "RG12",
+            "type": "AND",
+            "conditions": [
+              { "blockId": "trigger.bbReentry#1" }
+            ]
+          }
+        ]
+      },
+      "lotModel": { "type": "lot.fixed", "params": { "lots": 0.01 } },
+      "riskModel": { "type": "risk.fixedSLTP", "params": { "slPips": 20, "tpPips": 40 } },
+      "exitModel": { "type": "exit.none", "params": {} },
+      "nanpinModel": { "type": "nanpin.off", "params": {} }
+    },
+    {
+      "id": "test_trigger_bbBreakout_long",
+      "name": "Trigger: BB Breakout Long単体",
+      "enabled": true,
+      "priority": 13,
+      "conflictPolicy": "all",
+      "directionPolicy": "longOnly",
+      "entryRequirement": {
+        "type": "OR",
+        "ruleGroups": [
+          {
+            "id": "RG13",
+            "type": "AND",
+            "conditions": [
+              { "blockId": "trigger.bbBreakout#1" }
+            ]
+          }
+        ]
+      },
+      "lotModel": { "type": "lot.fixed", "params": { "lots": 0.01 } },
+      "riskModel": { "type": "risk.fixedSLTP", "params": { "slPips": 20, "tpPips": 40 } },
+      "exitModel": { "type": "exit.none", "params": {} },
+      "nanpinModel": { "type": "nanpin.off", "params": {} }
+    },
+    {
+      "id": "test_trigger_macdCross_golden",
+      "name": "Trigger: MACD Cross Golden単体",
+      "enabled": true,
+      "priority": 14,
+      "conflictPolicy": "all",
+      "directionPolicy": "longOnly",
+      "entryRequirement": {
+        "type": "OR",
+        "ruleGroups": [
+          {
+            "id": "RG14",
+            "type": "AND",
+            "conditions": [
+              { "blockId": "trigger.macdCross#1" }
+            ]
+          }
+        ]
+      },
+      "lotModel": { "type": "lot.fixed", "params": { "lots": 0.01 } },
+      "riskModel": { "type": "risk.fixedSLTP", "params": { "slPips": 20, "tpPips": 40 } },
+      "exitModel": { "type": "exit.none", "params": {} },
+      "nanpinModel": { "type": "nanpin.off", "params": {} }
+    },
+    {
+      "id": "test_trigger_stochCross_golden",
+      "name": "Trigger: Stoch Cross Golden単体",
+      "enabled": true,
+      "priority": 15,
+      "conflictPolicy": "all",
+      "directionPolicy": "longOnly",
+      "entryRequirement": {
+        "type": "OR",
+        "ruleGroups": [
+          {
+            "id": "RG15",
+            "type": "AND",
+            "conditions": [
+              { "blockId": "trigger.stochCross#1" }
+            ]
+          }
+        ]
+      },
+      "lotModel": { "type": "lot.fixed", "params": { "lots": 0.01 } },
+      "riskModel": { "type": "risk.fixedSLTP", "params": { "slPips": 20, "tpPips": 40 } },
+      "exitModel": { "type": "exit.none", "params": {} },
+      "nanpinModel": { "type": "nanpin.off", "params": {} }
+    },
+    {
+      "id": "test_trigger_rsiLevel_oversold",
+      "name": "Trigger: RSI Oversold単体",
+      "enabled": true,
+      "priority": 16,
+      "conflictPolicy": "all",
+      "directionPolicy": "longOnly",
+      "entryRequirement": {
+        "type": "OR",
+        "ruleGroups": [
+          {
+            "id": "RG16",
+            "type": "AND",
+            "conditions": [
+              { "blockId": "trigger.rsiLevel#1" }
+            ]
+          }
+        ]
+      },
+      "lotModel": { "type": "lot.fixed", "params": { "lots": 0.01 } },
+      "riskModel": { "type": "risk.fixedSLTP", "params": { "slPips": 20, "tpPips": 40 } },
+      "exitModel": { "type": "exit.none", "params": {} },
+      "nanpinModel": { "type": "nanpin.off", "params": {} }
+    },
+    {
+      "id": "test_trigger_cciLevel_oversold",
+      "name": "Trigger: CCI Oversold単体",
+      "enabled": true,
+      "priority": 17,
+      "conflictPolicy": "all",
+      "directionPolicy": "longOnly",
+      "entryRequirement": {
+        "type": "OR",
+        "ruleGroups": [
+          {
+            "id": "RG17",
+            "type": "AND",
+            "conditions": [
+              { "blockId": "trigger.cciLevel#1" }
+            ]
+          }
+        ]
+      },
+      "lotModel": { "type": "lot.fixed", "params": { "lots": 0.01 } },
+      "riskModel": { "type": "risk.fixedSLTP", "params": { "slPips": 20, "tpPips": 40 } },
+      "exitModel": { "type": "exit.none", "params": {} },
+      "nanpinModel": { "type": "nanpin.off", "params": {} }
+    },
+    {
+      "id": "test_trigger_sarFlip",
+      "name": "Trigger: SAR Flip単体",
+      "enabled": true,
+      "priority": 18,
+      "conflictPolicy": "all",
+      "directionPolicy": "both",
+      "entryRequirement": {
+        "type": "OR",
+        "ruleGroups": [
+          {
+            "id": "RG18",
+            "type": "AND",
+            "conditions": [
+              { "blockId": "trigger.sarFlip#1" }
+            ]
+          }
+        ]
+      },
+      "lotModel": { "type": "lot.fixed", "params": { "lots": 0.01 } },
+      "riskModel": { "type": "risk.fixedSLTP", "params": { "slPips": 20, "tpPips": 40 } },
+      "exitModel": { "type": "exit.none", "params": {} },
+      "nanpinModel": { "type": "nanpin.off", "params": {} }
+    },
+    {
+      "id": "test_trigger_wprLevel_oversold",
+      "name": "Trigger: WPR Oversold単体",
+      "enabled": true,
+      "priority": 19,
+      "conflictPolicy": "all",
+      "directionPolicy": "longOnly",
+      "entryRequirement": {
+        "type": "OR",
+        "ruleGroups": [
+          {
+            "id": "RG19",
+            "type": "AND",
+            "conditions": [
+              { "blockId": "trigger.wprLevel#1" }
+            ]
+          }
+        ]
+      },
+      "lotModel": { "type": "lot.fixed", "params": { "lots": 0.01 } },
+      "riskModel": { "type": "risk.fixedSLTP", "params": { "slPips": 20, "tpPips": 40 } },
+      "exitModel": { "type": "exit.none", "params": {} },
+      "nanpinModel": { "type": "nanpin.off", "params": {} }
+    },
+    {
+      "id": "test_trigger_mfiLevel_oversold",
+      "name": "Trigger: MFI Oversold単体",
+      "enabled": true,
+      "priority": 20,
+      "conflictPolicy": "all",
+      "directionPolicy": "longOnly",
+      "entryRequirement": {
+        "type": "OR",
+        "ruleGroups": [
+          {
+            "id": "RG20",
+            "type": "AND",
+            "conditions": [
+              { "blockId": "trigger.mfiLevel#1" }
+            ]
+          }
+        ]
+      },
+      "lotModel": { "type": "lot.fixed", "params": { "lots": 0.01 } },
+      "riskModel": { "type": "risk.fixedSLTP", "params": { "slPips": 20, "tpPips": 40 } },
+      "exitModel": { "type": "exit.none", "params": {} },
+      "nanpinModel": { "type": "nanpin.off", "params": {} }
+    },
+    {
+      "id": "test_trigger_rviCross_golden",
+      "name": "Trigger: RVI Cross Golden単体",
+      "enabled": true,
+      "priority": 21,
+      "conflictPolicy": "all",
+      "directionPolicy": "longOnly",
+      "entryRequirement": {
+        "type": "OR",
+        "ruleGroups": [
+          {
+            "id": "RG21",
+            "type": "AND",
+            "conditions": [
+              { "blockId": "trigger.rviCross#1" }
+            ]
+          }
+        ]
+      },
+      "lotModel": { "type": "lot.fixed", "params": { "lots": 0.01 } },
+      "riskModel": { "type": "risk.fixedSLTP", "params": { "slPips": 20, "tpPips": 40 } },
+      "exitModel": { "type": "exit.none", "params": {} },
+      "nanpinModel": { "type": "nanpin.off", "params": {} }
+    },
+    {
+      "id": "test_osc_momentum_above",
+      "name": "Osc: Momentum Above単体",
+      "enabled": true,
+      "priority": 22,
+      "conflictPolicy": "all",
+      "directionPolicy": "both",
+      "entryRequirement": {
+        "type": "OR",
+        "ruleGroups": [
+          {
+            "id": "RG22",
+            "type": "AND",
+            "conditions": [
+              { "blockId": "osc.momentum#1" }
+            ]
+          }
+        ]
+      },
+      "lotModel": { "type": "lot.fixed", "params": { "lots": 0.01 } },
+      "riskModel": { "type": "risk.fixedSLTP", "params": { "slPips": 20, "tpPips": 40 } },
+      "exitModel": { "type": "exit.none", "params": {} },
+      "nanpinModel": { "type": "nanpin.off", "params": {} }
+    },
+    {
+      "id": "test_osc_osma_above",
+      "name": "Osc: OsMA Above単体",
+      "enabled": true,
+      "priority": 23,
+      "conflictPolicy": "all",
+      "directionPolicy": "both",
+      "entryRequirement": {
+        "type": "OR",
+        "ruleGroups": [
+          {
+            "id": "RG23",
+            "type": "AND",
+            "conditions": [
+              { "blockId": "osc.osma#1" }
+            ]
+          }
+        ]
+      },
+      "lotModel": { "type": "lot.fixed", "params": { "lots": 0.01 } },
+      "riskModel": { "type": "risk.fixedSLTP", "params": { "slPips": 20, "tpPips": 40 } },
+      "exitModel": { "type": "exit.none", "params": {} },
+      "nanpinModel": { "type": "nanpin.off", "params": {} }
+    },
+    {
+      "id": "test_osc_forceIndex_above",
+      "name": "Osc: Force Index Above単体",
+      "enabled": true,
+      "priority": 24,
+      "conflictPolicy": "all",
+      "directionPolicy": "both",
+      "entryRequirement": {
+        "type": "OR",
+        "ruleGroups": [
+          {
+            "id": "RG24",
+            "type": "AND",
+            "conditions": [
+              { "blockId": "osc.forceIndex#1" }
+            ]
+          }
+        ]
+      },
+      "lotModel": { "type": "lot.fixed", "params": { "lots": 0.01 } },
+      "riskModel": { "type": "risk.fixedSLTP", "params": { "slPips": 20, "tpPips": 40 } },
+      "exitModel": { "type": "exit.none", "params": {} },
+      "nanpinModel": { "type": "nanpin.off", "params": {} }
+    },
+    {
+      "id": "test_volume_obvTrend_up",
+      "name": "Volume: OBV Trend Up単体",
+      "enabled": true,
+      "priority": 25,
+      "conflictPolicy": "all",
+      "directionPolicy": "both",
+      "entryRequirement": {
+        "type": "OR",
+        "ruleGroups": [
+          {
+            "id": "RG25",
+            "type": "AND",
+            "conditions": [
+              { "blockId": "volume.obvTrend#1" }
+            ]
+          }
+        ]
+      },
+      "lotModel": { "type": "lot.fixed", "params": { "lots": 0.01 } },
+      "riskModel": { "type": "risk.fixedSLTP", "params": { "slPips": 20, "tpPips": 40 } },
+      "exitModel": { "type": "exit.none", "params": {} },
+      "nanpinModel": { "type": "nanpin.off", "params": {} }
+    },
+    {
+      "id": "test_bill_fractals_up",
+      "name": "Bill: Fractals Up単体",
+      "enabled": true,
+      "priority": 26,
+      "conflictPolicy": "all",
+      "directionPolicy": "longOnly",
+      "entryRequirement": {
+        "type": "OR",
+        "ruleGroups": [
+          {
+            "id": "RG26",
+            "type": "AND",
+            "conditions": [
+              { "blockId": "bill.fractals#1" }
+            ]
+          }
+        ]
+      },
+      "lotModel": { "type": "lot.fixed", "params": { "lots": 0.01 } },
+      "riskModel": { "type": "risk.fixedSLTP", "params": { "slPips": 20, "tpPips": 40 } },
+      "exitModel": { "type": "exit.none", "params": {} },
+      "nanpinModel": { "type": "nanpin.off", "params": {} }
+    },
+    {
+      "id": "test_bill_alligator_long",
+      "name": "Bill: Alligator Long単体",
+      "enabled": true,
+      "priority": 27,
+      "conflictPolicy": "all",
+      "directionPolicy": "longOnly",
+      "entryRequirement": {
+        "type": "OR",
+        "ruleGroups": [
+          {
+            "id": "RG27",
+            "type": "AND",
+            "conditions": [
+              { "blockId": "bill.alligator#1" }
+            ]
+          }
+        ]
+      },
+      "lotModel": { "type": "lot.fixed", "params": { "lots": 0.01 } },
+      "riskModel": { "type": "risk.fixedSLTP", "params": { "slPips": 20, "tpPips": 40 } },
+      "exitModel": { "type": "exit.none", "params": {} },
+      "nanpinModel": { "type": "nanpin.off", "params": {} }
+    }
+  ],
+  "blocks": [
+    {
+      "id": "filter.spreadMax#1",
+      "typeId": "filter.spreadMax",
+      "params": { "maxSpreadPips": 10.0 }
+    },
+    {
+      "id": "filter.atrRange#1",
+      "typeId": "filter.volatility.atrRange",
+      "params": { "period": 14, "minAtr": 0.0, "maxAtr": 1.0 }
+    },
+    {
+      "id": "filter.stddevRange#1",
+      "typeId": "filter.volatility.stddevRange",
+      "params": { "period": 20, "maPeriod": 20, "maMethod": "SMA", "appliedPrice": "CLOSE", "min": 0.0, "max": 1.0 }
+    },
+    {
+      "id": "filter.daysOfWeek#1",
+      "typeId": "filter.session.daysOfWeek",
+      "params": { "days": [1, 2, 3, 4, 5] }
+    },
+    {
+      "id": "trend.maRelation#1",
+      "typeId": "trend.maRelation",
+      "params": { "period": 20, "maType": "SMA", "relation": "closeAbove" }
+    },
+    {
+      "id": "trend.maRelation#2",
+      "typeId": "trend.maRelation",
+      "params": { "period": 20, "maType": "SMA", "relation": "closeBelow" }
+    },
+    {
+      "id": "trend.maCross#1",
+      "typeId": "trend.maCross",
+      "params": { "fastPeriod": 5, "slowPeriod": 20, "maMethod": "EMA", "appliedPrice": "CLOSE", "crossType": "golden" }
+    },
+    {
+      "id": "trend.maCross#2",
+      "typeId": "trend.maCross",
+      "params": { "fastPeriod": 5, "slowPeriod": 20, "maMethod": "EMA", "appliedPrice": "CLOSE", "crossType": "dead" }
+    },
+    {
+      "id": "trend.adxThreshold#1",
+      "typeId": "trend.adxThreshold",
+      "params": { "period": 14, "minAdx": 15 }
+    },
+    {
+      "id": "trend.ichimokuCloud#1",
+      "typeId": "trend.ichimokuCloud",
+      "params": { "tenkan": 9, "kijun": 26, "senkouB": 52, "position": "above" }
+    },
+    {
+      "id": "trend.sarDirection#1",
+      "typeId": "trend.sarDirection",
+      "params": { "step": 0.02, "maximum": 0.2, "direction": "bullish" }
+    },
+    {
+      "id": "trigger.bbReentry#1",
+      "typeId": "trigger.bbReentry",
+      "params": { "period": 20, "deviation": 2.0, "side": "lowerToInside" }
+    },
+    {
+      "id": "trigger.bbBreakout#1",
+      "typeId": "trigger.bbBreakout",
+      "params": { "period": 20, "deviation": 2.0, "direction": "upper" }
+    },
+    {
+      "id": "trigger.macdCross#1",
+      "typeId": "trigger.macdCross",
+      "params": { "fastEma": 12, "slowEma": 26, "signal": 9, "appliedPrice": "CLOSE", "direction": "golden" }
+    },
+    {
+      "id": "trigger.stochCross#1",
+      "typeId": "trigger.stochCross",
+      "params": { "kPeriod": 5, "dPeriod": 3, "slowing": 3, "maMethod": "SMA", "priceField": "LOWHIGH", "direction": "golden" }
+    },
+    {
+      "id": "trigger.rsiLevel#1",
+      "typeId": "trigger.rsiLevel",
+      "params": { "period": 14, "appliedPrice": "CLOSE", "threshold": 30, "mode": "oversold" }
+    },
+    {
+      "id": "trigger.cciLevel#1",
+      "typeId": "trigger.cciLevel",
+      "params": { "period": 14, "appliedPrice": "TYPICAL", "threshold": -100, "mode": "oversold" }
+    },
+    {
+      "id": "trigger.sarFlip#1",
+      "typeId": "trigger.sarFlip",
+      "params": { "step": 0.02, "maximum": 0.2 }
+    },
+    {
+      "id": "trigger.wprLevel#1",
+      "typeId": "trigger.wprLevel",
+      "params": { "period": 14, "threshold": -80, "mode": "oversold" }
+    },
+    {
+      "id": "trigger.mfiLevel#1",
+      "typeId": "trigger.mfiLevel",
+      "params": { "period": 14, "appliedVolume": "TICK", "threshold": 20, "mode": "oversold" }
+    },
+    {
+      "id": "trigger.rviCross#1",
+      "typeId": "trigger.rviCross",
+      "params": { "period": 10, "direction": "golden" }
+    },
+    {
+      "id": "osc.momentum#1",
+      "typeId": "osc.momentum",
+      "params": { "period": 14, "appliedPrice": "CLOSE", "comparison": "above", "threshold": 100 }
+    },
+    {
+      "id": "osc.osma#1",
+      "typeId": "osc.osma",
+      "params": { "fastEma": 12, "slowEma": 26, "signal": 9, "appliedPrice": "CLOSE", "comparison": "above", "threshold": 0 }
+    },
+    {
+      "id": "osc.forceIndex#1",
+      "typeId": "osc.forceIndex",
+      "params": { "maPeriod": 13, "maMethod": "SMA", "appliedVolume": "TICK", "comparison": "above", "threshold": 0 }
+    },
+    {
+      "id": "volume.obvTrend#1",
+      "typeId": "volume.obvTrend",
+      "params": { "appliedVolume": "TICK", "direction": "up" }
+    },
+    {
+      "id": "bill.fractals#1",
+      "typeId": "bill.fractals",
+      "params": { "direction": "up" }
+    },
+    {
+      "id": "bill.alligator#1",
+      "typeId": "bill.alligator",
+      "params": { "jawPeriod": 13, "jawShift": 8, "teethPeriod": 8, "teethShift": 5, "lipsPeriod": 5, "lipsShift": 3, "maMethod": "SMMA", "appliedPrice": "MEDIAN", "position": "above" }
+    }
+  ]
+}

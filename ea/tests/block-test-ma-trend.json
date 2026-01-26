@@ -1,0 +1,59 @@
+{
+  "meta": {
+    "formatVersion": "1.0",
+    "name": "block-test-ma-trend",
+    "generatedBy": "Block Test",
+    "generatedAt": "2026-01-26T07:00:00.000Z"
+  },
+  "globalGuards": {
+    "timeframe": "M1",
+    "useClosedBarOnly": true,
+    "noReentrySameBar": true,
+    "maxPositionsTotal": 1,
+    "maxPositionsPerSymbol": 1,
+    "maxSpreadPips": 50.0,
+    "session": {
+      "enabled": false,
+      "windows": [],
+      "weekDays": { "sun": true, "mon": true, "tue": true, "wed": true, "thu": true, "fri": true, "sat": true }
+    }
+  },
+  "strategies": [
+    {
+      "id": "S1",
+      "name": "MA Trend Only",
+      "enabled": true,
+      "priority": 10,
+      "conflictPolicy": "firstOnly",
+      "directionPolicy": "both",
+      "entryRequirement": {
+        "type": "OR",
+        "ruleGroups": [
+          {
+            "id": "rg1",
+            "type": "AND",
+            "conditions": [
+              { "blockId": "trend.maRelation#1" }
+            ]
+          }
+        ]
+      },
+      "lotModel": { "type": "lot.fixed", "params": { "lots": 0.1 } },
+      "riskModel": { "type": "risk.fixedSLTP", "params": { "slPips": 30, "tpPips": 30 } },
+      "exitModel": { "type": "exit.none", "params": {} },
+      "nanpinModel": { "type": "nanpin.off", "params": {} }
+    }
+  ],
+  "blocks": [
+    {
+      "id": "trend.maRelation#1",
+      "typeId": "trend.maRelation",
+      "params": {
+        "period": 20,
+        "maMethod": "SMA",
+        "appliedPrice": "CLOSE",
+        "relation": "above"
+      }
+    }
+  ]
+}

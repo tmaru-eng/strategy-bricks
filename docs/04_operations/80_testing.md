@@ -1,828 +1,381 @@
-# 04_operations/80_testing.md
-# テスト計画 — Strategy Bricks（仮称）
+# テスト計画・戦略
 
-## 0. ドキュメント情報
-- ファイル名：`docs/04_operations/80_testing.md`
-- 版：v0.1
-- 対象：テスト担当、品質保証担当
-- 目的：具体的なテスト手法と項目を定義
+## 概要
 
----
+Strategy Bricks EAの品質保証のための包括的なテスト戦略を定義します。
 
-## 1. テスト戦略
+## テスト方針
 
-### 1.1 テストレベル
+### 基本原則
 
-**単体テスト（Unit Testing）:**
-- 対象：個別のクラス・関数
-- 目的：各コンポーネントが仕様通り動作することを確認
-- 手法：独立したテストケース、モック使用
+1. **段階的テスト**: 単体 → 統合 → システム の順でテスト
+2. **問題の切り分け**: 各レイヤーで問題を特定できる構造
+3. **自動化と手動の組み合わせ**: 効率と信頼性のバランス
+4. **継続的な改善**: 新機能追加時にテストも拡張
 
-**統合テスト（Integration Testing）:**
-- 対象：複数コンポーネントの連携
-- 目的：コンポーネント間のインターフェースが正しく動作することを確認
-- 手法：実際のデータフロー、ログベース検証
+### テストレイヤー
 
-**E2Eテスト（End-to-End Testing）:**
-- 対象：GUI → JSON → EA → Market
-- 目的：システム全体が一貫して動作することを確認
-- 手法：バックテスト、ログ確認
-
-**回帰テスト（Regression Testing）:**
-- 対象：変更後の既存機能
-- 目的：変更が既存機能に影響しないことを確認
-- 手法：自動化テストスイート、ログ比較
-
-### 1.2 テスト方針
-
-**ログベース検証を中心とする:**
-- すべてのログイベントが記録されることを前提
-- ログから挙動を追跡可能にする
-- バックテストで再現性を確保
-
-**受入基準に基づくテストケース:**
-- `docs/02_requirements/12_acceptance_criteria.md` の各ACをテストケース化
-- 成功基準・失敗例を明確化
-
-**自動化可能な部分は自動化:**
-- ログ解析スクリプト（Python等）
-- バックテスト結果の比較スクリプト
-
----
-
-## 2. 単体テスト
-
-### 2.1 ConfigValidator（設定検証）
-
-**目的:** 設定ファイルの検証ロジックが正しく動作することを確認
-
-**テストケース:**
-
-#### TC-CV-01: formatVersion互換性チェック
-
-**前提条件:**
-- Config構造体準備
-
-**テストデータ:**
-- formatVersion = "1.0" → 合格
-- formatVersion = "2.0" → 不合格
-- formatVersion = "" → 不合格
-
-**実行:**
-```mql5
-bool result1 = ValidateFormatVersion(config1); // "1.0"
-bool result2 = ValidateFormatVersion(config2); // "2.0"
-bool result3 = ValidateFormatVersion(config3); // ""
+```
+┌─────────────────────────────────────┐
+│  システムテスト (MT5 Strategy Tester) │  ← 実際の取引動作確認
+├─────────────────────────────────────┤
+│  統合テスト (GUI Integration Tests)  │  ← コンポーネント連携確認
+├─────────────────────────────────────┤
+│  単体テスト (EA Block Unit Tests)    │  ← 個別ブロック動作確認
+└─────────────────────────────────────┘
 ```
 
-**期待結果:**
-- result1 == true
-- result2 == false（ログにエラー出力）
-- result3 == false（ログにエラー出力）
+## テストタイプ
 
-#### TC-CV-02: 必須フィールドチェック
+### 1. GUI統合テスト
 
-**テストデータ:**
-- globalGuards.timeframe = "M1" → 合格
-- globalGuards.timeframe = "" → 不合格
-- globalGuards.timeframe = "M5" → 不合格
+**目的**: フロントエンドの動作確認とコンポーネント連携テスト
 
-**期待結果:**
-- "M1"のみ合格
-- その他は不合格でログ出力
+**場所**: `gui/src/__tests__/`
 
-#### TC-CV-03: ブロック参照チェック
-
-**テストデータ:**
-- blockId = "filter.spreadMax#1"（存在する）→ 合格
-- blockId = "nonexistent#1"（存在しない）→ 不合格
-
-**期待結果:**
-- 存在しないblockIdで不合格
-- ログに"Block reference not found: nonexistent#1"
-
----
-
-### 2.2 CompositeEvaluator（複合評価器）
-
-**目的:** OR/AND短絡評価が正しく動作することを確認
-
-**テストケース:**
-
-#### TC-CE-01: OR短絡評価（最初に成立）
-
-**前提条件:**
-- 3つのRuleGroupを準備
-- RuleGroup#1: 成立（全条件PASS）
-- RuleGroup#2: 成立（全条件PASS）
-- RuleGroup#3: 不成立（一部FAIL）
-
-**実行:**
-```mql5
-bool result = evaluator.EvaluateOR(entryRequirement);
+**実行方法**:
+```bash
+cd gui
+npm test
 ```
 
-**期待結果:**
-- result == true
-- RuleGroup#1のみ評価される
-- RuleGroup#2, #3は評価されない（ログなし）
-
-#### TC-CE-02: OR短絡評価（2番目に成立）
-
-**前提条件:**
-- RuleGroup#1: 不成立
-- RuleGroup#2: 成立
-- RuleGroup#3: 成立
-
-**期待結果:**
-- result == true
-- RuleGroup#1, #2が評価される
-- RuleGroup#3は評価されない
-
-#### TC-CE-03: AND短絡評価（最初にFAIL）
-
-**前提条件:**
-- 4つのConditionを準備
-- Condition#1: FAIL
-- Condition#2, #3, #4: PASS
-
-**実行:**
-```mql5
-bool result = evaluator.EvaluateAND(ruleGroup);
-```
-
-**期待結果:**
-- result == false
-- Condition#1のみ評価される
-- Condition#2, #3, #4は評価されない
-
-#### TC-CE-04: AND短絡評価（全てPASS）
-
-**前提条件:**
-- 全てのConditionがPASS
-
-**期待結果:**
-- result == true
-- 全Conditionが評価される
-
----
-
-### 2.3 ブロック単体テスト
-
-**目的:** 各ブロックが正しく判定を行うことを確認
-
-**テストケース:**
-
-#### TC-BL-01: filter.spreadMax
-
-**テストデータ:**
-- maxSpreadPips = 2.0
-- 現在スプレッド = 1.5 pips → PASS
-- 現在スプレッド = 3.0 pips → FAIL
-
-**実行:**
-```mql5
-Context ctx1 = CreateContext(1.5);
-BlockResult result1 = block.Evaluate(ctx1);
-
-Context ctx2 = CreateContext(3.0);
-BlockResult result2 = block.Evaluate(ctx2);
-```
-
-**期待結果:**
-- result1.status == PASS
-- result2.status == FAIL
-- result2.reason == "Spread=3.0 pips (max=2.0)"
-
-#### TC-BL-02: trend.maRelation
-
-**テストデータ:**
-- period = 200, maType = "EMA", relation = "closeAbove"
-- Close[1] = 1.10500, MA[1] = 1.10000 → PASS
-- Close[1] = 1.09500, MA[1] = 1.10000 → FAIL
-
-**期待結果:**
-- Close > MA → PASS
-- Close < MA → FAIL
-- reason文字列に価格とMA値が含まれる
-
-#### TC-BL-03: trigger.bbReentry
-
-**テストデータ:**
-- side = "lowerToInside"
-- Close[2] < Lower[2], Close[1] >= Lower[1] → PASS
-- Close[2] >= Lower[2] → FAIL
-
-**期待結果:**
-- 外→内回帰でPASS
-- それ以外でFAIL
-
----
-
-### 2.4 IndicatorCache
-
-**目的:** インジケータのハンドル共有と値キャッシュが正しく動作することを確認
-
-**テストケース:**
-
-#### TC-IC-01: ハンドル共有
-
-**実行:**
-```mql5
-int handle1 = cache.GetMAHandle(Symbol(), 200, 0, MODE_EMA);
-int handle2 = cache.GetMAHandle(Symbol(), 200, 0, MODE_EMA);
-```
-
-**期待結果:**
-- handle1 == handle2（同一ハンドル）
-- iMA()は1回のみ呼ばれる
-
-#### TC-IC-02: 値キャッシュ
-
-**実行:**
-```mql5
-datetime barTime = iTime(Symbol(), PERIOD_M1, 1);
-double value1 = cache.GetMAValue(handle, 1, barTime);
-double value2 = cache.GetMAValue(handle, 1, barTime);
-```
-
-**期待結果:**
-- value1 == value2
-- CopyBuffer()は1回のみ呼ばれる（同一barTime）
-
-#### TC-IC-03: キャッシュクリア
-
-**実行:**
-```mql5
-cache.ClearValueCache();
-double value3 = cache.GetMAValue(handle, 1, barTime);
-```
-
-**期待結果:**
-- CopyBuffer()が再度呼ばれる
-
----
-
-## 3. 統合テスト
-
-### 3.1 新バー検知
-
-**目的:** M1新バー検知が正しく動作することを確認
-
-**テストケース:**
-
-#### TC-IT-01: 新バー検知の動作
-
-**実行:**
-1. バックテストを1時間実行
-2. ログファイルでBAR_EVAL_STARTイベントを抽出
-
-**検証スクリプト（Python）:**
-```python
-import json
-from datetime import datetime, timedelta
-
-# ログファイル読込
-with open('strategy_20240110.jsonl', 'r') as f:
-    logs = [json.loads(line) for line in f]
-
-# BAR_EVAL_STARTイベント抽出
-bar_events = [log for log in logs if log['event'] == 'BAR_EVAL_START']
-
-# 件数チェック
-assert len(bar_events) == 60, f"Expected 60, got {len(bar_events)}"
-
-# barTimeM1が1分刻みかチェック
-prev_time = None
-for event in bar_events:
-    current_time = datetime.fromisoformat(event['barTimeM1'])
-    if prev_time:
-        delta = (current_time - prev_time).total_seconds()
-        assert delta == 60, f"Expected 60s, got {delta}s"
-    prev_time = current_time
-
-print("TC-IT-01: PASS")
-```
-
-**期待結果:**
-- BAR_EVAL_START == 60回
-- 各barTimeM1が1分間隔
-
----
-
-### 3.2 同一足再エントリー禁止
-
-**テストケース:**
-
-#### TC-IT-02: 同一足再エントリー禁止の動作
-
-**実行:**
-1. 複数RuleGroupを持つ戦略でバックテスト
-2. ログファイルでORDER_RESULTとORDER_REJECTを抽出
-
-**検証スクリプト（Python）:**
-```python
-# ORDER_RESULT/REJECT抽出
-order_events = [log for log in logs if log['event'] in ['ORDER_RESULT', 'ORDER_REJECT']]
-
-# barTimeM1ごとにグループ化
-from collections import defaultdict
-by_bar = defaultdict(list)
-for event in order_events:
-    bar_time = event.get('barTimeM1', '')
-    by_bar[bar_time].append(event)
-
-# 各barで最大1回のORDER_RESULTをチェック
-for bar_time, events in by_bar.items():
-    results = [e for e in events if e['event'] == 'ORDER_RESULT']
-    assert len(results) <= 1, f"Multiple ORDER_RESULT for bar {bar_time}"
-
-    # 2回目以降はREJECT
-    if len(events) > 1:
-        for e in events[1:]:
-            assert e['event'] == 'ORDER_REJECT'
-            assert e['rejectType'] == 'SAME_BAR_REENTRY'
-
-print("TC-IT-02: PASS")
-```
-
-**期待結果:**
-- 各barTimeM1でORDER_RESULTは最大1回
-- 2回目以降はORDER_REJECT
-
----
-
-### 3.3 OR/AND評価
-
-**テストケース:**
-
-#### TC-IT-03: OR短絡評価（統合）
-
-**実行:**
-1. 3つのRuleGroupを持つ戦略でバックテスト
-2. RuleGroup#1が成立するケースのログ確認
-
-**検証スクリプト（Python）:**
-```python
-# 特定barTimeのイベント抽出
-target_bar = '2024-01-10 10:00:00'
-bar_events = [log for log in logs if log.get('barTimeM1') == target_bar]
-
-# RULEGROUP_EVALイベント確認
-rg_evals = [e for e in bar_events if e['event'] == 'RULEGROUP_EVAL']
-
-# 最初のRuleGroupが成立していたら、2つ目以降は評価されない
-if rg_evals and rg_evals[0].get('matched'):
-    assert len(rg_evals) == 1, "OR short-circuit failed"
-
-print("TC-IT-03: PASS")
-```
-
----
-
-### 3.4 ポジション制限
-
-**テストケース:**
-
-#### TC-IT-04: ポジション制限の動作
-
-**実行:**
-1. maxPositionsTotal = 2 に設定
-2. バックテスト実行
-3. 2ポジション保有後のエントリー条件成立時のログ確認
-
-**検証スクリプト（Python）:**
-```python
-# LIMIT_EXCEEDEDイベント確認
-limit_events = [log for log in logs if log['event'] == 'LIMIT_EXCEEDED']
-
-# LIMIT_EXCEEDED後にORDER_ATTEMPTがないことを確認
-for limit_event in limit_events:
-    limit_time = limit_event['ts']
-    limit_bar = limit_event.get('barTimeM1', '')
-
-    # 同一barのORDER_ATTEMPT確認
-    order_attempts = [log for log in logs
-                     if log['event'] == 'ORDER_ATTEMPT'
-                     and log.get('barTimeM1') == limit_bar]
-
-    assert len(order_attempts) == 0, f"ORDER_ATTEMPT after LIMIT_EXCEEDED at {limit_bar}"
-
-print("TC-IT-04: PASS")
-```
-
----
-
-## 4. ストラテジーテスター検証
-
-### 4.1 再現性テスト
-
-**目的:** 同じ設定・同じ期間でバックテストした時、結果が同じになることを確認
-
-**テストケース:**
-
-#### TC-ST-01: 再現性の確認
-
-**実行:**
-1. 戦略Aで2024-01-01〜2024-01-31のバックテスト実行（1回目）
-2. 結果を記録: Total Trades, Profit, Drawdown
-3. 同じ設定で再度バックテスト実行（2回目）
-4. 結果を比較
-
-**検証:**
-```python
-# 1回目の結果
-result1 = {
-    'total_trades': 150,
-    'profit': 1250.50,
-    'drawdown': -320.00,
+**テスト内容**:
+- パレット表示確認
+- 全ブロックカテゴリの表示確認
+- 複数ブロック組み合わせの設定生成
+- バリデーション機能
+
+**テストファイル**:
+- `app.integration.test.tsx` - アプリケーション統合テスト
+- `validator.test.ts` - バリデーションロジックテスト
+
+**カバレッジ目標**: 80%以上
+
+### 2. EA単体ブロックテスト
+
+**目的**: 各ブロックが単体で正しく動作するか確認
+
+**場所**: `ea/tests/test_single_blocks.json`
+
+**テスト戦略**:
+- 1ブロック = 1戦略
+- 最もシンプルな条件設定
+- 取引発生の可能性を最大化
+
+**テスト設定**:
+```json
+{
+  "strategies": [
+    {
+      "id": "test_<blockType>_<variant>",
+      "conditions": [
+        { "blockId": "<single_block>" }  // 単一ブロックのみ
+      ],
+      "lotModel": { "type": "lot.fixed", "params": { "lots": 0.01 } },
+      "riskModel": { "type": "risk.fixedSLTP", "params": { "slPips": 20, "tpPips": 40 } }
+    }
+  ]
 }
-
-# 2回目の結果
-result2 = {
-    'total_trades': 150,
-    'profit': 1250.50,
-    'drawdown': -320.00,
-}
-
-# 比較
-assert result1 == result2, "Reproducibility test failed"
-
-# ログファイルも比較
-with open('log1.jsonl', 'r') as f1, open('log2.jsonl', 'r') as f2:
-    logs1 = f1.readlines()
-    logs2 = f2.readlines()
-    assert logs1 == logs2, "Log files differ"
-
-print("TC-ST-01: PASS")
 ```
 
-**期待結果:**
-- Total Trades一致
-- Profit一致
-- Drawdown一致
-- ログファイル内容一致
+**カバレッジ**: 全36ブロックタイプ × 27戦略
 
----
+**期待結果**:
+- 初期化成功
+- 3ヶ月で50-200回の取引発生
+- エラーなし
 
-### 4.2 必須テスト項目（バックテスト）
+**問題の切り分け**:
+- 取引0回 → そのブロックに問題あり
+- エラー発生 → ブロック実装の不具合
+- 初期化失敗 → 設定パラメータの問題
 
-**テストケース:**
+### 3. EA統合テスト（複数ブロック組み合わせ）
 
-#### TC-ST-02: M1新バーのみ評価
+**目的**: 複数ブロックの組み合わせ動作確認
 
-**検証:** AC-01に準拠（`12_acceptance_criteria.md`参照）
+**場所**: 
+- `ea/tests/test_strategy_advanced.json` - 高度な戦略
+- `ea/tests/test_strategy_all_blocks.json` - 全ブロック網羅
 
-#### TC-ST-03: 同一足再エントリー禁止
+**テスト戦略**:
+- 実際の戦略に近い複雑な条件
+- 複数フィルタ・トリガーの組み合わせ
+- 各種モデル（Lot/Risk/Exit/Nanpin）の動作確認
 
-**検証:** AC-02に準拠
+**カバレッジ**:
+- `test_strategy_advanced.json`: 19ブロック、3戦略
+- `test_strategy_all_blocks.json`: 30ブロック、4戦略
 
-#### TC-ST-04: スプレッド超過時の停止
+**期待結果**:
+- 初期化成功
+- 3ヶ月で3-30回の取引発生（条件が厳しいため）
+- エラーなし
 
-**検証:** AC-05に準拠
+### 4. EA基本動作テスト
 
-#### TC-ST-05: ポジション制限超過時の停止
+**目的**: 基本的な戦略の動作確認
 
-**検証:** AC-04に準拠
+**場所**: `ea/tests/active.json`
 
-#### TC-ST-06: ナンピン最大段数制限
+**テスト内容**:
+- シンプルな戦略（6ブロック）
+- 基本的なフィルタ・トリガー・モデル
 
-**検証:** AC-12に準拠
+**期待結果**:
+- 初期化成功
+- 3ヶ月で10-50回の取引発生
+- エラーなし
 
-#### TC-ST-07: ナンピンシリーズ損切り
+## テスト実行手順
 
-**検証:** AC-13に準拠
+### 自動テストスクリプト
 
----
+**場所**: `scripts/automated_tester.py`
 
-## 5. ログベース検証
-
-### 5.1 ログ解析スクリプト
-
-**目的:** ログファイルから自動的に検証を行う
-
-**スクリプト例（Python）:**
-
-```python
-#!/usr/bin/env python3
-import json
-import sys
-from datetime import datetime
-from collections import defaultdict
-
-class LogValidator:
-    def __init__(self, log_file):
-        with open(log_file, 'r') as f:
-            self.logs = [json.loads(line) for line in f]
-
-    def validate_bar_eval_frequency(self, expected_minutes):
-        """BAR_EVAL_STARTが期待回数出現するか"""
-        bar_events = [log for log in self.logs if log['event'] == 'BAR_EVAL_START']
-        actual = len(bar_events)
-        assert actual == expected_minutes, f"Expected {expected_minutes} bars, got {actual}"
-        print(f"✓ BAR_EVAL_START frequency: {actual}/{expected_minutes}")
-
-    def validate_no_same_bar_reentry(self):
-        """同一barTimeM1でORDER_RESULTが複数ないか"""
-        by_bar = defaultdict(int)
-        for log in self.logs:
-            if log['event'] == 'ORDER_RESULT' and log.get('success'):
-                bar_time = log.get('barTimeM1', '')
-                by_bar[bar_time] += 1
-
-        duplicates = {bar: count for bar, count in by_bar.items() if count > 1}
-        assert len(duplicates) == 0, f"Duplicate ORDER_RESULT: {duplicates}"
-        print(f"✓ No same-bar re-entry")
-
-    def validate_block_eval_reasons(self):
-        """すべてのBLOCK_EVALにreasonがあるか"""
-        block_evals = [log for log in self.logs if log['event'] == 'BLOCK_EVAL']
-        missing_reasons = [log for log in block_evals if not log.get('reason')]
-        assert len(missing_reasons) == 0, f"Missing reasons: {len(missing_reasons)}"
-        print(f"✓ All BLOCK_EVAL have reasons ({len(block_evals)} events)")
-
-    def validate_order_reject_reasons(self):
-        """すべてのORDER_REJECTにreasonがあるか"""
-        order_rejects = [log for log in self.logs if log['event'] == 'ORDER_REJECT']
-        missing_reasons = [log for log in order_rejects if not log.get('reason')]
-        assert len(missing_reasons) == 0, f"Missing reasons: {len(missing_reasons)}"
-        print(f"✓ All ORDER_REJECT have reasons ({len(order_rejects)} events)")
-
-    def validate_limit_exceeded_behavior(self):
-        """LIMIT_EXCEEDED後にORDER_ATTEMPTがないか"""
-        limit_events = [log for log in self.logs if log['event'] == 'LIMIT_EXCEEDED']
-        for limit_event in limit_events:
-            limit_bar = limit_event.get('barTimeM1', '')
-            order_attempts = [log for log in self.logs
-                            if log['event'] == 'ORDER_ATTEMPT'
-                            and log.get('barTimeM1') == limit_bar]
-            assert len(order_attempts) == 0, f"ORDER_ATTEMPT after LIMIT at {limit_bar}"
-        print(f"✓ No ORDER_ATTEMPT after LIMIT_EXCEEDED ({len(limit_events)} limits)")
-
-# 使用例
-if __name__ == '__main__':
-    if len(sys.argv) < 2:
-        print(f"Usage: {sys.argv[0]} <log_file.jsonl>")
-        sys.exit(1)
-
-    validator = LogValidator(sys.argv[1])
-
-    # 検証実行
-    validator.validate_bar_eval_frequency(60)  # 1時間のテストを想定
-    validator.validate_no_same_bar_reentry()
-    validator.validate_block_eval_reasons()
-    validator.validate_order_reject_reasons()
-    validator.validate_limit_exceeded_behavior()
-
-    print("\n✅ All validations passed!")
-```
-
-**実行:**
+**実行方法**:
 ```bash
-python validate_logs.py strategy_20240110.jsonl
+python3 scripts/automated_tester.py
 ```
 
----
+**機能**:
+- 設定ファイルの存在確認
+- 手動テスト手順の表示
+- テストレポートテンプレート生成
 
-## 6. 回帰テスト
+### MT5ストラテジーテスター実行手順
 
-### 6.1 回帰テスト戦略
+1. MT5を起動
+2. ツール > ストラテジーテスター を開く
+3. 以下を設定:
+   - EA: `Experts\StrategyBricks\StrategyBricks.ex5`
+   - シンボル: `USDJPYm`
+   - 期間: `M1`
+   - 日付: `2025.10.01 - 2025.12.31` (3ヶ月)
+   - 初期証拠金: 1,000,000 JPY
+   - レバレッジ: 1:100
+4. 入力パラメータ: `InpConfigPath=strategy/<test_file>.json`
+5. テスト開始
+6. 結果を記録:
+   - 初期化: 成功/失敗
+   - ブロック読み込み数
+   - 戦略読み込み数
+   - 取引回数
+   - エラー有無
 
-**目的:** 変更が既存機能に影響しないことを確認
+### テスト順序（推奨）
 
-**手法:**
-1. **ベースライン確立**：MVP完成時のバックテスト結果とログを保存
-2. **変更後テスト**：変更後に同じバックテストを実行
-3. **結果比較**：差分を確認し、意図しない変更がないか検証
+```
+1. test_single_blocks.json    ← 最優先（問題の切り分け）
+   ↓
+2. active.json                ← 基本動作確認
+   ↓
+3. test_strategy_advanced.json ← 複雑な条件確認
+   ↓
+4. test_strategy_all_blocks.json ← 全機能網羅確認
+```
 
-**対象:**
-- コアロジック変更（StrategyEngine, CompositeEvaluator等）
-- ブロック追加・変更
-- 設定スキーマ変更
+## テスト結果の評価基準
 
-### 6.2 回帰テスト実施手順
+### ✅ PASS（合格）
 
-**手順:**
+- 初期化成功
+- エラーなし
+- 取引回数 > 0
 
-1. **ベースライン保存:**
+### ⚠️ WARNING（警告）
+
+- 初期化成功
+- エラーなし
+- 取引回数 = 0（条件が厳しすぎる可能性）
+
+### ❌ FAIL（不合格）
+
+- 初期化失敗
+- エラーあり
+
+## 問題の診断フロー
+
+### 取引が発生しない場合
+
+```
+取引回数 = 0
+  ↓
+単体ブロックテストで確認
+  ↓
+├─ 単体でも0回 → ブロック実装の問題
+│   ├─ ログ確認: ブロック評価結果
+│   ├─ パラメータ確認: 条件が厳しすぎないか
+│   └─ コード確認: Evaluate()ロジック
+│
+└─ 単体では発生 → 組み合わせの問題
+    ├─ 条件が厳しすぎる（AND条件多数）
+    ├─ 方向性の不一致（directionPolicy）
+    └─ グローバルガード（spread, session等）
+```
+
+### 初期化失敗の場合
+
+```
+初期化失敗
+  ↓
+エラーログ確認
+  ↓
+├─ "File not found" → 設定ファイルパス確認
+├─ "Unknown block typeId" → BlockRegistry登録確認
+├─ "Invalid JSON" → JSON構文エラー確認
+└─ "Parameter error" → パラメータ型・範囲確認
+```
+
+### エラー発生の場合
+
+```
+エラーあり
+  ↓
+エラーメッセージ確認
+  ↓
+├─ ブロック評価エラー → 該当ブロックのコード確認
+├─ インジケータエラー → IndicatorCache確認
+├─ 注文エラー → OrderExecutor確認
+└─ その他 → ログ詳細確認
+```
+
+## テスト環境
+
+### 必要なファイル配置
+
+**通常実行用**:
+```
+$HOME/Library/Application Support/net.metaquotes.wine.metatrader5/
+  drive_c/Program Files/MetaTrader 5/
+    MQL5/
+      Files/
+        strategy/
+          ├── active.json
+          ├── test_single_blocks.json
+          ├── test_strategy_advanced.json
+          └── test_strategy_all_blocks.json
+```
+
+**ストラテジーテスター用**:
+```
+$HOME/Library/Application Support/net.metaquotes.wine.metatrader5/
+  drive_c/Program Files/MetaTrader 5/
+    Tester/
+      Agent-127.0.0.1-3000/
+        Files/
+          strategy/
+            ├── active.json
+            ├── test_single_blocks.json
+            ├── test_strategy_advanced.json
+            └── test_strategy_all_blocks.json
+      Agent-127.0.0.1-3001/
+        Files/
+          strategy/
+            └── (同上)
+```
+
+### ファイルコピーコマンド
+
 ```bash
-# バックテスト実行
-# 結果をbaseline/に保存
-cp strategy_20240110.jsonl baseline/
-cp backtest_results.json baseline/
+# 通常実行用
+cp ea/tests/*.json "$HOME/Library/Application Support/net.metaquotes.wine.metatrader5/drive_c/Program Files/MetaTrader 5/MQL5/Files/strategy/"
+
+# テスター用（Agent-3000）
+cp ea/tests/*.json "$HOME/Library/Application Support/net.metaquotes.wine.metatrader5/drive_c/Program Files/MetaTrader 5/Tester/Agent-127.0.0.1-3000/Files/strategy/"
+
+# テスター用（Agent-3001）
+cp ea/tests/*.json "$HOME/Library/Application Support/net.metaquotes.wine.metatrader5/drive_c/Program Files/MetaTrader 5/Tester/Agent-127.0.0.1-3001/Files/strategy/"
 ```
 
-2. **変更実施:**
-（コード変更、ブロック追加等）
+## テスト結果の記録
 
-3. **回帰テスト実行:**
-```bash
-# 同じ設定・期間でバックテスト実行
-# 結果をregression/に保存
-cp strategy_20240110.jsonl regression/
-cp backtest_results.json regression/
+### レポートファイル
+
+**場所**: `ea/tests/results/`
+
+**ファイル形式**:
+- `test_report_YYYYMMDD_HHMMSS.txt` - 人間が読みやすい形式
+- `test_report_YYYYMMDD_HHMMSS.json` - 機械処理用
+
+**記録内容**:
+```
+- テスト日時
+- テスト期間
+- 各設定ファイルの結果:
+  - 初期化成功/失敗
+  - ブロック読み込み数
+  - 戦略読み込み数
+  - 取引回数
+  - エラー数
+  - 警告数
 ```
 
-4. **結果比較:**
-```python
-#!/usr/bin/env python3
-import json
+## 新機能追加時のテスト拡張
 
-# バックテスト結果比較
-with open('baseline/backtest_results.json', 'r') as f:
-    baseline = json.load(f)
+### 新ブロック追加時
 
-with open('regression/backtest_results.json', 'r') as f:
-    regression = json.load(f)
+1. **GUI統合テスト更新**:
+   - `gui/src/__tests__/app.integration.test.tsx`
+   - 新ブロックの表示確認テスト追加
 
-# 主要メトリクス比較
-metrics = ['total_trades', 'profit', 'drawdown', 'profit_factor']
-for metric in metrics:
-    if baseline[metric] != regression[metric]:
-        print(f"⚠ {metric} changed: {baseline[metric]} → {regression[metric]}")
-    else:
-        print(f"✓ {metric} unchanged: {baseline[metric]}")
+2. **EA単体テスト更新**:
+   - `ea/tests/test_single_blocks.json`
+   - 新ブロック用の戦略追加
+   - ブロック定義追加
 
-# ログ比較（エントリー時刻等）
-# ...
-```
+3. **BlockRegistry更新**:
+   - `ea/include/Core/BlockRegistry.mqh`
+   - CreateBlock()に新ブロック追加
 
-5. **差分の確認:**
-- 意図した変更か検証
-- 意図しない変更があれば原因調査
+4. **カタログ更新**:
+   - `gui/src/resources/block_catalog.default.json`
+   - 新ブロックの定義追加
 
----
+### 新モデル追加時（Lot/Risk/Exit/Nanpin）
 
-## 7. テストケース一覧（MVP）
+1. **統合テスト更新**:
+   - `ea/tests/test_strategy_advanced.json`
+   - 新モデルを使用する戦略追加
 
-### 7.1 単体テスト
+2. **BlockRegistry更新**:
+   - 新モデルの登録
 
-| ID | カテゴリ | テスト内容 | 優先度 |
-|----|---------|----------|--------|
-| TC-CV-01 | ConfigValidator | formatVersionチェック | Critical |
-| TC-CV-02 | ConfigValidator | 必須フィールドチェック | Critical |
-| TC-CV-03 | ConfigValidator | ブロック参照チェック | Critical |
-| TC-CE-01 | CompositeEvaluator | OR短絡評価（最初に成立） | Critical |
-| TC-CE-02 | CompositeEvaluator | OR短絡評価（2番目に成立） | High |
-| TC-CE-03 | CompositeEvaluator | AND短絡評価（最初にFAIL） | Critical |
-| TC-CE-04 | CompositeEvaluator | AND短絡評価（全てPASS） | High |
-| TC-BL-01 | Block | filter.spreadMax | Critical |
-| TC-BL-02 | Block | trend.maRelation | Critical |
-| TC-BL-03 | Block | trigger.bbReentry | High |
-| TC-IC-01 | IndicatorCache | ハンドル共有 | High |
-| TC-IC-02 | IndicatorCache | 値キャッシュ | High |
-| TC-IC-03 | IndicatorCache | キャッシュクリア | Medium |
+3. **カタログ更新**:
+   - 新モデルの定義追加
 
-### 7.2 統合テスト
+## 継続的インテグレーション（将来）
 
-| ID | カテゴリ | テスト内容 | 優先度 |
-|----|---------|----------|--------|
-| TC-IT-01 | NewBarDetector | 新バー検知の動作 | Critical |
-| TC-IT-02 | OrderExecutor | 同一足再エントリー禁止 | Critical |
-| TC-IT-03 | Evaluator | OR短絡評価（統合） | Critical |
-| TC-IT-04 | PositionManager | ポジション制限 | Critical |
+### 自動化の方向性
 
-### 7.3 ストラテジーテスター検証
+1. **GUIテスト**: GitHub Actions等で自動実行
+2. **EAコンパイル**: CI/CDパイプラインで自動コンパイル
+3. **EAテスト**: MT5 API経由での自動テスト（検討中）
 
-| ID | テスト内容 | 優先度 |
-|----|----------|--------|
-| TC-ST-01 | 再現性の確認 | Critical |
-| TC-ST-02 | M1新バーのみ評価 | Critical |
-| TC-ST-03 | 同一足再エントリー禁止 | Critical |
-| TC-ST-04 | スプレッド超過時の停止 | Critical |
-| TC-ST-05 | ポジション制限超過時の停止 | Critical |
-| TC-ST-06 | ナンピン最大段数制限 | High |
-| TC-ST-07 | ナンピンシリーズ損切り | High |
+### 現状の制約
 
----
+- MT5ストラテジーテスターは完全自動化が困難
+- 手動実行 + 結果記録の半自動化で運用
 
-## 8. テスト環境
+## まとめ
 
-### 8.1 バックテスト環境
+### テスト戦略の要点
 
-**必要なもの:**
-- MT5 Strategy Tester
-- 履歴データ（M1、少なくとも1ヶ月分）
-- StrategyBricks.ex5（EA）
-- active.json（設定ファイル）
+1. **単体テスト優先**: 問題の早期発見・切り分け
+2. **段階的テスト**: シンプル → 複雑 の順で実行
+3. **実データ使用**: 3ヶ月の実際の市場データでテスト
+4. **継続的改善**: 新機能追加時にテストも拡張
 
-**推奨設定:**
-- モデリング: Every tick（全ティック）
-- Spread: 現在値または固定値
-- 最適化: なし（再現性テストのため）
+### 成功の指標
 
-### 8.2 ログ解析環境
+- 全単体ブロックテストで取引発生
+- 統合テストで期待通りの動作
+- エラーなしで初期化成功
+- 実運用に近い条件での動作確認
 
-**必要なもの:**
-- Python 3.x
-- ログファイル（*.jsonl）
-- 検証スクリプト
+### 次のステップ
 
-**セットアップ:**
-```bash
-# Python環境準備
-python3 -m venv venv
-source venv/bin/activate
-pip install jsonlines
-
-# ログファイル配置
-cp ~/AppData/.../MQL5/Files/strategy/logs/*.jsonl ./logs/
-
-# 検証実行
-python validate_logs.py logs/strategy_20240110.jsonl
-```
-
----
-
-## 9. テスト自動化
-
-### 9.1 自動化対象
-
-**優先度高（MVP）:**
-- ログベース検証（Python）
-- 結果比較（バックテスト結果のdiff）
-
-**優先度中（MVP後）:**
-- GUI操作テスト（Selenium等）
-- 単体テスト自動実行（CI/CD）
-
-### 9.2 CI/CDパイプライン（将来）
-
-```yaml
-# .github/workflows/test.yml（例）
-name: Test Pipeline
-
-on: [push, pull_request]
-
-jobs:
-  test:
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v2
-
-    - name: Setup Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.x'
-
-    - name: Install dependencies
-      run: |
-        pip install jsonlines
-
-    - name: Run log validation
-      run: |
-        python tests/validate_logs.py test_data/strategy_20240110.jsonl
-
-    - name: Run regression tests
-      run: |
-        python tests/regression_test.py
-```
-
----
-
-## 10. テスト完了基準
-
-### 10.1 MVP完了基準
-
-**単体テスト:**
-- [ ] Critical優先度の全テストケースがPASS
-
-**統合テスト:**
-- [ ] Critical優先度の全テストケースがPASS
-
-**ストラテジーテスター検証:**
-- [ ] TC-ST-01〜TC-ST-05（Critical）がPASS
-
-**ログベース検証:**
-- [ ] BAR_EVAL_START頻度確認
-- [ ] 同一足再エントリー禁止確認
-- [ ] reason文字列確認
-
-**受入基準:**
-- [ ] `12_acceptance_criteria.md` のCritical項目がすべてPASS
-
-### 10.2 品質ゲート
-
-**リリース不可条件:**
-- Criticalテストケースの失敗
-- 再現性テストの失敗
-- 必須受入基準（AC-01〜AC-11）の未達
-
-**警告条件:**
-- Highテストケースの失敗（要調査）
-- ログ欠落
-- パフォーマンス劣化
-
----
-
-## 11. 参照ドキュメント
-
-本テスト計画は以下のドキュメントを基に作成されています:
-
-- `docs/02_requirements/12_acceptance_criteria.md` - 受入基準
-- `docs/03_design/50_ea_runtime_design.md` - EA Runtime詳細設計
-- `docs/03_design/60_gui_builder_design.md` - GUI Builder詳細設計
-- `docs/04_operations/90_observability_and_testing.md` - 観測性とテスト
-
----
+1. 4つのテスト設定でMT5テスト実行
+2. 結果を記録・分析
+3. 問題があれば診断フローに従って修正
+4. 全テストPASSまで繰り返し

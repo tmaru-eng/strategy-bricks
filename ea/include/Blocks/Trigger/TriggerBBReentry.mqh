@@ -37,7 +37,11 @@ public:
 
         m_period = GetParamInt(paramsJson, "period", 20);
         m_deviation = GetParamDouble(paramsJson, "deviation", 2.0);
-        m_side = GetParamString(paramsJson, "side", "lowerToInside");
+        // "side"と"direction"の両方に対応
+        m_side = GetParamString(paramsJson, "side", "");
+        if (m_side == "") {
+            m_side = GetParamString(paramsJson, "direction", "lowerToInside");
+        }
     }
 
     //+------------------------------------------------------------------+

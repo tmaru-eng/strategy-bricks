@@ -22,6 +22,7 @@ type FlowState = {
   onNodesChange: (changes: NodeChange[]) => void
   onEdgesChange: (changes: EdgeChange[]) => void
   selectNode: (nodeId: string | null) => void
+  deleteSelectedNode: () => void
   addRuleGroup: () => void
   updateNodeData: (nodeId: string, data: Record<string, unknown>) => void
   runValidation: () => ValidationIssue[]
@@ -36,32 +37,58 @@ const initialNodes: Node[] = [
   {
     id: 'strategy-1',
     type: 'strategyNode',
-    position: { x: 80, y: 140 },
+    position: { x: 50, y: 200 },
     data: {}
+  },
+  {
+    id: 'model-lot',
+    type: 'modelNode',
+    position: { x: 280, y: 50 },
+    data: { label: 'ロットモデル' }
+  },
+  {
+    id: 'model-risk',
+    type: 'modelNode',
+    position: { x: 280, y: 150 },
+    data: { label: 'リスクモデル' }
+  },
+  {
+    id: 'model-exit',
+    type: 'modelNode',
+    position: { x: 280, y: 250 },
+    data: { label: 'エグジットモデル' }
+  },
+  {
+    id: 'model-nanpin',
+    type: 'modelNode',
+    position: { x: 280, y: 350 },
+    data: { label: 'ナンピンモデル' }
   },
   {
     id: 'rulegroup-1',
     type: 'ruleGroupNode',
-    position: { x: 260, y: 140 },
+    position: { x: 520, y: 200 },
     data: {}
   },
   {
     id: 'condition-1',
     type: 'conditionNode',
-    position: { x: 500, y: 90 },
+    position: { x: 760, y: 80 },
     data: {
+      blockId: 'filter.spreadMax#1',
       blockTypeId: 'filter.spreadMax',
       displayName: '最大スプレッド',
       params: {
-        maxSpreadPips: 2
+        maxSpreadPips: 30
       }
     }
   },
   {
     id: 'condition-2',
     type: 'conditionNode',
-    position: { x: 500, y: 180 },
+    position: { x: 760, y: 200 },
     data: {
+      blockId: 'trend.maRelation#1',
       blockTypeId: 'trend.maRelation',
       displayName: 'MA上下',
       params: {
@@ -75,40 +102,18 @@ const initialNodes: Node[] = [
   {
     id: 'condition-3',
     type: 'conditionNode',
-    position: { x: 500, y: 270 },
+    position: { x: 760, y: 320 },
     data: {
+      blockId: 'trigger.bbReentry#1',
       blockTypeId: 'trigger.bbReentry',
       displayName: 'ボリンジャー回帰',
       params: {
         period: 20,
         deviation: 2,
-        appliedPrice: 'CLOSE'
+        appliedPrice: 'CLOSE',
+        side: 'lowerToInside'
       }
     }
-  },
-  {
-    id: 'model-lot',
-    type: 'modelNode',
-    position: { x: 420, y: 60 },
-    data: { label: 'ロットモデル' }
-  },
-  {
-    id: 'model-risk',
-    type: 'modelNode',
-    position: { x: 420, y: 140 },
-    data: { label: 'リスクモデル' }
-  },
-  {
-    id: 'model-exit',
-    type: 'modelNode',
-    position: { x: 420, y: 220 },
-    data: { label: 'エグジットモデル' }
-  },
-  {
-    id: 'model-nanpin',
-    type: 'modelNode',
-    position: { x: 420, y: 300 },
-    data: { label: 'ナンピンモデル' }
   }
 ]
 
@@ -136,6 +141,29 @@ export const useStateManager = create<CatalogState & FlowState>((set, get) => ({
   onEdgesChange: (changes) =>
     set((state) => ({ edges: applyEdgeChanges(changes, state.edges) })),
   selectNode: (nodeId) => set({ selectedNodeId: nodeId }),
+  deleteSelectedNode: () => {
+    const selectedNodeId = get().selectedNodeId
+    if (!selectedNodeId) return
+    
+    const nodes = get().nodes
+    const edges = get().edges
+    
+    // ノードを削除
+    const nextNodes = nodes.filter((node) => node.id !== selectedNodeId)
+    
+    // 削除されたノードに接続されているエッジも削除
+    const nextEdges = edges.filter(
+      (edge) => edge.source !== selectedNodeId && edge.target !== selectedNodeId
+    )
+    
+    set({ 
+      nodes: nextNodes, 
+      edges: nextEdges,
+      selectedNodeId: null 
+    })
+    
+    console.log('[StateManager] Deleted node:', selectedNodeId)
+  },
   addRuleGroup: () => {
     const nodes = get().nodes
     const maxY =
@@ -172,6 +200,7 @@ export const useStateManager = create<CatalogState & FlowState>((set, get) => ({
   },
   exportCurrentConfig: async (profileName) => {
     const nodes = get().nodes
-    return exportConfig(profileName, nodes)
+    const edges = get().edges
+    return exportConfig(profileName, nodes, edges)
   }
 }))

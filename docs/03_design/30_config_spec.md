@@ -142,8 +142,122 @@ flowchart TB
 - `blockId`参照の解決先
 - 追加・変更を局所化するため、Strategyからは `blockId` を参照する方式を基本とする
 
+#### 6.4.1 blockId形式仕様（v1.1追加）
+
+**形式**: `{typeId}#{uniqueIndex}`
+
+**ルール**:
+- typeIdはblock_catalog.jsonで定義されたブロックタイプ識別子
+- uniqueIndexは正の整数（1から開始）
+- セパレータは`#`（ハッシュ記号）必須
+- 同じtypeIdでも異なるパラメータを持つ場合は異なるindexを使用
+
+**例**:
+```json
+{
+  "blocks": [
+    {
+      "id": "filter.spreadMax#1",
+      "typeId": "filter.spreadMax",
+      "params": { "maxSpreadPips": 2.0 }
+    },
+    {
+      "id": "trend.maRelation#1",
+      "typeId": "trend.maRelation",
+      "params": { "period": 200, "maType": "EMA", "relation": "closeAbove" }
+    },
+    {
+      "id": "trend.maRelation#2",
+      "typeId": "trend.maRelation",
+      "params": { "period": 50, "maType": "SMA", "relation": "closeBelow" }
+    }
+  ]
+}
+```
+
+#### 6.4.2 blockId検証要件（v1.1追加）
+
+**GUI Builder側の検証**:
+1. **一意性**: blocks[]配列内のすべてのblockIdは一意でなければならない
+2. **参照解決**: strategies[].entryRequirement.ruleGroups[].conditions[].blockIdで参照されるすべてのblockIdは、blocks[]配列に存在しなければならない
+3. **形式準拠**: すべてのblockIdは`{typeId}#{index}`形式に従わなければならない（正規表現: `^[a-zA-Z0-9._]+#\d+$`）
+
+**EA Runtime側の検証**:
+1. **参照検証**: ConfigLoader::ValidateBlockReferences()で全参照の解決可能性を確認
+2. **重複検証**: ConfigLoader::ValidateDuplicateBlockIds()で重複を検出
+3. **形式検証**: ConfigLoader::ValidateBlockIdFormat()で形式準拠を確認
+4. **初期化失敗**: 検証失敗時はINIT_FAILEDを返し、詳細をログ出力
+
+#### 6.4.3 共有ブロックの扱い（v1.1追加）
+
+**定義**: 複数のstrategyまたはruleGroupで同じblockIdを参照するブロック
+
+**重要**: 共有ブロックはblocks[]配列に1回のみ出現し、複数のconditionsから同じblockIdで参照される
+
+**例**:
+```json
+{
+  "strategies": [
+    {
+      "id": "S1",
+      "entryRequirement": {
+        "ruleGroups": [
+          {
+            "id": "RG1",
+            "conditions": [
+              { "blockId": "filter.spreadMax#1" },
+              { "blockId": "trend.maRelation#1" }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "S2",
+      "entryRequirement": {
+        "ruleGroups": [
+          {
+            "id": "RG2",
+            "conditions": [
+              { "blockId": "filter.spreadMax#1" },
+              { "blockId": "trend.maRelation#2" }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "blocks": [
+    {
+      "id": "filter.spreadMax#1",
+      "typeId": "filter.spreadMax",
+      "params": { "maxSpreadPips": 2.0 }
+    },
+    {
+      "id": "trend.maRelation#1",
+      "typeId": "trend.maRelation",
+      "params": { "period": 200, "maType": "EMA", "relation": "closeAbove" }
+    },
+    {
+      "id": "trend.maRelation#2",
+      "typeId": "trend.maRelation",
+      "params": { "period": 50, "maType": "SMA", "relation": "closeBelow" }
+    }
+  ]
+}
+```
+
+上記の例では、`filter.spreadMax#1`は両方のstrategyで共有されている。
+
 ## 7. 未決事項（連携先で検討継続）
 - ポジション管理の評価タイミング：毎Tick vs 新バーのみ
 - conflictPolicy の拡張：bestScore / all / allowMulti 等
 - nanpinModel の詳細（再トリガー必須化、シリーズ損切りの定義粒度）
 - （Volatility/News等）の扱い：初期はVolatilityのみ、Newsは外部連携前提で将来拡張
+
+## 8. 変更履歴
+
+| 版 | 日付 | 変更内容 |
+|----|------|---------|
+| v1.0 | 2026-01-22 | 初版作成 |
+| v1.1 | 2026-01-26 | blockId形式仕様と検証要件を追加（セクション6.4.1-6.4.3） |

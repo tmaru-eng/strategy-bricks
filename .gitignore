@@ -23,6 +23,19 @@ dist-electron/
 build/
 out/
 
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+venv/
+env/
+ENV/
+*.egg-info/
+.pytest_cache/
+
 # MT5
 *.ex5
 *.ex4
@@ -82,3 +95,6 @@ $RECYCLE.BIN/
 .directory
 .Trash-*
 .nfs*
+
+# Embedded Python (unused - using PyInstaller instead)
+gui/python-embedded/

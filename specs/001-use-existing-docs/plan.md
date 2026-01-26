@@ -1,7 +1,7 @@
 # 実装計画: 既存ドキュメント準拠の進行
 
-**ブランチ**: `[001-use-existing-docs]` | **日付**: 2026-01-22 | **仕様**: /Users/ctake3/Documents/pProgram/MQL/Strategy Bricks/specs/001-use-existing-docs/spec.md
-**入力**: `/Users/ctake3/Documents/pProgram/MQL/Strategy Bricks/specs/001-use-existing-docs/spec.md` の機能仕様
+**ブランチ**: `[001-use-existing-docs]` | **日付**: 2026-01-22 | **仕様**: <project-root>/specs/001-use-existing-docs/spec.md
+**入力**: `<project-root>/specs/001-use-existing-docs/spec.md` の機能仕様
 
 ## サマリ
 
@@ -46,7 +46,7 @@
 ### ドキュメント（この機能）
 
 ```text
-/Users/ctake3/Documents/pProgram/MQL/Strategy Bricks/specs/001-use-existing-docs/
+<project-root>/specs/001-use-existing-docs/
 ├── plan.md
 ├── research.md
 ├── data-model.md
@@ -59,7 +59,7 @@
 ### ソースコード（リポジトリ直下）
 
 ```text
-/Users/ctake3/Documents/pProgram/MQL/Strategy Bricks/docs/
+<project-root>/docs/
 ├── 00_overview.md
 ├── README.md
 ├── 01_proposal/

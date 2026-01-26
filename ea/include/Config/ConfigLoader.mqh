@@ -240,6 +240,145 @@ private:
         return (block.id != "" && block.typeId != "");
     }
 
+    //+------------------------------------------------------------------+
+    //| blockId参照の検証                                                  |
+    //| すべてのcondition.blockIdがblocks[]に存在することを確認              |
+    //+------------------------------------------------------------------+
+    bool ValidateBlockReferences(const Config &config) {
+        // blocks[]からblockIdセットを構築
+        string blockIds[];
+        ArrayResize(blockIds, config.blockCount);
+        for (int i = 0; i < config.blockCount; i++) {
+            blockIds[i] = config.blocks[i].id;
+        }
+
+        // すべてのstrategyのconditionを検証
+        for (int s = 0; s < config.strategyCount; s++) {
+            const StrategyConfig &strategy = config.strategies[s];
+            const EntryRequirement &req = strategy.entryRequirement;
+
+            for (int rg = 0; rg < req.ruleGroupCount; rg++) {
+                const RuleGroup &ruleGroup = req.ruleGroups[rg];
+
+                for (int c = 0; c < ruleGroup.conditionCount; c++) {
+                    string blockId = ruleGroup.conditions[c].blockId;
+
+                    // blockIdが存在するか確認
+                    if (!ArrayContains(blockIds, config.blockCount, blockId)) {
+                        if (m_logger != NULL) {
+                            string errorMsg = StringFormat(
+                                "blockId '%s' not found in blocks[] (Strategy: %s, RuleGroup: %s)",
+                                blockId, strategy.id, ruleGroup.id
+                            );
+                            m_logger.LogError("UNRESOLVED_BLOCK_REFERENCE", errorMsg);
+                        }
+                        Print("ERROR: Unresolved block reference: ", blockId,
+                              " in Strategy: ", strategy.id, ", RuleGroup: ", ruleGroup.id);
+                        return false;
+                    }
+                }
+            }
+        }
+
+        return true;
+    }
+
+    //+------------------------------------------------------------------+
+    //| 配列に要素が含まれるか確認                                          |
+    //+------------------------------------------------------------------+
+    bool ArrayContains(const string &arr[], int size, const string &value) {
+        for (int i = 0; i < size; i++) {
+            if (arr[i] == value) return true;
+        }
+        return false;
+    }
+
+    //+------------------------------------------------------------------+
+    //| blockId重複の検証                                                  |
+    //| blocks[]配列内の重複blockIdを検出                                   |
+    //+------------------------------------------------------------------+
+    bool ValidateDuplicateBlockIds(const Config &config) {
+        // blocks[]配列内の重複をチェック
+        for (int i = 0; i < config.blockCount; i++) {
+            string blockId = config.blocks[i].id;
+            
+            // 同じblockIdが他に存在するか確認
+            for (int j = i + 1; j < config.blockCount; j++) {
+                if (config.blocks[j].id == blockId) {
+                    // 重複を検出 - 詳細にログ出力
+                    if (m_logger != NULL) {
+                        string errorMsg = StringFormat(
+                            "Duplicate blockId '%s' found in blocks[] at indices %d and %d",
+                            blockId, i, j
+                        );
+                        m_logger.LogError("DUPLICATE_BLOCK_ID", errorMsg);
+                    }
+                    Print("ERROR: Duplicate blockId detected: ", blockId,
+                          " at indices ", i, " and ", j);
+                    return false;
+                }
+            }
+        }
+        
+        return true;
+    }
+
+    //+------------------------------------------------------------------+
+    //| 文字列が数値か確認                                                  |
+    //+------------------------------------------------------------------+
+    bool IsNumeric(const string &str) {
+        int len = StringLen(str);
+        if (len == 0) return false;
+        
+        for (int i = 0; i < len; i++) {
+            ushort ch = StringGetCharacter(str, i);
+            if (ch < '0' || ch > '9') return false;
+        }
+        return true;
+    }
+
+    //+------------------------------------------------------------------+
+    //| blockId形式の検証                                                  |
+    //| blockIdが{typeId}#{index}形式に従うことを検証                       |
+    //+------------------------------------------------------------------+
+    bool ValidateBlockIdFormat(const Config &config) {
+        for (int i = 0; i < config.blockCount; i++) {
+            string blockId = config.blocks[i].id;
+            
+            // 形式チェック: {typeId}#{index}
+            int hashPos = StringFind(blockId, "#");
+            if (hashPos < 0) {
+                // '#'セパレータが見つからない
+                if (m_logger != NULL) {
+                    string errorMsg = StringFormat(
+                        "blockId '%s' does not contain '#' separator",
+                        blockId
+                    );
+                    m_logger.LogError("INVALID_BLOCK_ID_FORMAT", errorMsg);
+                }
+                Print("ERROR: Invalid blockId format (missing '#'): ", blockId);
+                return false;
+            }
+            
+            // インデックス部分が数値か確認
+            string indexPart = StringSubstr(blockId, hashPos + 1);
+            if (!IsNumeric(indexPart)) {
+                // インデックス部分が数値でない
+                if (m_logger != NULL) {
+                    string errorMsg = StringFormat(
+                        "blockId '%s' has non-numeric index part '%s'",
+                        blockId, indexPart
+                    );
+                    m_logger.LogError("INVALID_BLOCK_ID_FORMAT", errorMsg);
+                }
+                Print("ERROR: Invalid blockId format (non-numeric index): ", blockId);
+                return false;
+            }
+        }
+        
+        return true;
+    }
+
 public:
     //--- コンストラクタ
     CConfigLoader() {
@@ -257,8 +396,8 @@ public:
     bool Load(string path, Config &config) {
         config.Reset();
 
-        // ファイル存在確認
-        if (!FileIsExist(path)) {
+        // ファイル存在確認（FILE_COMMONフラグを追加してテスター対応）
+        if (!FileIsExist(path, FILE_COMMON)) {
             if (m_logger != NULL) {
                 m_logger.LogError("CONFIG_ERROR", "File not found: " + path);
             }
@@ -266,8 +405,8 @@ public:
             return false;
         }
 
-        // ファイル読込（ANSI - MT5互換性のため）
-        int handle = FileOpen(path, FILE_READ | FILE_TXT | FILE_ANSI);
+        // ファイル読込（FILE_COMMONフラグを追加してテスター対応）
+        int handle = FileOpen(path, FILE_READ | FILE_TXT | FILE_ANSI | FILE_COMMON);
         if (handle == INVALID_HANDLE) {
             if (m_logger != NULL) {
                 m_logger.LogError("CONFIG_ERROR", "Cannot open file: " + path);
@@ -332,6 +471,42 @@ public:
             }
         }
 
+        // blockId参照の検証
+        if (!ValidateBlockReferences(config)) {
+            if (m_logger != NULL) {
+                m_logger.LogError("CONFIG_VALIDATION_FAILED", "Block reference validation failed");
+            }
+            Print("ERROR: Config validation failed - unresolved block references");
+            return false;
+        }
+
+        // blockId重複の検証
+        if (!ValidateDuplicateBlockIds(config)) {
+            if (m_logger != NULL) {
+                m_logger.LogError("CONFIG_VALIDATION_FAILED", "Duplicate blockId detected");
+            }
+            Print("ERROR: Config validation failed - duplicate blockIds");
+            return false;
+        }
+
+        // blockId形式の検証
+        if (!ValidateBlockIdFormat(config)) {
+            if (m_logger != NULL) {
+                m_logger.LogError("CONFIG_VALIDATION_FAILED", "Invalid blockId format detected");
+            }
+            Print("ERROR: Config validation failed - invalid blockId format");
+            return false;
+        }
+
+        // 成功時のログ記録
+        if (m_logger != NULL) {
+            string successMsg = StringFormat(
+                "Config loaded successfully: %d strategies, %d blocks",
+                config.strategyCount, config.blockCount
+            );
+            m_logger.LogInfo("CONFIG_LOADED", successMsg);
+        }
+        
         Print("ConfigLoader: Loaded ", config.strategyCount, " strategies, ",
               config.blockCount, " blocks");
         return true;

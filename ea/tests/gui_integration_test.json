@@ -1,0 +1,104 @@
+{
+  "meta": {
+    "formatVersion": "1.0",
+    "name": "GUI Integration Test - Shared Blocks",
+    "generatedBy": "GUI Builder Test",
+    "generatedAt": "2026-01-26T00:00:00Z"
+  },
+  "globalGuards": {
+    "timeframe": "M1",
+    "useClosedBarOnly": true,
+    "noReentrySameBar": true,
+    "maxPositionsTotal": 2,
+    "maxPositionsPerSymbol": 1,
+    "maxSpreadPips": 2.0,
+    "session": {
+      "enabled": true,
+      "windows": [
+        { "start": "00:00", "end": "23:59" }
+      ],
+      "weekDays": { "sun": false, "mon": true, "tue": true, "wed": true, "thu": true, "fri": true, "sat": false }
+    }
+  },
+  "strategies": [
+    {
+      "id": "S1",
+      "name": "Strategy 1 - Shared Filter",
+      "enabled": true,
+      "priority": 10,
+      "conflictPolicy": "firstOnly",
+      "directionPolicy": "both",
+      "entryRequirement": {
+        "type": "OR",
+        "ruleGroups": [
+          {
+            "id": "RG1",
+            "type": "AND",
+            "conditions": [
+              { "blockId": "filter.spreadMax#1" },
+              { "blockId": "trend.maRelation#1" },
+              { "blockId": "trigger.rsiLevel#1" }
+            ]
+          }
+        ]
+      },
+      "lotModel": { "type": "lot.fixed", "params": { "lots": 0.1 } },
+      "riskModel": { "type": "risk.fixedSLTP", "params": { "slPips": 20, "tpPips": 40 } },
+      "exitModel": { "type": "exit.none", "params": {} },
+      "nanpinModel": { "type": "nanpin.off", "params": {} }
+    },
+    {
+      "id": "S2",
+      "name": "Strategy 2 - Shared Filter",
+      "enabled": true,
+      "priority": 20,
+      "conflictPolicy": "firstOnly",
+      "directionPolicy": "both",
+      "entryRequirement": {
+        "type": "OR",
+        "ruleGroups": [
+          {
+            "id": "RG2",
+            "type": "AND",
+            "conditions": [
+              { "blockId": "filter.spreadMax#1" },
+              { "blockId": "trend.maRelation#2" },
+              { "blockId": "trigger.rsiLevel#2" }
+            ]
+          }
+        ]
+      },
+      "lotModel": { "type": "lot.fixed", "params": { "lots": 0.1 } },
+      "riskModel": { "type": "risk.fixedSLTP", "params": { "slPips": 30, "tpPips": 30 } },
+      "exitModel": { "type": "exit.none", "params": {} },
+      "nanpinModel": { "type": "nanpin.off", "params": {} }
+    }
+  ],
+  "blocks": [
+    {
+      "id": "filter.spreadMax#1",
+      "typeId": "filter.spreadMax",
+      "params": { "maxSpreadPips": 2.0 }
+    },
+    {
+      "id": "trend.maRelation#1",
+      "typeId": "trend.maRelation",
+      "params": { "period": 200, "maType": "EMA", "relation": "closeAbove" }
+    },
+    {
+      "id": "trend.maRelation#2",
+      "typeId": "trend.maRelation",
+      "params": { "period": 50, "maType": "SMA", "relation": "closeBelow" }
+    },
+    {
+      "id": "trigger.rsiLevel#1",
+      "typeId": "trigger.rsiLevel",
+      "params": { "period": 14, "level": 30, "direction": "crossAbove" }
+    },
+    {
+      "id": "trigger.rsiLevel#2",
+      "typeId": "trigger.rsiLevel",
+      "params": { "period": 14, "level": 70, "direction": "crossBelow" }
+    }
+  ]
+}
