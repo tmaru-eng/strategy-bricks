@@ -97,7 +97,11 @@ public:
             return;
         }
         
-        double atrPips = atr / (pipValue * 10.0);
+        // ブローカーの桁数に基づいて動的に除数を決定
+        int digits = (int)SymbolInfoInteger(ctx.market.symbol, SYMBOL_DIGITS);
+        double pipMultiplier = (digits == 3 || digits == 5) ? 10.0 : 1.0;
+        
+        double atrPips = atr / (pipValue * pipMultiplier);
         double basePips = atrPips * m_atrRatio;
         
         // SL/TPを計算

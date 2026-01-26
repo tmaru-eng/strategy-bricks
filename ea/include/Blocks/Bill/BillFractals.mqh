@@ -46,36 +46,16 @@ public:
         int bufferIndex = (m_direction == "up") ? 0 : 1;
         
         for (int i = CONFIRMED_BAR_SHIFT; i < CONFIRMED_BAR_SHIFT + 10; i++) {
-            double val = ctx.cache.GetFractalsValue(m_handle, bufferIndex, i, 0); // barTime=0 to skip strict caching check or use approximate
-            // Actually GetValueCommon expects specific barTime for caching key. If we iterate, we might not have barTime for historical bars in state easily.
-            // Using direct CopyBuffer is safer for loop search to avoid cache pollution with misses.
-            // But we need barTime for cache key.
-            // Let's use direct CopyBuffer here or just accept cache misses.
-            // The `GetFractalsValue` uses `GetValueCommon`.
-            // We can pass `0` as barTime, but then cache key is `V_handle_buf_idx`.
-            // If we access `i` relative to current, barTime changes every bar.
-            // Actually, `GetValueCommon` uses `index` in key? No, `index`. So `V_..._index`.
-            // If `index` is shift, it shifts every new bar. Caching by shift is valid only for that specific bar moment.
-            // `IndicatorCache` uses `barTime` in `ValueCacheEntry` to invalidate old cache?
-            // Yes: `if (m_values[i].key == key && m_values[i].barTime == barTime)`. 
-            // So `GetFractalsValue` requires correct `barTime` for that index `i`.
-            // We don't have historical bar times easily here without CopyTime.
+            // Get correct barTime for each historical bar to ensure proper caching
+            datetime barTime = iTime(ctx.market.symbol, EA_TIMEFRAME, i);
+            if (barTime == 0) continue; // Skip if barTime is invalid
             
-            // To simplify: Breakout of *previously confirmed* fractal.
-            // Standard Fractal is confirmed at index 2 (closed).
-            // Let's just check if index 2 IS a fractal, and use that as signal?
-            // "Fractal" block usually means "Wait for Fractal formation" or "Breakout of Fractal".
-            // Description says "フラクタルブレイク".
-            // Logic: Close > Last Upper Fractal.
+            double val = ctx.cache.GetFractalsValue(m_handle, bufferIndex, i, barTime);
             
-            // We need to find the last fractal level.
-            double valBuf[];
-            if (CopyBuffer(m_handle, bufferIndex, i, 1, valBuf) > 0) {
-                if (valBuf[0] != EMPTY_VALUE && valBuf[0] != 0) {
-                    level = valBuf[0];
-                    foundIndex = i;
-                    break;
-                }
+            if (val != EMPTY_VALUE && val != 0) {
+                level = val;
+                foundIndex = i;
+                break;
             }
         }
 
