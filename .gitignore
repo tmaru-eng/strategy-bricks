@@ -29,6 +29,7 @@ __pycache__/
 *$py.class
 *.so
 .Python
+build/
 venv/
 env/
 ENV/
