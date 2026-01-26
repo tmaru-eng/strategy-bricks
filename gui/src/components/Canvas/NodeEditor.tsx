@@ -93,11 +93,19 @@ export const NodeEditor: React.FC = () => {
         y: event.clientY - reactFlowBounds.top
       })
 
+      // Generate blockId: count existing blocks of same typeId and increment
+      const existingBlocksOfType = nodes.filter(
+        (n) => n.type === 'conditionNode' && n.data?.blockTypeId === data.typeId
+      )
+      const blockIndex = existingBlocksOfType.length + 1
+      const blockId = `${data.typeId}#${blockIndex}`
+
       const newNode: Node = {
         id: `condition-${crypto.randomUUID()}`,
         type: 'conditionNode',
         position,
         data: {
+          blockId: blockId,
           blockTypeId: data.typeId,
           displayName: data.displayName,
           params: {}
@@ -133,6 +141,9 @@ export const NodeEditor: React.FC = () => {
         onNodeClick={onNodeClick}
         fitView
         defaultViewport={defaultViewport}
+        nodesDeletable={true}
+        edgesDeletable={true}
+        deleteKeyCode={['Backspace', 'Delete']}
       >
         <Background gap={22} size={1} />
         <Controls />

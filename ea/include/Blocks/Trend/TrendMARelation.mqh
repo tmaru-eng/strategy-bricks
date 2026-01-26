@@ -67,10 +67,11 @@ public:
         bool pass = false;
         TradeDirection direction = DIRECTION_NEUTRAL;
 
-        if (m_relation == "closeAbove") {
+        // "above"/"below"と"closeAbove"/"closeBelow"の両方に対応
+        if (m_relation == "closeAbove" || m_relation == "above") {
             pass = (close > ma);
             direction = DIRECTION_LONG;
-        } else if (m_relation == "closeBelow") {
+        } else if (m_relation == "closeBelow" || m_relation == "below") {
             pass = (close < ma);
             direction = DIRECTION_SHORT;
         }

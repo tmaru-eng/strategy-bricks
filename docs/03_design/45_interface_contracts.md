@@ -1119,10 +1119,399 @@ if (!ValidateLot(request.lot, reason)) {
 
 ---
 
-## 13. 変更履歴
+## 13. blockId割り当てと検証ルール
+
+### 13.1 blockId形式仕様
+
+**形式**: `{typeId}#{uniqueIndex}`
+
+**例**:
+- `filter.spreadMax#1`
+- `trend.maRelation#1`
+- `trend.maRelation#2`
+- `trigger.rsiLevel#1`
+
+**ルール**:
+- typeIdはblock_catalog.jsonで定義されたブロックタイプ識別子
+- uniqueIndexは正の整数（1から開始）
+- セパレータは`#`（ハッシュ記号）
+- 同じtypeIdでも異なるパラメータを持つ場合は異なるindexを使用
+
+### 13.2 GUI Builder側のblockId割り当て
+
+#### 13.2.1 NodeManager責務
+
+**タイミング**: conditionノードがキャンバスに追加された時
+
+**処理フロー**:
+```typescript
+class NodeManager {
+  private typeCounters: Map<string, number> = new Map()
+  private nodeBlockIdMap: Map<string, string> = new Map()
+
+  assignBlockId(node: Node): string {
+    const typeId = node.data.blockTypeId
+    
+    // typeId毎のカウンターを取得・インクリメント
+    const counter = (this.typeCounters.get(typeId) || 0) + 1
+    this.typeCounters.set(typeId, counter)
+    
+    // blockId生成
+    const blockId = `${typeId}#${counter}`
+    
+    // ノードデータに設定
+    node.data.blockId = blockId
+    
+    // マッピング保存
+    this.nodeBlockIdMap.set(node.id, blockId)
+    
+    return blockId
+  }
+}
+```
+
+#### 13.2.2 Exporter責務
+
+**重要**: blockIdを再生成せず、ノードに割り当てられたblockIdを保持
+
+**処理フロー**:
+```typescript
+// blocks配列の構築
+const buildBlocks = (nodes: Node[]) => {
+  const conditionNodes = nodes.filter(n => n.type === 'conditionNode')
+  
+  return conditionNodes.map(node => ({
+    id: node.data.blockId,  // ✅ ノードのblockIdを使用（再生成しない）
+    typeId: node.data.blockTypeId,
+    params: node.data.params || {}
+  }))
+}
+
+// conditions配列の構築
+const buildConditions = (connectedNodes: Node[]) => {
+  return connectedNodes.map(node => ({
+    blockId: node.data.blockId  // ✅ ノードのblockIdを使用（再生成しない）
+  }))
+}
+```
+
+### 13.3 GUI Builder側の検証ルール
+
+#### 13.3.1 BlockIdReferenceRule
+
+**目的**: すべてのcondition.blockIdがblocks[]配列に存在することを検証
+
+**実装**:
+```typescript
+class BlockIdReferenceRule implements ValidationRule {
+  validate(config: StrategyConfig): ValidationError[] {
+    const blockIds = new Set(config.blocks.map(b => b.id))
+    const errors: ValidationError[] = []
+    
+    for (const strategy of config.strategies) {
+      for (const ruleGroup of strategy.entryRequirement.ruleGroups) {
+        for (const condition of ruleGroup.conditions) {
+          if (!blockIds.has(condition.blockId)) {
+            errors.push({
+              type: 'UNRESOLVED_BLOCK_REFERENCE',
+              message: `blockId "${condition.blockId}" not found in blocks[]`,
+              location: `strategies[${strategy.id}].ruleGroups[${ruleGroup.id}]`
+            })
+          }
+        }
+      }
+    }
+    
+    return errors
+  }
+}
+```
+
+#### 13.3.2 DuplicateBlockIdRule
+
+**目的**: blocks[]配列内の重複blockIdを検出
+
+**実装**:
+```typescript
+class DuplicateBlockIdRule implements ValidationRule {
+  validate(config: StrategyConfig): ValidationError[] {
+    const seen = new Map<string, number>()
+    const errors: ValidationError[] = []
+    
+    for (const block of config.blocks) {
+      const count = seen.get(block.id) || 0
+      seen.set(block.id, count + 1)
+    }
+    
+    for (const [blockId, count] of seen.entries()) {
+      if (count > 1) {
+        errors.push({
+          type: 'DUPLICATE_BLOCK_ID',
+          message: `blockId "${blockId}" appears ${count} times`,
+          location: 'blocks[]'
+        })
+      }
+    }
+    
+    return errors
+  }
+}
+```
+
+#### 13.3.3 BlockIdFormatRule
+
+**目的**: blockIdが`{typeId}#{index}`形式に従うことを検証
+
+**実装**:
+```typescript
+class BlockIdFormatRule implements ValidationRule {
+  validate(config: StrategyConfig): ValidationError[] {
+    const errors: ValidationError[] = []
+    const pattern = /^[a-zA-Z0-9._]+#\d+$/
+    
+    for (const block of config.blocks) {
+      if (!pattern.test(block.id)) {
+        errors.push({
+          type: 'INVALID_BLOCK_ID_FORMAT',
+          message: `blockId "${block.id}" does not match format "{typeId}#{index}"`,
+          location: `blocks[${block.id}]`
+        })
+      }
+    }
+    
+    return errors
+  }
+}
+```
+
+### 13.4 EA Runtime側の検証ルール
+
+#### 13.4.1 ConfigLoader検証
+
+**タイミング**: LoadConfig()実行時、JSON読み込み後
+
+**検証項目**:
+1. blockId参照の解決可能性
+2. blockIdの重複チェック
+3. blockId形式の検証
+
+**実装**:
+```mql5
+bool ConfigLoader::LoadConfig(string path, Config &outConfig) {
+    // JSON読み込み
+    if (!ReadJsonFile(path, outConfig)) {
+        m_logger->LogError("CONFIG_LOAD_FAILED", "Failed to read config file");
+        return false;
+    }
+    
+    // blockId参照検証
+    if (!ValidateBlockReferences(outConfig)) {
+        m_logger->LogError("CONFIG_VALIDATION_FAILED", "Block reference validation failed");
+        return false;
+    }
+    
+    // blockId重複検証
+    if (!ValidateDuplicateBlockIds(outConfig)) {
+        m_logger->LogError("CONFIG_VALIDATION_FAILED", "Duplicate blockId detected");
+        return false;
+    }
+    
+    // blockId形式検証
+    if (!ValidateBlockIdFormat(outConfig)) {
+        m_logger->LogError("CONFIG_VALIDATION_FAILED", "Invalid blockId format detected");
+        return false;
+    }
+    
+    m_logger->LogInfo("CONFIG_LOADED", "Config loaded successfully");
+    return true;
+}
+```
+
+#### 13.4.2 ValidateBlockReferences()
+
+**処理内容**:
+```mql5
+bool ConfigLoader::ValidateBlockReferences(const Config &config) {
+    // blocks[]からblockIdセットを構築
+    string blockIds[];
+    ArrayResize(blockIds, config.blockCount);
+    for (int i = 0; i < config.blockCount; i++) {
+        blockIds[i] = config.blocks[i].id;
+    }
+    
+    // すべてのstrategyのconditionを検証
+    for (int s = 0; s < config.strategyCount; s++) {
+        Strategy strategy = config.strategies[s];
+        EntryRequirement req = strategy.entryRequirement;
+        
+        for (int rg = 0; rg < req.ruleGroupCount; rg++) {
+            RuleGroup ruleGroup = req.ruleGroups[rg];
+            
+            for (int c = 0; c < ruleGroup.conditionCount; c++) {
+                string blockId = ruleGroup.conditions[c].blockId;
+                
+                if (!ArrayContains(blockIds, blockId)) {
+                    m_logger->LogError(
+                        "UNRESOLVED_BLOCK_REFERENCE",
+                        StringFormat(
+                            "blockId '%s' not found in blocks[] (Strategy: %s, RuleGroup: %s)",
+                            blockId, strategy.id, ruleGroup.id
+                        )
+                    );
+                    return false;
+                }
+            }
+        }
+    }
+    
+    return true;
+}
+```
+
+#### 13.4.3 ValidateDuplicateBlockIds()
+
+**処理内容**:
+```mql5
+bool ConfigLoader::ValidateDuplicateBlockIds(const Config &config) {
+    for (int i = 0; i < config.blockCount; i++) {
+        string blockId = config.blocks[i].id;
+        
+        for (int j = i + 1; j < config.blockCount; j++) {
+            if (config.blocks[j].id == blockId) {
+                m_logger->LogError(
+                    "DUPLICATE_BLOCK_ID",
+                    StringFormat("Duplicate blockId '%s' found in blocks[]", blockId)
+                );
+                return false;
+            }
+        }
+    }
+    
+    return true;
+}
+```
+
+#### 13.4.4 ValidateBlockIdFormat()
+
+**処理内容**:
+```mql5
+bool ConfigLoader::ValidateBlockIdFormat(const Config &config) {
+    for (int i = 0; i < config.blockCount; i++) {
+        string blockId = config.blocks[i].id;
+        
+        // '#'セパレータの存在確認
+        int hashPos = StringFind(blockId, "#");
+        if (hashPos < 0) {
+            m_logger->LogError(
+                "INVALID_BLOCK_ID_FORMAT",
+                StringFormat("blockId '%s' does not contain '#' separator", blockId)
+            );
+            return false;
+        }
+        
+        // インデックス部分が数値か確認
+        string indexPart = StringSubstr(blockId, hashPos + 1);
+        if (!IsNumeric(indexPart)) {
+            m_logger->LogError(
+                "INVALID_BLOCK_ID_FORMAT",
+                StringFormat("blockId '%s' has non-numeric index part", blockId)
+            );
+            return false;
+        }
+    }
+    
+    return true;
+}
+```
+
+### 13.5 新しいログイベント
+
+**CONFIG_VALIDATION_FAILED**: 設定検証失敗
+```jsonl
+{"ts":"2026-01-26 10:00:00","event":"CONFIG_VALIDATION_FAILED","reason":"Block reference validation failed"}
+```
+
+**UNRESOLVED_BLOCK_REFERENCE**: blockId参照が解決できない
+```jsonl
+{"ts":"2026-01-26 10:00:00","event":"UNRESOLVED_BLOCK_REFERENCE","blockId":"filter.spreadMax#2","strategy":"S1","ruleGroup":"RG1","message":"blockId 'filter.spreadMax#2' not found in blocks[]"}
+```
+
+**DUPLICATE_BLOCK_ID**: blockIdの重複
+```jsonl
+{"ts":"2026-01-26 10:00:00","event":"DUPLICATE_BLOCK_ID","blockId":"filter.spreadMax#1","message":"Duplicate blockId 'filter.spreadMax#1' found in blocks[]"}
+```
+
+**INVALID_BLOCK_ID_FORMAT**: blockId形式が不正
+```jsonl
+{"ts":"2026-01-26 10:00:00","event":"INVALID_BLOCK_ID_FORMAT","blockId":"filter.spreadMax","message":"blockId 'filter.spreadMax' does not contain '#' separator"}
+```
+
+### 13.6 共有ブロックの扱い
+
+**定義**: 複数のstrategyまたはruleGroupで同じblockIdを参照するブロック
+
+**例**:
+```json
+{
+  "strategies": [
+    {
+      "id": "S1",
+      "entryRequirement": {
+        "ruleGroups": [
+          {
+            "id": "RG1",
+            "conditions": [
+              { "blockId": "filter.spreadMax#1" },
+              { "blockId": "trend.maRelation#1" }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "S2",
+      "entryRequirement": {
+        "ruleGroups": [
+          {
+            "id": "RG2",
+            "conditions": [
+              { "blockId": "filter.spreadMax#1" },
+              { "blockId": "trend.maRelation#2" }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "blocks": [
+    {
+      "id": "filter.spreadMax#1",
+      "typeId": "filter.spreadMax",
+      "params": { "maxSpreadPips": 2.0 }
+    },
+    {
+      "id": "trend.maRelation#1",
+      "typeId": "trend.maRelation",
+      "params": { "period": 200, "maType": "EMA", "relation": "closeAbove" }
+    },
+    {
+      "id": "trend.maRelation#2",
+      "typeId": "trend.maRelation",
+      "params": { "period": 50, "maType": "SMA", "relation": "closeBelow" }
+    }
+  ]
+}
+```
+
+**重要**: `filter.spreadMax#1`は両方のstrategyで共有されているが、blocks[]配列には1回のみ出現
+
+---
+
+## 14. 変更履歴
 
 | 版 | 日付 | 変更内容 |
 |----|------|---------|
 | v1.0 | 2026-01-22 | 初版作成、未決事項A1-A5の決定を反映 |
+| v1.1 | 2026-01-26 | blockId割り当てルールと検証ルールを追加（セクション13） |
 
 ---

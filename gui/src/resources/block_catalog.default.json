@@ -512,7 +512,7 @@
           "period",
           "deviation",
           "appliedPrice",
-          "direction"
+          "side"
         ],
         "properties": {
           "period": {
@@ -554,6 +554,17 @@
               "WEIGHTED"
             ],
             "default": "CLOSE",
+            "ui": {
+              "control": "select"
+            }
+          },
+          "side": {
+            "type": "string",
+            "enum": [
+              "lowerToInside",
+              "upperToInside"
+            ],
+            "default": "lowerToInside",
             "ui": {
               "control": "select"
             }

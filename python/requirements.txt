@@ -1,0 +1,16 @@
+# Strategy Bricks Backtest Engine - Python Dependencies
+
+# MetaTrader5 library for historical data access
+MetaTrader5>=5.0.0
+
+# PyInstaller for building exe
+pyinstaller>=6.0.0
+
+# Property-based testing library
+hypothesis>=6.0.0
+
+# Testing framework
+pytest>=7.0.0
+
+# Type checking
+mypy>=1.0.0

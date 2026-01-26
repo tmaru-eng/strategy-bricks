@@ -33,12 +33,42 @@ body {
   border-radius: 14px;
   background: #fefcf8;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  gap: 16px;
 }
 
 .app-title {
   font-size: 20px;
   font-weight: 600;
   letter-spacing: 0.4px;
+}
+
+.app-tabs {
+  display: flex;
+  gap: 4px;
+  flex: 1;
+  justify-content: center;
+}
+
+.tab-button {
+  border: 1px solid #d7d1c8;
+  background: #f3eee5;
+  color: #5b4f41;
+  padding: 8px 20px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tab-button:hover {
+  background: #e8e3da;
+}
+
+.tab-button.active {
+  background: #2c6e63;
+  color: #f8f6f1;
+  border-color: #2c6e63;
 }
 
 .app-actions {
@@ -54,6 +84,16 @@ body {
   border-radius: 10px;
   font-size: 13px;
   cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn:hover:not(:disabled) {
+  background: #e8e3da;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .btn-primary {
@@ -62,11 +102,34 @@ body {
   border-color: #2c6e63;
 }
 
+.btn-primary:hover:not(:disabled) {
+  background: #245850;
+}
+
+.btn-danger {
+  background: #dc3545;
+  color: #ffffff;
+  border-color: #dc3545;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: #c82333;
+}
+
 .app-body {
   flex: 1;
   display: grid;
   grid-template-columns: 280px 1fr 320px;
   gap: 12px;
+}
+
+.app-body-full {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 0;
+  min-height: 0;
 }
 
 .panel {
@@ -77,6 +140,11 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 0;
+  overflow: hidden;
+}
+
+.panel-center {
+  min-height: 600px;
 }
 
 .panel-title {
@@ -99,6 +167,8 @@ body {
     transparent 24px
   );
   padding: 12px;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .canvas-root {
@@ -122,6 +192,12 @@ body {
 }
 
 .node-editor {
+  width: 100%;
+  height: 100%;
+  min-height: 500px;
+}
+
+.react-flow {
   width: 100%;
   height: 100%;
 }
@@ -235,6 +311,21 @@ body {
   border-color: #7c5aa6;
 }
 
+.palette-tab.category-volume.is-active,
+.palette-item.category-volume {
+  border-color: #2d7a4f;
+}
+
+.palette-tab.category-bill.is-active,
+.palette-item.category-bill {
+  border-color: #c97a3e;
+}
+
+.palette-tab.category-osc.is-active,
+.palette-item.category-osc {
+  border-color: #9c4d7f;
+}
+
 .palette-search {
   width: 100%;
   border-radius: 10px;
@@ -291,6 +382,18 @@ body {
 
 .palette-item.category-nanpin {
   background: #f2ebfb;
+}
+
+.palette-item.category-volume {
+  background: #e1f5ea;
+}
+
+.palette-item.category-bill {
+  background: #fef0e5;
+}
+
+.palette-item.category-osc {
+  background: #f7e8f3;
 }
 
 .palette-name {
@@ -421,4 +524,81 @@ body {
   .panel-bottom {
     min-height: 160px;
   }
+}
+
+/* ValidationErrorDisplay styles */
+.validation-errors {
+  background: #f8e1dd;
+  border: 1px solid #e2b9b1;
+  border-radius: 12px;
+  padding: 16px;
+  margin-top: 12px;
+}
+
+/* Export errors container - displayed at top of app */
+.export-errors-container {
+  background: #fff5f5;
+  border-bottom: 2px solid #e2b9b1;
+  padding: 16px 24px;
+  box-shadow: 0 2px 8px rgba(139, 43, 26, 0.1);
+}
+
+.export-errors-container .validation-errors {
+  margin-top: 0;
+  background: #f8e1dd;
+}
+
+.validation-errors-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #8b2b1a;
+  margin: 0 0 12px 0;
+}
+
+.validation-errors-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.validation-error-item {
+  background: #ffffff;
+  border: 1px solid #e2b9b1;
+  border-radius: 10px;
+  padding: 12px;
+}
+
+.validation-error-header {
+  margin-bottom: 6px;
+}
+
+.validation-error-type {
+  display: inline-block;
+  background: #8b2b1a;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
+.validation-error-message {
+  font-size: 14px;
+  color: #1f1f1f;
+  margin-bottom: 6px;
+  line-height: 1.4;
+}
+
+.validation-error-location {
+  font-size: 12px;
+  color: #8c7e6f;
+}
+
+.validation-error-location small {
+  font-size: inherit;
 }

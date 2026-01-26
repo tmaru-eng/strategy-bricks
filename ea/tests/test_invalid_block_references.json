@@ -1,0 +1,54 @@
+{
+  "meta": {
+    "formatVersion": "1.0",
+    "name": "Invalid Block References Test",
+    "description": "Test configuration with unresolved block references to verify ValidateBlockReferences function",
+    "generatedBy": "Strategy Bricks Test Suite",
+    "generatedAt": "2026-01-26T12:00:00Z"
+  },
+  "globalGuards": {
+    "timeframe": "M1",
+    "useClosedBarOnly": true,
+    "noReentrySameBar": true,
+    "maxPositionsTotal": 10,
+    "maxPositionsPerSymbol": 5,
+    "maxSpreadPips": 5.0,
+    "session": {
+      "enabled": false
+    }
+  },
+  "strategies": [
+    {
+      "id": "S1",
+      "name": "Strategy with Invalid Block Reference",
+      "enabled": true,
+      "priority": 1,
+      "conflictPolicy": "firstOnly",
+      "directionPolicy": "both",
+      "entryRequirement": {
+        "type": "OR",
+        "ruleGroups": [
+          {
+            "id": "RG1",
+            "type": "AND",
+            "conditions": [
+              { "blockId": "filter.spreadMax#1" },
+              { "blockId": "trend.maRelation#999" }
+            ]
+          }
+        ]
+      },
+      "lotModel": { "type": "lot.fixed", "params": { "lots": 0.01 } },
+      "riskModel": { "type": "risk.fixedSLTP", "params": { "slPips": 20, "tpPips": 40 } },
+      "exitModel": { "type": "exit.none", "params": {} },
+      "nanpinModel": { "type": "nanpin.off", "params": {} }
+    }
+  ],
+  "blocks": [
+    {
+      "id": "filter.spreadMax#1",
+      "typeId": "filter.spreadMax",
+      "params": { "maxSpreadPips": 5.0 }
+    }
+  ]
+}

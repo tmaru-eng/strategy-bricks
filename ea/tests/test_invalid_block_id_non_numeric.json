@@ -1,0 +1,83 @@
+{
+  "meta": {
+    "formatVersion": "1.0",
+    "name": "test_invalid_block_id_non_numeric",
+    "generatedBy": "Test Suite",
+    "generatedAt": "2026-01-26T10:00:00Z"
+  },
+  "globalGuards": {
+    "timeframe": "M1",
+    "useClosedBarOnly": true,
+    "noReentrySameBar": true,
+    "maxPositionsTotal": 5,
+    "maxPositionsPerSymbol": 1,
+    "maxSpreadPips": 2.0,
+    "session": {
+      "enabled": false,
+      "windows": [],
+      "weekDays": {
+        "sun": false,
+        "mon": true,
+        "tue": true,
+        "wed": true,
+        "thu": true,
+        "fri": true,
+        "sat": false
+      }
+    }
+  },
+  "strategies": [
+    {
+      "id": "S1",
+      "name": "Test Strategy",
+      "enabled": true,
+      "priority": 0,
+      "conflictPolicy": "firstOnly",
+      "directionPolicy": "both",
+      "entryRequirement": {
+        "type": "OR",
+        "ruleGroups": [
+          {
+            "id": "RG1",
+            "type": "AND",
+            "conditions": [
+              {
+                "blockId": "filter.spreadMax#abc"
+              }
+            ]
+          }
+        ]
+      },
+      "lotModel": {
+        "type": "fixed",
+        "params": {
+          "lots": 0.01
+        }
+      },
+      "riskModel": {
+        "type": "fixed",
+        "params": {
+          "slPips": 20.0,
+          "tpPips": 40.0
+        }
+      },
+      "exitModel": {
+        "type": "none",
+        "params": {}
+      },
+      "nanpinModel": {
+        "type": "none",
+        "params": {}
+      }
+    }
+  ],
+  "blocks": [
+    {
+      "id": "filter.spreadMax#abc",
+      "typeId": "filter.spreadMax",
+      "params": {
+        "maxSpreadPips": 2.0
+      }
+    }
+  ]
+}
