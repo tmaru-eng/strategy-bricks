@@ -122,11 +122,20 @@ docs/
 ## 04_operations（運用・検証：Run / Test / Observe）
 「実運用で壊れない」「原因追跡できる」ための資料。
 
-### 04_operations/80_testing.md（テスト計画）
-- ConfigValidatorテスト
-- CompositeEvaluatorテスト（OR/AND短絡）
-- ブロック単体テスト方針
-- ストラテジーテスターでの確認項目（再現性）
+### 04_operations/60_backtest_windows.md（バックテスト：Windows）
+- GUIからのバックテスト実行手順
+- backtest_engine.exe の配置と確認
+
+### 04_operations/70_strategy_tester_windows.md（Strategy Tester：Windows）
+- EA配置/コンパイル手順
+- Strategy Tester 実行と判定基準
+
+### 04_operations/75_gui_ea_integration_test.md（GUI-EA統合テスト）
+- blockId参照整合性の検証手順
+
+### 04_operations/80_testing.md（テスト入口）
+- テスト計画と実行導線の入口
+- 単体/統合/システムの方針
 
 ### 04_operations/90_observability_and_testing.md（ログ/モニタリングとテスト）
 - ログ項目（ブロックreason、採用Strategy、発注拒否理由）
@@ -147,6 +156,9 @@ docs/
 - フェーズ分割と成果物
 - マイルストーン定義
 - 並行ストリームと未決事項
+
+### 05_development_plan/20_change_log.md（変更ログ）
+- 実装メモの統合
 
 ---
 

@@ -4,6 +4,16 @@
 
 Strategy Bricks EAの品質保証のための包括的なテスト戦略を定義します。
 
+## テスト入口（Windowsのみ）
+
+バックテスト/Strategy Tester は **Windowsのみ**を正とします。  
+実行手順は以下を参照してください。
+
+- Backtest（GUI）: `docs/04_operations/60_backtest_windows.md`
+- Strategy Tester（手動）: `docs/04_operations/70_strategy_tester_windows.md`
+- GUI-EA統合テスト: `docs/04_operations/75_gui_ea_integration_test.md`
+- ログ/観測: `docs/04_operations/90_observability_and_testing.md`
+
 ## テスト方針
 
 ### 基本原則
@@ -127,6 +137,14 @@ npm test
 - 3ヶ月で10-50回の取引発生
 - エラーなし
 
+### 5. GUI-EA統合テスト
+
+**目的**: GUI生成物とEAのblockId参照整合性を確認
+
+**場所**: `ea/tests/gui_integration_test.json`
+
+**詳細手順**: `docs/04_operations/75_gui_ea_integration_test.md`
+
 ## テスト実行手順
 
 ### 自動テストスクリプト
@@ -135,7 +153,7 @@ npm test
 
 **実行方法**:
 ```bash
-python3 scripts/automated_tester.py
+python scripts/automated_tester.py
 ```
 
 **機能**:
@@ -143,25 +161,10 @@ python3 scripts/automated_tester.py
 - 手動テスト手順の表示
 - テストレポートテンプレート生成
 
-### MT5ストラテジーテスター実行手順
+### 手動テスト（Windows）
 
-1. MT5を起動
-2. ツール > ストラテジーテスター を開く
-3. 以下を設定:
-   - EA: `Experts\StrategyBricks\StrategyBricks.ex5`
-   - シンボル: `USDJPYm`
-   - 期間: `M1`
-   - 日付: `2025.10.01 - 2025.12.31` (3ヶ月)
-   - 初期証拠金: 1,000,000 JPY
-   - レバレッジ: 1:100
-4. 入力パラメータ: `InpConfigPath=strategy/<test_file>.json`
-5. テスト開始
-6. 結果を記録:
-   - 初期化: 成功/失敗
-   - ブロック読み込み数
-   - 戦略読み込み数
-   - 取引回数
-   - エラー有無
+- Strategy Tester: `docs/04_operations/70_strategy_tester_windows.md`
+- Backtest（GUI）: `docs/04_operations/60_backtest_windows.md`
 
 ### テスト順序（推奨）
 
@@ -240,53 +243,9 @@ python3 scripts/automated_tester.py
 └─ その他 → ログ詳細確認
 ```
 
-## テスト環境
+## テスト環境（Windows）
 
-### 必要なファイル配置
-
-**通常実行用**:
-```
-$HOME/Library/Application Support/net.metaquotes.wine.metatrader5/
-  drive_c/Program Files/MetaTrader 5/
-    MQL5/
-      Files/
-        strategy/
-          ├── active.json
-          ├── test_single_blocks.json
-          ├── test_strategy_advanced.json
-          └── test_strategy_all_blocks.json
-```
-
-**ストラテジーテスター用**:
-```
-$HOME/Library/Application Support/net.metaquotes.wine.metatrader5/
-  drive_c/Program Files/MetaTrader 5/
-    Tester/
-      Agent-127.0.0.1-3000/
-        Files/
-          strategy/
-            ├── active.json
-            ├── test_single_blocks.json
-            ├── test_strategy_advanced.json
-            └── test_strategy_all_blocks.json
-      Agent-127.0.0.1-3001/
-        Files/
-          strategy/
-            └── (同上)
-```
-
-### ファイルコピーコマンド
-
-```bash
-# 通常実行用
-cp ea/tests/*.json "$HOME/Library/Application Support/net.metaquotes.wine.metatrader5/drive_c/Program Files/MetaTrader 5/MQL5/Files/strategy/"
-
-# テスター用（Agent-3000）
-cp ea/tests/*.json "$HOME/Library/Application Support/net.metaquotes.wine.metatrader5/drive_c/Program Files/MetaTrader 5/Tester/Agent-127.0.0.1-3000/Files/strategy/"
-
-# テスター用（Agent-3001）
-cp ea/tests/*.json "$HOME/Library/Application Support/net.metaquotes.wine.metatrader5/drive_c/Program Files/MetaTrader 5/Tester/Agent-127.0.0.1-3001/Files/strategy/"
-```
+ファイル配置・パスの正は `docs/04_operations/70_strategy_tester_windows.md` を参照。
 
 ## テスト結果の記録
 
