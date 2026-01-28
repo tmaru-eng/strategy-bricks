@@ -54,11 +54,15 @@ function Get-ScenarioMap {
         "recent-30d" = @{ symbol = "USDJPY"; timeframe = "M1"; days = 30 }
     }
 
+    $pathProvided = [bool]$Path
     if (-not $Path) {
         $Path = Join-Path $PSScriptRoot "scenarios\gui_integration_scenarios.json"
     }
 
     if (-not (Test-Path $Path)) {
+        if ($pathProvided) {
+            throw "Scenario file not found: $Path"
+        }
         return $default
     }
 

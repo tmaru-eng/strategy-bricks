@@ -195,7 +195,7 @@ MT5はブローカー接尾辞が付くため、**入力は6桁（例: USDJPY）
 
 2. **EA単体テスト更新**:
    - `ea/tests/test_single_blocks.json`
-- `ea/tests/test_single_blocks_extra.json` (extra blocks beyond MAX_STRATEGIES)
+   - `ea/tests/test_single_blocks_extra.json` (extra blocks beyond MAX_STRATEGIES)
    - 新ブロック用の戦略追加
    - ブロック定義追加
 

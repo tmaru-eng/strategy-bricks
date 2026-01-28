@@ -72,20 +72,6 @@ foreach ($config in $configs) {
     Write-Host ""
     Write-Host ">>> Running: $($config.FullName)" -ForegroundColor Yellow
 
-    $args = @(
-        $config.FullName,
-        $Scenario
-    )
-
-    if ($ScenarioFile) { $args += @($ScenarioFile) }
-    if ($SymbolBase) { $args += @($SymbolBase) }
-    if ($Timeframe) { $args += @($Timeframe) }
-    if ($Start) { $args += @($Start) }
-    if ($End) { $args += @($End) }
-    if ($Days -gt 0) { $args += @($Days) }
-    if ($StopMt5) { $args += @($StopMt5) }
-    if (-not $Portable) { $args += @($Portable) }
-
     try {
         & $flowScript -ConfigPath $config.FullName -Scenario $Scenario -ScenarioFile $ScenarioFile -SymbolBase $SymbolBase -Timeframe $Timeframe -Start $Start -End $End -Days $Days -StopMt5:$StopMt5 -Portable:$Portable
         if ($LASTEXITCODE -eq 0) {

@@ -430,7 +430,7 @@ class ErrorHandler {
           
           try {
             // ファイル名からタイムスタンプを抽出
-            const match = file.name.match(/_(\\d+)(?:_results)?\\.json$/)
+            const match = file.name.match(/_(\d+)(?:_results)?\.json$/)
             if (match) {
               const timestamp = parseInt(match[1], 10)
               const age = now - timestamp

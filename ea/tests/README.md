@@ -105,11 +105,13 @@ python3 scripts/automated_tester.py
 ```
 1. test_single_blocks.json    ← 最優先（問題の切り分け）
    ↓
-2. active.json                ← 基本動作確認
+2. test_single_blocks_extra.json ← 追加2ブロックの確認
    ↓
-3. test_strategy_advanced.json ← 複雑な条件確認
+3. active.json                ← 基本動作確認
    ↓
-4. test_strategy_all_blocks.json ← 全機能網羅確認
+4. test_strategy_advanced.json ← 複雑な条件確認
+   ↓
+5. test_strategy_all_blocks.json ← 全機能網羅確認
 ```
 
 ## テスト結果の評価
