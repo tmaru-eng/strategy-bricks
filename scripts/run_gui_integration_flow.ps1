@@ -186,7 +186,12 @@ if ($resolvedSymbol -and $resolvedSymbol -ne $symbolBaseValue) {
     Write-Host "Resolved symbol: $resolvedSymbol (from $symbolBaseValue)" -ForegroundColor Gray
 }
 $symbolForEngine = if ($resolvedSymbol) { $resolvedSymbol } else { $symbolBaseValue }
-$timeframeValue = if ($Timeframe) { $Timeframe } elseif ($scenarioTimeframe) { $scenarioTimeframe } elseif ($configJson.globalGuards.timeframe) { $configJson.globalGuards.timeframe } else { "M1" }
+$globalGuards = $null
+$globalGuardsProp = $configJson.PSObject.Properties["globalGuards"]
+if ($globalGuardsProp) {
+    $globalGuards = $globalGuardsProp.Value
+}
+$timeframeValue = if ($Timeframe) { $Timeframe } elseif ($scenarioTimeframe) { $scenarioTimeframe } elseif ($globalGuards -and $globalGuards.PSObject.Properties["timeframe"] -and $globalGuards.timeframe) { $globalGuards.timeframe } else { "M1" }
 
 $startDate = Parse-DateUtc $Start
 $endDate = Parse-DateUtc $End
@@ -281,6 +286,9 @@ $testerFrom = $startDate.ToString("yyyy.MM.dd")
 $testerTo = $endDate.ToString("yyyy.MM.dd")
 
 & $testerScript -ConfigPath $configPathResolved -Symbol $testerSymbol -Period $timeframeValue -DateFrom $testerFrom -DateTo $testerTo -Portable:$Portable
+if ($LASTEXITCODE -ne 0) {
+    throw "MT5 Strategy Tester failed (exit code: $LASTEXITCODE)"
+}
 
 Write-Host ""
 Write-Host "Flow completed." -ForegroundColor Green
