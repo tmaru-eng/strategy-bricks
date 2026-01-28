@@ -1,9 +1,0 @@
-テスト: active
-日時: 2026年 1月26日 月曜日 11時23分29秒 JST
-初期化: false
-ロード済みブロック数: 
-ロード済み戦略数: 
-エラー数: 0
-0
-
-ログファイル: /Users/ctake3/Library/Application Support/net.metaquotes.wine.metatrader5/drive_c/Program Files/MetaTrader 5/Tester/Agent-127.0.0.1-3000/logs/20260126.log

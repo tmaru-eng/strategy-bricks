@@ -19,6 +19,11 @@ TEST_CONFIGS = [
         "description": "Single Block Unit Tests"
     },
     {
+        "name": "test_single_blocks_extra",
+        "config_file": "strategy/test_single_blocks_extra.json",
+        "description": "Single Block Unit Tests (extra)"
+    },
+    {
         "name": "active",
         "config_file": "strategy/active.json",
         "description": "Basic Strategy Test"
@@ -114,6 +119,7 @@ echo ""
 # テスト設定
 TESTS=(
     "test_single_blocks:Single Block Unit Tests"
+    "test_single_blocks_extra:Single Block Unit Tests (extra)"
     "active:Basic Strategy Test"
     "test_strategy_advanced:Advanced Strategy Test"
     "test_strategy_all_blocks:All Blocks Comprehensive Test"
@@ -166,6 +172,7 @@ def main():
         print("   bash scripts/run_mt5_tester.sh")
         print("\n2. Or run individual test:")
         print("   wine \"$MT5_PATH/terminal64.exe\" /config:\"$MT5_PATH/config/tester_test_single_blocks.ini\" /tester")
+        print("   wine \"$MT5_PATH/terminal64.exe\" /config:\"$MT5_PATH/config/tester_test_single_blocks_extra.ini\" /tester")
         print("\n3. Check results in:")
         print("   $MT5_PATH/Tester/")
         print("\n" + "=" * 60)

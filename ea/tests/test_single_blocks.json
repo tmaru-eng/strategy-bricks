@@ -14,7 +14,22 @@
     "maxPositionsPerSymbol": 50,
     "maxSpreadPips": 10.0,
     "session": {
-      "enabled": false
+      "enabled": true,
+      "windows": [
+        {
+          "start": "00:00",
+          "end": "23:59"
+        }
+      ],
+      "weekDays": {
+        "sun": true,
+        "mon": true,
+        "tue": true,
+        "wed": true,
+        "thu": true,
+        "fri": true,
+        "sat": true
+      }
     }
   },
   "strategies": [
@@ -32,15 +47,34 @@
             "id": "RG1",
             "type": "AND",
             "conditions": [
-              { "blockId": "filter.spreadMax#1" }
+              {
+                "blockId": "filter.spreadMax#1"
+              }
             ]
           }
         ]
       },
-      "lotModel": { "type": "lot.fixed", "params": { "lots": 0.01 } },
-      "riskModel": { "type": "risk.fixedSLTP", "params": { "slPips": 20, "tpPips": 40 } },
-      "exitModel": { "type": "exit.none", "params": {} },
-      "nanpinModel": { "type": "nanpin.off", "params": {} }
+      "lotModel": {
+        "type": "lot.fixed",
+        "params": {
+          "lots": 0.01
+        }
+      },
+      "riskModel": {
+        "type": "risk.fixedSLTP",
+        "params": {
+          "slPips": 20,
+          "tpPips": 40
+        }
+      },
+      "exitModel": {
+        "type": "exit.none",
+        "params": {}
+      },
+      "nanpinModel": {
+        "type": "nanpin.off",
+        "params": {}
+      }
     },
     {
       "id": "test_filter_atrRange",
@@ -56,15 +90,34 @@
             "id": "RG2",
             "type": "AND",
             "conditions": [
-              { "blockId": "filter.atrRange#1" }
+              {
+                "blockId": "filter.atrRange#1"
+              }
             ]
           }
         ]
       },
-      "lotModel": { "type": "lot.fixed", "params": { "lots": 0.01 } },
-      "riskModel": { "type": "risk.fixedSLTP", "params": { "slPips": 20, "tpPips": 40 } },
-      "exitModel": { "type": "exit.none", "params": {} },
-      "nanpinModel": { "type": "nanpin.off", "params": {} }
+      "lotModel": {
+        "type": "lot.fixed",
+        "params": {
+          "lots": 0.01
+        }
+      },
+      "riskModel": {
+        "type": "risk.fixedSLTP",
+        "params": {
+          "slPips": 20,
+          "tpPips": 40
+        }
+      },
+      "exitModel": {
+        "type": "exit.none",
+        "params": {}
+      },
+      "nanpinModel": {
+        "type": "nanpin.off",
+        "params": {}
+      }
     },
     {
       "id": "test_filter_stddevRange",
@@ -80,15 +133,34 @@
             "id": "RG3",
             "type": "AND",
             "conditions": [
-              { "blockId": "filter.stddevRange#1" }
+              {
+                "blockId": "filter.stddevRange#1"
+              }
             ]
           }
         ]
       },
-      "lotModel": { "type": "lot.fixed", "params": { "lots": 0.01 } },
-      "riskModel": { "type": "risk.fixedSLTP", "params": { "slPips": 20, "tpPips": 40 } },
-      "exitModel": { "type": "exit.none", "params": {} },
-      "nanpinModel": { "type": "nanpin.off", "params": {} }
+      "lotModel": {
+        "type": "lot.fixed",
+        "params": {
+          "lots": 0.01
+        }
+      },
+      "riskModel": {
+        "type": "risk.fixedSLTP",
+        "params": {
+          "slPips": 20,
+          "tpPips": 40
+        }
+      },
+      "exitModel": {
+        "type": "exit.none",
+        "params": {}
+      },
+      "nanpinModel": {
+        "type": "nanpin.off",
+        "params": {}
+      }
     },
     {
       "id": "test_filter_daysOfWeek",
@@ -104,15 +176,34 @@
             "id": "RG4",
             "type": "AND",
             "conditions": [
-              { "blockId": "filter.daysOfWeek#1" }
+              {
+                "blockId": "filter.daysOfWeek#1"
+              }
             ]
           }
         ]
       },
-      "lotModel": { "type": "lot.fixed", "params": { "lots": 0.01 } },
-      "riskModel": { "type": "risk.fixedSLTP", "params": { "slPips": 20, "tpPips": 40 } },
-      "exitModel": { "type": "exit.none", "params": {} },
-      "nanpinModel": { "type": "nanpin.off", "params": {} }
+      "lotModel": {
+        "type": "lot.fixed",
+        "params": {
+          "lots": 0.01
+        }
+      },
+      "riskModel": {
+        "type": "risk.fixedSLTP",
+        "params": {
+          "slPips": 20,
+          "tpPips": 40
+        }
+      },
+      "exitModel": {
+        "type": "exit.none",
+        "params": {}
+      },
+      "nanpinModel": {
+        "type": "nanpin.off",
+        "params": {}
+      }
     },
     {
       "id": "test_trend_maRelation_long",
@@ -128,15 +219,34 @@
             "id": "RG5",
             "type": "AND",
             "conditions": [
-              { "blockId": "trend.maRelation#1" }
+              {
+                "blockId": "trend.maRelation#1"
+              }
             ]
           }
         ]
       },
-      "lotModel": { "type": "lot.fixed", "params": { "lots": 0.01 } },
-      "riskModel": { "type": "risk.fixedSLTP", "params": { "slPips": 20, "tpPips": 40 } },
-      "exitModel": { "type": "exit.none", "params": {} },
-      "nanpinModel": { "type": "nanpin.off", "params": {} }
+      "lotModel": {
+        "type": "lot.fixed",
+        "params": {
+          "lots": 0.01
+        }
+      },
+      "riskModel": {
+        "type": "risk.fixedSLTP",
+        "params": {
+          "slPips": 20,
+          "tpPips": 40
+        }
+      },
+      "exitModel": {
+        "type": "exit.none",
+        "params": {}
+      },
+      "nanpinModel": {
+        "type": "nanpin.off",
+        "params": {}
+      }
     },
     {
       "id": "test_trend_maRelation_short",
@@ -152,15 +262,34 @@
             "id": "RG6",
             "type": "AND",
             "conditions": [
-              { "blockId": "trend.maRelation#2" }
+              {
+                "blockId": "trend.maRelation#2"
+              }
             ]
           }
         ]
       },
-      "lotModel": { "type": "lot.fixed", "params": { "lots": 0.01 } },
-      "riskModel": { "type": "risk.fixedSLTP", "params": { "slPips": 20, "tpPips": 40 } },
-      "exitModel": { "type": "exit.none", "params": {} },
-      "nanpinModel": { "type": "nanpin.off", "params": {} }
+      "lotModel": {
+        "type": "lot.fixed",
+        "params": {
+          "lots": 0.01
+        }
+      },
+      "riskModel": {
+        "type": "risk.fixedSLTP",
+        "params": {
+          "slPips": 20,
+          "tpPips": 40
+        }
+      },
+      "exitModel": {
+        "type": "exit.none",
+        "params": {}
+      },
+      "nanpinModel": {
+        "type": "nanpin.off",
+        "params": {}
+      }
     },
     {
       "id": "test_trend_maCross_golden",
@@ -176,15 +305,34 @@
             "id": "RG7",
             "type": "AND",
             "conditions": [
-              { "blockId": "trend.maCross#1" }
+              {
+                "blockId": "trend.maCross#1"
+              }
             ]
           }
         ]
       },
-      "lotModel": { "type": "lot.fixed", "params": { "lots": 0.01 } },
-      "riskModel": { "type": "risk.fixedSLTP", "params": { "slPips": 20, "tpPips": 40 } },
-      "exitModel": { "type": "exit.none", "params": {} },
-      "nanpinModel": { "type": "nanpin.off", "params": {} }
+      "lotModel": {
+        "type": "lot.fixed",
+        "params": {
+          "lots": 0.01
+        }
+      },
+      "riskModel": {
+        "type": "risk.fixedSLTP",
+        "params": {
+          "slPips": 20,
+          "tpPips": 40
+        }
+      },
+      "exitModel": {
+        "type": "exit.none",
+        "params": {}
+      },
+      "nanpinModel": {
+        "type": "nanpin.off",
+        "params": {}
+      }
     },
     {
       "id": "test_trend_maCross_dead",
@@ -200,15 +348,34 @@
             "id": "RG8",
             "type": "AND",
             "conditions": [
-              { "blockId": "trend.maCross#2" }
+              {
+                "blockId": "trend.maCross#2"
+              }
             ]
           }
         ]
       },
-      "lotModel": { "type": "lot.fixed", "params": { "lots": 0.01 } },
-      "riskModel": { "type": "risk.fixedSLTP", "params": { "slPips": 20, "tpPips": 40 } },
-      "exitModel": { "type": "exit.none", "params": {} },
-      "nanpinModel": { "type": "nanpin.off", "params": {} }
+      "lotModel": {
+        "type": "lot.fixed",
+        "params": {
+          "lots": 0.01
+        }
+      },
+      "riskModel": {
+        "type": "risk.fixedSLTP",
+        "params": {
+          "slPips": 20,
+          "tpPips": 40
+        }
+      },
+      "exitModel": {
+        "type": "exit.none",
+        "params": {}
+      },
+      "nanpinModel": {
+        "type": "nanpin.off",
+        "params": {}
+      }
     },
     {
       "id": "test_trend_adxThreshold",
@@ -224,15 +391,34 @@
             "id": "RG9",
             "type": "AND",
             "conditions": [
-              { "blockId": "trend.adxThreshold#1" }
+              {
+                "blockId": "trend.adxThreshold#1"
+              }
             ]
           }
         ]
       },
-      "lotModel": { "type": "lot.fixed", "params": { "lots": 0.01 } },
-      "riskModel": { "type": "risk.fixedSLTP", "params": { "slPips": 20, "tpPips": 40 } },
-      "exitModel": { "type": "exit.none", "params": {} },
-      "nanpinModel": { "type": "nanpin.off", "params": {} }
+      "lotModel": {
+        "type": "lot.fixed",
+        "params": {
+          "lots": 0.01
+        }
+      },
+      "riskModel": {
+        "type": "risk.fixedSLTP",
+        "params": {
+          "slPips": 20,
+          "tpPips": 40
+        }
+      },
+      "exitModel": {
+        "type": "exit.none",
+        "params": {}
+      },
+      "nanpinModel": {
+        "type": "nanpin.off",
+        "params": {}
+      }
     },
     {
       "id": "test_trend_ichimokuCloud_long",
@@ -248,15 +434,34 @@
             "id": "RG10",
             "type": "AND",
             "conditions": [
-              { "blockId": "trend.ichimokuCloud#1" }
+              {
+                "blockId": "trend.ichimokuCloud#1"
+              }
             ]
           }
         ]
       },
-      "lotModel": { "type": "lot.fixed", "params": { "lots": 0.01 } },
-      "riskModel": { "type": "risk.fixedSLTP", "params": { "slPips": 20, "tpPips": 40 } },
-      "exitModel": { "type": "exit.none", "params": {} },
-      "nanpinModel": { "type": "nanpin.off", "params": {} }
+      "lotModel": {
+        "type": "lot.fixed",
+        "params": {
+          "lots": 0.01
+        }
+      },
+      "riskModel": {
+        "type": "risk.fixedSLTP",
+        "params": {
+          "slPips": 20,
+          "tpPips": 40
+        }
+      },
+      "exitModel": {
+        "type": "exit.none",
+        "params": {}
+      },
+      "nanpinModel": {
+        "type": "nanpin.off",
+        "params": {}
+      }
     },
     {
       "id": "test_trend_sarDirection_bullish",
@@ -272,15 +477,34 @@
             "id": "RG11",
             "type": "AND",
             "conditions": [
-              { "blockId": "trend.sarDirection#1" }
+              {
+                "blockId": "trend.sarDirection#1"
+              }
             ]
           }
         ]
       },
-      "lotModel": { "type": "lot.fixed", "params": { "lots": 0.01 } },
-      "riskModel": { "type": "risk.fixedSLTP", "params": { "slPips": 20, "tpPips": 40 } },
-      "exitModel": { "type": "exit.none", "params": {} },
-      "nanpinModel": { "type": "nanpin.off", "params": {} }
+      "lotModel": {
+        "type": "lot.fixed",
+        "params": {
+          "lots": 0.01
+        }
+      },
+      "riskModel": {
+        "type": "risk.fixedSLTP",
+        "params": {
+          "slPips": 20,
+          "tpPips": 40
+        }
+      },
+      "exitModel": {
+        "type": "exit.none",
+        "params": {}
+      },
+      "nanpinModel": {
+        "type": "nanpin.off",
+        "params": {}
+      }
     },
     {
       "id": "test_trigger_bbReentry_long",
@@ -296,15 +520,34 @@
             "id": "RG12",
             "type": "AND",
             "conditions": [
-              { "blockId": "trigger.bbReentry#1" }
+              {
+                "blockId": "trigger.bbReentry#1"
+              }
             ]
           }
         ]
       },
-      "lotModel": { "type": "lot.fixed", "params": { "lots": 0.01 } },
-      "riskModel": { "type": "risk.fixedSLTP", "params": { "slPips": 20, "tpPips": 40 } },
-      "exitModel": { "type": "exit.none", "params": {} },
-      "nanpinModel": { "type": "nanpin.off", "params": {} }
+      "lotModel": {
+        "type": "lot.fixed",
+        "params": {
+          "lots": 0.01
+        }
+      },
+      "riskModel": {
+        "type": "risk.fixedSLTP",
+        "params": {
+          "slPips": 20,
+          "tpPips": 40
+        }
+      },
+      "exitModel": {
+        "type": "exit.none",
+        "params": {}
+      },
+      "nanpinModel": {
+        "type": "nanpin.off",
+        "params": {}
+      }
     },
     {
       "id": "test_trigger_bbBreakout_long",
@@ -320,15 +563,34 @@
             "id": "RG13",
             "type": "AND",
             "conditions": [
-              { "blockId": "trigger.bbBreakout#1" }
+              {
+                "blockId": "trigger.bbBreakout#1"
+              }
             ]
           }
         ]
       },
-      "lotModel": { "type": "lot.fixed", "params": { "lots": 0.01 } },
-      "riskModel": { "type": "risk.fixedSLTP", "params": { "slPips": 20, "tpPips": 40 } },
-      "exitModel": { "type": "exit.none", "params": {} },
-      "nanpinModel": { "type": "nanpin.off", "params": {} }
+      "lotModel": {
+        "type": "lot.fixed",
+        "params": {
+          "lots": 0.01
+        }
+      },
+      "riskModel": {
+        "type": "risk.fixedSLTP",
+        "params": {
+          "slPips": 20,
+          "tpPips": 40
+        }
+      },
+      "exitModel": {
+        "type": "exit.none",
+        "params": {}
+      },
+      "nanpinModel": {
+        "type": "nanpin.off",
+        "params": {}
+      }
     },
     {
       "id": "test_trigger_macdCross_golden",
@@ -344,15 +606,34 @@
             "id": "RG14",
             "type": "AND",
             "conditions": [
-              { "blockId": "trigger.macdCross#1" }
+              {
+                "blockId": "trigger.macdCross#1"
+              }
             ]
           }
         ]
       },
-      "lotModel": { "type": "lot.fixed", "params": { "lots": 0.01 } },
-      "riskModel": { "type": "risk.fixedSLTP", "params": { "slPips": 20, "tpPips": 40 } },
-      "exitModel": { "type": "exit.none", "params": {} },
-      "nanpinModel": { "type": "nanpin.off", "params": {} }
+      "lotModel": {
+        "type": "lot.fixed",
+        "params": {
+          "lots": 0.01
+        }
+      },
+      "riskModel": {
+        "type": "risk.fixedSLTP",
+        "params": {
+          "slPips": 20,
+          "tpPips": 40
+        }
+      },
+      "exitModel": {
+        "type": "exit.none",
+        "params": {}
+      },
+      "nanpinModel": {
+        "type": "nanpin.off",
+        "params": {}
+      }
     },
     {
       "id": "test_trigger_stochCross_golden",
@@ -368,15 +649,34 @@
             "id": "RG15",
             "type": "AND",
             "conditions": [
-              { "blockId": "trigger.stochCross#1" }
+              {
+                "blockId": "trigger.stochCross#1"
+              }
             ]
           }
         ]
       },
-      "lotModel": { "type": "lot.fixed", "params": { "lots": 0.01 } },
-      "riskModel": { "type": "risk.fixedSLTP", "params": { "slPips": 20, "tpPips": 40 } },
-      "exitModel": { "type": "exit.none", "params": {} },
-      "nanpinModel": { "type": "nanpin.off", "params": {} }
+      "lotModel": {
+        "type": "lot.fixed",
+        "params": {
+          "lots": 0.01
+        }
+      },
+      "riskModel": {
+        "type": "risk.fixedSLTP",
+        "params": {
+          "slPips": 20,
+          "tpPips": 40
+        }
+      },
+      "exitModel": {
+        "type": "exit.none",
+        "params": {}
+      },
+      "nanpinModel": {
+        "type": "nanpin.off",
+        "params": {}
+      }
     },
     {
       "id": "test_trigger_rsiLevel_oversold",
@@ -392,15 +692,34 @@
             "id": "RG16",
             "type": "AND",
             "conditions": [
-              { "blockId": "trigger.rsiLevel#1" }
+              {
+                "blockId": "trigger.rsiLevel#1"
+              }
             ]
           }
         ]
       },
-      "lotModel": { "type": "lot.fixed", "params": { "lots": 0.01 } },
-      "riskModel": { "type": "risk.fixedSLTP", "params": { "slPips": 20, "tpPips": 40 } },
-      "exitModel": { "type": "exit.none", "params": {} },
-      "nanpinModel": { "type": "nanpin.off", "params": {} }
+      "lotModel": {
+        "type": "lot.fixed",
+        "params": {
+          "lots": 0.01
+        }
+      },
+      "riskModel": {
+        "type": "risk.fixedSLTP",
+        "params": {
+          "slPips": 20,
+          "tpPips": 40
+        }
+      },
+      "exitModel": {
+        "type": "exit.none",
+        "params": {}
+      },
+      "nanpinModel": {
+        "type": "nanpin.off",
+        "params": {}
+      }
     },
     {
       "id": "test_trigger_cciLevel_oversold",
@@ -416,15 +735,34 @@
             "id": "RG17",
             "type": "AND",
             "conditions": [
-              { "blockId": "trigger.cciLevel#1" }
+              {
+                "blockId": "trigger.cciLevel#1"
+              }
             ]
           }
         ]
       },
-      "lotModel": { "type": "lot.fixed", "params": { "lots": 0.01 } },
-      "riskModel": { "type": "risk.fixedSLTP", "params": { "slPips": 20, "tpPips": 40 } },
-      "exitModel": { "type": "exit.none", "params": {} },
-      "nanpinModel": { "type": "nanpin.off", "params": {} }
+      "lotModel": {
+        "type": "lot.fixed",
+        "params": {
+          "lots": 0.01
+        }
+      },
+      "riskModel": {
+        "type": "risk.fixedSLTP",
+        "params": {
+          "slPips": 20,
+          "tpPips": 40
+        }
+      },
+      "exitModel": {
+        "type": "exit.none",
+        "params": {}
+      },
+      "nanpinModel": {
+        "type": "nanpin.off",
+        "params": {}
+      }
     },
     {
       "id": "test_trigger_sarFlip",
@@ -440,15 +778,34 @@
             "id": "RG18",
             "type": "AND",
             "conditions": [
-              { "blockId": "trigger.sarFlip#1" }
+              {
+                "blockId": "trigger.sarFlip#1"
+              }
             ]
           }
         ]
       },
-      "lotModel": { "type": "lot.fixed", "params": { "lots": 0.01 } },
-      "riskModel": { "type": "risk.fixedSLTP", "params": { "slPips": 20, "tpPips": 40 } },
-      "exitModel": { "type": "exit.none", "params": {} },
-      "nanpinModel": { "type": "nanpin.off", "params": {} }
+      "lotModel": {
+        "type": "lot.fixed",
+        "params": {
+          "lots": 0.01
+        }
+      },
+      "riskModel": {
+        "type": "risk.fixedSLTP",
+        "params": {
+          "slPips": 20,
+          "tpPips": 40
+        }
+      },
+      "exitModel": {
+        "type": "exit.none",
+        "params": {}
+      },
+      "nanpinModel": {
+        "type": "nanpin.off",
+        "params": {}
+      }
     },
     {
       "id": "test_trigger_wprLevel_oversold",
@@ -464,15 +821,34 @@
             "id": "RG19",
             "type": "AND",
             "conditions": [
-              { "blockId": "trigger.wprLevel#1" }
+              {
+                "blockId": "trigger.wprLevel#1"
+              }
             ]
           }
         ]
       },
-      "lotModel": { "type": "lot.fixed", "params": { "lots": 0.01 } },
-      "riskModel": { "type": "risk.fixedSLTP", "params": { "slPips": 20, "tpPips": 40 } },
-      "exitModel": { "type": "exit.none", "params": {} },
-      "nanpinModel": { "type": "nanpin.off", "params": {} }
+      "lotModel": {
+        "type": "lot.fixed",
+        "params": {
+          "lots": 0.01
+        }
+      },
+      "riskModel": {
+        "type": "risk.fixedSLTP",
+        "params": {
+          "slPips": 20,
+          "tpPips": 40
+        }
+      },
+      "exitModel": {
+        "type": "exit.none",
+        "params": {}
+      },
+      "nanpinModel": {
+        "type": "nanpin.off",
+        "params": {}
+      }
     },
     {
       "id": "test_trigger_mfiLevel_oversold",
@@ -488,15 +864,34 @@
             "id": "RG20",
             "type": "AND",
             "conditions": [
-              { "blockId": "trigger.mfiLevel#1" }
+              {
+                "blockId": "trigger.mfiLevel#1"
+              }
             ]
           }
         ]
       },
-      "lotModel": { "type": "lot.fixed", "params": { "lots": 0.01 } },
-      "riskModel": { "type": "risk.fixedSLTP", "params": { "slPips": 20, "tpPips": 40 } },
-      "exitModel": { "type": "exit.none", "params": {} },
-      "nanpinModel": { "type": "nanpin.off", "params": {} }
+      "lotModel": {
+        "type": "lot.fixed",
+        "params": {
+          "lots": 0.01
+        }
+      },
+      "riskModel": {
+        "type": "risk.fixedSLTP",
+        "params": {
+          "slPips": 20,
+          "tpPips": 40
+        }
+      },
+      "exitModel": {
+        "type": "exit.none",
+        "params": {}
+      },
+      "nanpinModel": {
+        "type": "nanpin.off",
+        "params": {}
+      }
     },
     {
       "id": "test_trigger_rviCross_golden",
@@ -512,15 +907,34 @@
             "id": "RG21",
             "type": "AND",
             "conditions": [
-              { "blockId": "trigger.rviCross#1" }
+              {
+                "blockId": "trigger.rviCross#1"
+              }
             ]
           }
         ]
       },
-      "lotModel": { "type": "lot.fixed", "params": { "lots": 0.01 } },
-      "riskModel": { "type": "risk.fixedSLTP", "params": { "slPips": 20, "tpPips": 40 } },
-      "exitModel": { "type": "exit.none", "params": {} },
-      "nanpinModel": { "type": "nanpin.off", "params": {} }
+      "lotModel": {
+        "type": "lot.fixed",
+        "params": {
+          "lots": 0.01
+        }
+      },
+      "riskModel": {
+        "type": "risk.fixedSLTP",
+        "params": {
+          "slPips": 20,
+          "tpPips": 40
+        }
+      },
+      "exitModel": {
+        "type": "exit.none",
+        "params": {}
+      },
+      "nanpinModel": {
+        "type": "nanpin.off",
+        "params": {}
+      }
     },
     {
       "id": "test_osc_momentum_above",
@@ -536,15 +950,34 @@
             "id": "RG22",
             "type": "AND",
             "conditions": [
-              { "blockId": "osc.momentum#1" }
+              {
+                "blockId": "osc.momentum#1"
+              }
             ]
           }
         ]
       },
-      "lotModel": { "type": "lot.fixed", "params": { "lots": 0.01 } },
-      "riskModel": { "type": "risk.fixedSLTP", "params": { "slPips": 20, "tpPips": 40 } },
-      "exitModel": { "type": "exit.none", "params": {} },
-      "nanpinModel": { "type": "nanpin.off", "params": {} }
+      "lotModel": {
+        "type": "lot.fixed",
+        "params": {
+          "lots": 0.01
+        }
+      },
+      "riskModel": {
+        "type": "risk.fixedSLTP",
+        "params": {
+          "slPips": 20,
+          "tpPips": 40
+        }
+      },
+      "exitModel": {
+        "type": "exit.none",
+        "params": {}
+      },
+      "nanpinModel": {
+        "type": "nanpin.off",
+        "params": {}
+      }
     },
     {
       "id": "test_osc_osma_above",
@@ -560,15 +993,34 @@
             "id": "RG23",
             "type": "AND",
             "conditions": [
-              { "blockId": "osc.osma#1" }
+              {
+                "blockId": "osc.osma#1"
+              }
             ]
           }
         ]
       },
-      "lotModel": { "type": "lot.fixed", "params": { "lots": 0.01 } },
-      "riskModel": { "type": "risk.fixedSLTP", "params": { "slPips": 20, "tpPips": 40 } },
-      "exitModel": { "type": "exit.none", "params": {} },
-      "nanpinModel": { "type": "nanpin.off", "params": {} }
+      "lotModel": {
+        "type": "lot.fixed",
+        "params": {
+          "lots": 0.01
+        }
+      },
+      "riskModel": {
+        "type": "risk.fixedSLTP",
+        "params": {
+          "slPips": 20,
+          "tpPips": 40
+        }
+      },
+      "exitModel": {
+        "type": "exit.none",
+        "params": {}
+      },
+      "nanpinModel": {
+        "type": "nanpin.off",
+        "params": {}
+      }
     },
     {
       "id": "test_osc_forceIndex_above",
@@ -584,15 +1036,34 @@
             "id": "RG24",
             "type": "AND",
             "conditions": [
-              { "blockId": "osc.forceIndex#1" }
+              {
+                "blockId": "osc.forceIndex#1"
+              }
             ]
           }
         ]
       },
-      "lotModel": { "type": "lot.fixed", "params": { "lots": 0.01 } },
-      "riskModel": { "type": "risk.fixedSLTP", "params": { "slPips": 20, "tpPips": 40 } },
-      "exitModel": { "type": "exit.none", "params": {} },
-      "nanpinModel": { "type": "nanpin.off", "params": {} }
+      "lotModel": {
+        "type": "lot.fixed",
+        "params": {
+          "lots": 0.01
+        }
+      },
+      "riskModel": {
+        "type": "risk.fixedSLTP",
+        "params": {
+          "slPips": 20,
+          "tpPips": 40
+        }
+      },
+      "exitModel": {
+        "type": "exit.none",
+        "params": {}
+      },
+      "nanpinModel": {
+        "type": "nanpin.off",
+        "params": {}
+      }
     },
     {
       "id": "test_volume_obvTrend_up",
@@ -608,15 +1079,34 @@
             "id": "RG25",
             "type": "AND",
             "conditions": [
-              { "blockId": "volume.obvTrend#1" }
+              {
+                "blockId": "volume.obvTrend#1"
+              }
             ]
           }
         ]
       },
-      "lotModel": { "type": "lot.fixed", "params": { "lots": 0.01 } },
-      "riskModel": { "type": "risk.fixedSLTP", "params": { "slPips": 20, "tpPips": 40 } },
-      "exitModel": { "type": "exit.none", "params": {} },
-      "nanpinModel": { "type": "nanpin.off", "params": {} }
+      "lotModel": {
+        "type": "lot.fixed",
+        "params": {
+          "lots": 0.01
+        }
+      },
+      "riskModel": {
+        "type": "risk.fixedSLTP",
+        "params": {
+          "slPips": 20,
+          "tpPips": 40
+        }
+      },
+      "exitModel": {
+        "type": "exit.none",
+        "params": {}
+      },
+      "nanpinModel": {
+        "type": "nanpin.off",
+        "params": {}
+      }
     },
     {
       "id": "test_bill_fractals_up",
@@ -632,15 +1122,34 @@
             "id": "RG26",
             "type": "AND",
             "conditions": [
-              { "blockId": "bill.fractals#1" }
+              {
+                "blockId": "bill.fractals#1"
+              }
             ]
           }
         ]
       },
-      "lotModel": { "type": "lot.fixed", "params": { "lots": 0.01 } },
-      "riskModel": { "type": "risk.fixedSLTP", "params": { "slPips": 20, "tpPips": 40 } },
-      "exitModel": { "type": "exit.none", "params": {} },
-      "nanpinModel": { "type": "nanpin.off", "params": {} }
+      "lotModel": {
+        "type": "lot.fixed",
+        "params": {
+          "lots": 0.01
+        }
+      },
+      "riskModel": {
+        "type": "risk.fixedSLTP",
+        "params": {
+          "slPips": 20,
+          "tpPips": 40
+        }
+      },
+      "exitModel": {
+        "type": "exit.none",
+        "params": {}
+      },
+      "nanpinModel": {
+        "type": "nanpin.off",
+        "params": {}
+      }
     },
     {
       "id": "test_bill_alligator_long",
@@ -656,152 +1165,577 @@
             "id": "RG27",
             "type": "AND",
             "conditions": [
-              { "blockId": "bill.alligator#1" }
+              {
+                "blockId": "bill.alligator#1"
+              }
             ]
           }
         ]
       },
-      "lotModel": { "type": "lot.fixed", "params": { "lots": 0.01 } },
-      "riskModel": { "type": "risk.fixedSLTP", "params": { "slPips": 20, "tpPips": 40 } },
-      "exitModel": { "type": "exit.none", "params": {} },
-      "nanpinModel": { "type": "nanpin.off", "params": {} }
+      "lotModel": {
+        "type": "lot.fixed",
+        "params": {
+          "lots": 0.01
+        }
+      },
+      "riskModel": {
+        "type": "risk.fixedSLTP",
+        "params": {
+          "slPips": 20,
+          "tpPips": 40
+        }
+      },
+      "exitModel": {
+        "type": "exit.none",
+        "params": {}
+      },
+      "nanpinModel": {
+        "type": "nanpin.off",
+        "params": {}
+      }
+    },
+    {
+      "id": "test_filter_timeWindow",
+      "name": "Filter: Session TimeWindow",
+      "enabled": true,
+      "priority": 28,
+      "conflictPolicy": "all",
+      "directionPolicy": "both",
+      "entryRequirement": {
+        "type": "OR",
+        "ruleGroups": [
+          {
+            "id": "RG28",
+            "type": "AND",
+            "conditions": [
+              {
+                "blockId": "filter.timeWindow#1"
+              }
+            ]
+          }
+        ]
+      },
+      "lotModel": {
+        "type": "lot.fixed",
+        "params": {
+          "lots": 0.01
+        }
+      },
+      "riskModel": {
+        "type": "risk.fixedSLTP",
+        "params": {
+          "slPips": 20,
+          "tpPips": 40
+        }
+      },
+      "exitModel": {
+        "type": "exit.none",
+        "params": {}
+      },
+      "nanpinModel": {
+        "type": "nanpin.off",
+        "params": {}
+      }
+    },
+    {
+      "id": "test_model_lot_riskPercent",
+      "name": "Model: Lot RiskPercent",
+      "enabled": true,
+      "priority": 29,
+      "conflictPolicy": "all",
+      "directionPolicy": "longOnly",
+      "entryRequirement": {
+        "type": "OR",
+        "ruleGroups": [
+          {
+            "id": "RG29",
+            "type": "AND",
+            "conditions": [
+              {
+                "blockId": "trend.maRelation#3"
+              }
+            ]
+          }
+        ]
+      },
+      "lotModel": {
+        "type": "lot.riskPercent",
+        "params": {
+          "riskPercent": 1.0,
+          "useMarginFree": false,
+          "minLot": 0.01,
+          "maxLot": 1.0
+        }
+      },
+      "riskModel": {
+        "type": "risk.fixedSLTP",
+        "params": {
+          "slPips": 20,
+          "tpPips": 40
+        }
+      },
+      "exitModel": {
+        "type": "exit.none",
+        "params": {}
+      },
+      "nanpinModel": {
+        "type": "nanpin.off",
+        "params": {}
+      }
+    },
+    {
+      "id": "test_model_risk_atrBased",
+      "name": "Model: Risk ATR Based",
+      "enabled": true,
+      "priority": 30,
+      "conflictPolicy": "all",
+      "directionPolicy": "longOnly",
+      "entryRequirement": {
+        "type": "OR",
+        "ruleGroups": [
+          {
+            "id": "RG30",
+            "type": "AND",
+            "conditions": [
+              {
+                "blockId": "trend.maRelation#4"
+              }
+            ]
+          }
+        ]
+      },
+      "lotModel": {
+        "type": "lot.fixed",
+        "params": {
+          "lots": 0.01
+        }
+      },
+      "riskModel": {
+        "type": "risk.atrBased",
+        "params": {
+          "atrPeriod": 14,
+          "atrTimeframe": "H1",
+          "atrRatio": 3.0,
+          "buyTpRatio": 1.2,
+          "buySlRatio": 1.3,
+          "sellTpRatio": 1.2,
+          "sellSlRatio": 1.3
+        }
+      },
+      "exitModel": {
+        "type": "exit.none",
+        "params": {}
+      },
+      "nanpinModel": {
+        "type": "nanpin.off",
+        "params": {}
+      }
+    },
+    {
+      "id": "test_model_exit_trail",
+      "name": "Model: Exit Trail",
+      "enabled": true,
+      "priority": 31,
+      "conflictPolicy": "all",
+      "directionPolicy": "longOnly",
+      "entryRequirement": {
+        "type": "OR",
+        "ruleGroups": [
+          {
+            "id": "RG31",
+            "type": "AND",
+            "conditions": [
+              {
+                "blockId": "trend.maRelation#5"
+              }
+            ]
+          }
+        ]
+      },
+      "lotModel": {
+        "type": "lot.fixed",
+        "params": {
+          "lots": 0.01
+        }
+      },
+      "riskModel": {
+        "type": "risk.fixedSLTP",
+        "params": {
+          "slPips": 20,
+          "tpPips": 40
+        }
+      },
+      "exitModel": {
+        "type": "exit.trail",
+        "params": {
+          "startPips": 10,
+          "trailPips": 5,
+          "useAtr": false
+        }
+      },
+      "nanpinModel": {
+        "type": "nanpin.off",
+        "params": {}
+      }
+    },
+    {
+      "id": "test_model_exit_breakEven",
+      "name": "Model: Exit BreakEven",
+      "enabled": true,
+      "priority": 32,
+      "conflictPolicy": "all",
+      "directionPolicy": "longOnly",
+      "entryRequirement": {
+        "type": "OR",
+        "ruleGroups": [
+          {
+            "id": "RG32",
+            "type": "AND",
+            "conditions": [
+              {
+                "blockId": "trend.maRelation#6"
+              }
+            ]
+          }
+        ]
+      },
+      "lotModel": {
+        "type": "lot.fixed",
+        "params": {
+          "lots": 0.01
+        }
+      },
+      "riskModel": {
+        "type": "risk.fixedSLTP",
+        "params": {
+          "slPips": 20,
+          "tpPips": 40
+        }
+      },
+      "exitModel": {
+        "type": "exit.breakEven",
+        "params": {
+          "triggerPips": 10,
+          "offsetPips": 1
+        }
+      },
+      "nanpinModel": {
+        "type": "nanpin.off",
+        "params": {}
+      }
     }
   ],
   "blocks": [
     {
       "id": "filter.spreadMax#1",
       "typeId": "filter.spreadMax",
-      "params": { "maxSpreadPips": 10.0 }
+      "params": {
+        "maxSpreadPips": 10.0
+      }
     },
     {
       "id": "filter.atrRange#1",
       "typeId": "filter.volatility.atrRange",
-      "params": { "period": 14, "minAtr": 0.0, "maxAtr": 1.0 }
+      "params": {
+        "period": 14,
+        "minAtr": 0.0,
+        "maxAtr": 1.0
+      }
     },
     {
       "id": "filter.stddevRange#1",
       "typeId": "filter.volatility.stddevRange",
-      "params": { "period": 20, "maPeriod": 20, "maMethod": "SMA", "appliedPrice": "CLOSE", "min": 0.0, "max": 1.0 }
+      "params": {
+        "period": 20,
+        "maPeriod": 20,
+        "maMethod": "SMA",
+        "appliedPrice": "CLOSE",
+        "min": 0.0,
+        "max": 1.0
+      }
     },
     {
       "id": "filter.daysOfWeek#1",
       "typeId": "filter.session.daysOfWeek",
-      "params": { "days": [1, 2, 3, 4, 5] }
+      "params": {
+        "days": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ]
+      }
+    },
+    {
+      "id": "filter.timeWindow#1",
+      "typeId": "filter.session.timeWindow",
+      "params": {
+        "start": "09:00",
+        "end": "17:00"
+      }
     },
     {
       "id": "trend.maRelation#1",
       "typeId": "trend.maRelation",
-      "params": { "period": 20, "maType": "SMA", "relation": "closeAbove" }
+      "params": {
+        "period": 20,
+        "maType": "SMA",
+        "relation": "closeAbove"
+      }
     },
     {
       "id": "trend.maRelation#2",
       "typeId": "trend.maRelation",
-      "params": { "period": 20, "maType": "SMA", "relation": "closeBelow" }
+      "params": {
+        "period": 20,
+        "maType": "SMA",
+        "relation": "closeBelow"
+      }
+    },
+    {
+      "id": "trend.maRelation#3",
+      "typeId": "trend.maRelation",
+      "params": {
+        "period": 20,
+        "maType": "SMA",
+        "relation": "closeAbove"
+      }
+    },
+    {
+      "id": "trend.maRelation#4",
+      "typeId": "trend.maRelation",
+      "params": {
+        "period": 20,
+        "maType": "SMA",
+        "relation": "closeAbove"
+      }
+    },
+    {
+      "id": "trend.maRelation#5",
+      "typeId": "trend.maRelation",
+      "params": {
+        "period": 20,
+        "maType": "SMA",
+        "relation": "closeAbove"
+      }
+    },
+    {
+      "id": "trend.maRelation#6",
+      "typeId": "trend.maRelation",
+      "params": {
+        "period": 20,
+        "maType": "SMA",
+        "relation": "closeAbove"
+      }
     },
     {
       "id": "trend.maCross#1",
       "typeId": "trend.maCross",
-      "params": { "fastPeriod": 5, "slowPeriod": 20, "maMethod": "EMA", "appliedPrice": "CLOSE", "crossType": "golden" }
+      "params": {
+        "fastPeriod": 5,
+        "slowPeriod": 20,
+        "maMethod": "EMA",
+        "appliedPrice": "CLOSE",
+        "crossType": "golden"
+      }
     },
     {
       "id": "trend.maCross#2",
       "typeId": "trend.maCross",
-      "params": { "fastPeriod": 5, "slowPeriod": 20, "maMethod": "EMA", "appliedPrice": "CLOSE", "crossType": "dead" }
+      "params": {
+        "fastPeriod": 5,
+        "slowPeriod": 20,
+        "maMethod": "EMA",
+        "appliedPrice": "CLOSE",
+        "crossType": "dead"
+      }
     },
     {
       "id": "trend.adxThreshold#1",
       "typeId": "trend.adxThreshold",
-      "params": { "period": 14, "minAdx": 15 }
+      "params": {
+        "period": 14,
+        "minAdx": 15
+      }
     },
     {
       "id": "trend.ichimokuCloud#1",
       "typeId": "trend.ichimokuCloud",
-      "params": { "tenkan": 9, "kijun": 26, "senkouB": 52, "position": "above" }
+      "params": {
+        "tenkan": 9,
+        "kijun": 26,
+        "senkouB": 52,
+        "position": "above"
+      }
     },
     {
       "id": "trend.sarDirection#1",
       "typeId": "trend.sarDirection",
-      "params": { "step": 0.02, "maximum": 0.2, "direction": "bullish" }
+      "params": {
+        "step": 0.02,
+        "maximum": 0.2,
+        "direction": "bullish"
+      }
     },
     {
       "id": "trigger.bbReentry#1",
       "typeId": "trigger.bbReentry",
-      "params": { "period": 20, "deviation": 2.0, "side": "lowerToInside" }
+      "params": {
+        "period": 20,
+        "deviation": 2.0,
+        "side": "lowerToInside"
+      }
     },
     {
       "id": "trigger.bbBreakout#1",
       "typeId": "trigger.bbBreakout",
-      "params": { "period": 20, "deviation": 2.0, "direction": "upper" }
+      "params": {
+        "period": 20,
+        "deviation": 2.0,
+        "direction": "upper"
+      }
     },
     {
       "id": "trigger.macdCross#1",
       "typeId": "trigger.macdCross",
-      "params": { "fastEma": 12, "slowEma": 26, "signal": 9, "appliedPrice": "CLOSE", "direction": "golden" }
+      "params": {
+        "fastEma": 12,
+        "slowEma": 26,
+        "signal": 9,
+        "appliedPrice": "CLOSE",
+        "direction": "golden"
+      }
     },
     {
       "id": "trigger.stochCross#1",
       "typeId": "trigger.stochCross",
-      "params": { "kPeriod": 5, "dPeriod": 3, "slowing": 3, "maMethod": "SMA", "priceField": "LOWHIGH", "direction": "golden" }
+      "params": {
+        "kPeriod": 5,
+        "dPeriod": 3,
+        "slowing": 3,
+        "maMethod": "SMA",
+        "priceField": "LOWHIGH",
+        "direction": "golden"
+      }
     },
     {
       "id": "trigger.rsiLevel#1",
       "typeId": "trigger.rsiLevel",
-      "params": { "period": 14, "appliedPrice": "CLOSE", "threshold": 30, "mode": "oversold" }
+      "params": {
+        "period": 14,
+        "appliedPrice": "CLOSE",
+        "threshold": 30,
+        "mode": "oversold"
+      }
     },
     {
       "id": "trigger.cciLevel#1",
       "typeId": "trigger.cciLevel",
-      "params": { "period": 14, "appliedPrice": "TYPICAL", "threshold": -100, "mode": "oversold" }
+      "params": {
+        "period": 14,
+        "appliedPrice": "TYPICAL",
+        "threshold": -100,
+        "mode": "oversold"
+      }
     },
     {
       "id": "trigger.sarFlip#1",
       "typeId": "trigger.sarFlip",
-      "params": { "step": 0.02, "maximum": 0.2 }
+      "params": {
+        "step": 0.02,
+        "maximum": 0.2
+      }
     },
     {
       "id": "trigger.wprLevel#1",
       "typeId": "trigger.wprLevel",
-      "params": { "period": 14, "threshold": -80, "mode": "oversold" }
+      "params": {
+        "period": 14,
+        "threshold": -80,
+        "mode": "oversold"
+      }
     },
     {
       "id": "trigger.mfiLevel#1",
       "typeId": "trigger.mfiLevel",
-      "params": { "period": 14, "appliedVolume": "TICK", "threshold": 20, "mode": "oversold" }
+      "params": {
+        "period": 14,
+        "appliedVolume": "TICK",
+        "threshold": 20,
+        "mode": "oversold"
+      }
     },
     {
       "id": "trigger.rviCross#1",
       "typeId": "trigger.rviCross",
-      "params": { "period": 10, "direction": "golden" }
+      "params": {
+        "period": 10,
+        "direction": "golden"
+      }
     },
     {
       "id": "osc.momentum#1",
       "typeId": "osc.momentum",
-      "params": { "period": 14, "appliedPrice": "CLOSE", "comparison": "above", "threshold": 100 }
+      "params": {
+        "period": 14,
+        "appliedPrice": "CLOSE",
+        "comparison": "above",
+        "threshold": 100
+      }
     },
     {
       "id": "osc.osma#1",
       "typeId": "osc.osma",
-      "params": { "fastEma": 12, "slowEma": 26, "signal": 9, "appliedPrice": "CLOSE", "comparison": "above", "threshold": 0 }
+      "params": {
+        "fastEma": 12,
+        "slowEma": 26,
+        "signal": 9,
+        "appliedPrice": "CLOSE",
+        "comparison": "above",
+        "threshold": 0
+      }
     },
     {
       "id": "osc.forceIndex#1",
       "typeId": "osc.forceIndex",
-      "params": { "maPeriod": 13, "maMethod": "SMA", "appliedVolume": "TICK", "comparison": "above", "threshold": 0 }
+      "params": {
+        "maPeriod": 13,
+        "maMethod": "SMA",
+        "appliedVolume": "TICK",
+        "comparison": "above",
+        "threshold": 0
+      }
     },
     {
       "id": "volume.obvTrend#1",
       "typeId": "volume.obvTrend",
-      "params": { "appliedVolume": "TICK", "direction": "up" }
+      "params": {
+        "appliedVolume": "TICK",
+        "direction": "up"
+      }
     },
     {
       "id": "bill.fractals#1",
       "typeId": "bill.fractals",
-      "params": { "direction": "up" }
+      "params": {
+        "direction": "up"
+      }
     },
     {
       "id": "bill.alligator#1",
       "typeId": "bill.alligator",
-      "params": { "jawPeriod": 13, "jawShift": 8, "teethPeriod": 8, "teethShift": 5, "lipsPeriod": 5, "lipsShift": 3, "maMethod": "SMMA", "appliedPrice": "MEDIAN", "position": "above" }
+      "params": {
+        "jawPeriod": 13,
+        "jawShift": 8,
+        "teethPeriod": 8,
+        "teethShift": 5,
+        "lipsPeriod": 5,
+        "lipsShift": 3,
+        "maMethod": "SMMA",
+        "appliedPrice": "MEDIAN",
+        "position": "above"
+      }
     }
   ]
 }

@@ -4,8 +4,13 @@ import { vi } from 'vitest'
 if (!window.matchMedia) {
   window.matchMedia = () => ({
     matches: false,
+    media: '',
+    onchange: null,
     addListener: () => {},
-    removeListener: () => {}
+    removeListener: () => {},
+    addEventListener: () => {},
+    removeEventListener: () => {},
+    dispatchEvent: () => false
   })
 }
 

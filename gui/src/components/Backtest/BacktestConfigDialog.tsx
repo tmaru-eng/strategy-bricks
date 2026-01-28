@@ -141,7 +141,7 @@ function saveConfigToStorage(config: BacktestConfig): void {
  * 入力するためのダイアログを表示します。
  * 
  * 機能:
- * - デフォルト値の設定（USDJPY, M1, 過去3ヶ月）
+ * - デフォルト値の設定（USDJPYm, M1, 過去7日間）
  * - 入力値の検証
  * - ローカルストレージへの設定永続化
  */

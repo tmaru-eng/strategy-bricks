@@ -125,8 +125,11 @@ class MockBacktestProcessManager {
       await this.cancelBacktest()
     }
 
-    const timestamp = Date.now()
-    const resultsPath = `/mock/path/results_${timestamp}.json`
+    const fileName = strategyConfigPath.split(/[\\/]/).pop() || 'strategy.json'
+    const configBase = fileName.replace(/\.json$/i, '')
+    const hasTimestampSuffix = /_\d+$/.test(configBase)
+    const resultsBase = hasTimestampSuffix ? configBase : `${configBase}_${Date.now()}`
+    const resultsPath = `/mock/path/${resultsBase}_results.json`
 
     // モックプロセスを作成
     const mockProcess = new EventEmitter() as any
@@ -141,6 +144,8 @@ class MockBacktestProcessManager {
     }, this.TIMEOUT_MS)
 
     return new Promise((resolve, reject) => {
+      let settled = false
+
       mockProcess.on('exit', (code: number) => {
         if (this.timeoutHandle) {
           clearTimeout(this.timeoutHandle)
@@ -150,9 +155,15 @@ class MockBacktestProcessManager {
         this.currentProcess = null
 
         if (code === 0) {
-          resolve(resultsPath)
+          if (!settled) {
+            settled = true
+            resolve(resultsPath)
+          }
         } else {
-          reject(new Error(`Backtest failed with code ${code}`))
+          if (!settled) {
+            settled = true
+            reject(new Error(`Backtest failed with code ${code}`))
+          }
         }
       })
 
@@ -163,12 +174,17 @@ class MockBacktestProcessManager {
         }
 
         this.currentProcess = null
-        reject(err)
+        if (!settled) {
+          settled = true
+          reject(err)
+        }
       })
 
       // テスト用: 即座に成功を返す
       setTimeout(() => {
-        mockProcess.emit('exit', 0)
+        if (!settled) {
+          mockProcess.emit('exit', 0)
+        }
       }, 10)
     })
   }
@@ -213,7 +229,7 @@ describe('BacktestProcessManager', () => {
 
       const resultsPath = await manager.startBacktest(config, strategyPath)
 
-      expect(resultsPath).toMatch(/results_\d+\.json$/)
+      expect(resultsPath).toMatch(/strategy_\d+_results\.json$/)
     })
 
     it('should construct correct command line arguments', async () => {
@@ -356,12 +372,10 @@ describe('BacktestProcessManager', () => {
         const promise = originalStart(config, strategyPath)
         
         // プロセスエラーを発生させる
-        setTimeout(() => {
-          const process = (this as any).currentProcess
-          if (process) {
-            process.emit('error', new Error('Process spawn failed'))
-          }
-        }, 5)
+        const process = (this as any).currentProcess
+        if (process) {
+          process.emit('error', new Error('Process spawn failed'))
+        }
         
         return promise
       }
@@ -411,7 +425,7 @@ describe('BacktestProcessManager', () => {
       const resultsPath = await manager.startBacktest(config, strategyPath)
 
       // 結果ファイルが ea/tests/ ディレクトリに配置されることを確認
-      expect(resultsPath).toContain('results_')
+      expect(resultsPath).toContain('_results.json')
       expect(resultsPath).toContain('.json')
     })
   })
@@ -452,7 +466,7 @@ describe('BacktestProcessManager', () => {
             ;(this as any).currentProcess = null
 
             if (code === 0) {
-              resolve(`/mock/path/results_${Date.now()}.json`)
+              resolve(`/mock/path/strategy_${Date.now()}_results.json`)
             } else {
               reject(new Error(`Backtest failed with code ${code}`))
             }
@@ -773,7 +787,7 @@ describe('ErrorHandler', () => {
 
     it('should register multiple temporary files', () => {
       const file1 = '/tmp/strategy_123.json'
-      const file2 = '/tmp/results_123.json'
+      const file2 = '/tmp/strategy_123_results.json'
       
       MockErrorHandler.registerTempFile(file1)
       MockErrorHandler.registerTempFile(file2)
@@ -810,7 +824,7 @@ describe('ErrorHandler', () => {
   describe('error handling with cleanup', () => {
     it('should cleanup temporary files when handling errors', async () => {
       MockErrorHandler.registerTempFile('/tmp/strategy_123.json')
-      MockErrorHandler.registerTempFile('/tmp/results_123.json')
+      MockErrorHandler.registerTempFile('/tmp/strategy_123_results.json')
       
       const error = new Error('Test error')
       MockErrorHandler.handleBacktestError(error, 'test')
@@ -982,7 +996,7 @@ describe('BacktestProcessManager with ErrorHandler integration', () => {
 
   it('should cleanup temporary files on cancellation', async () => {
     MockErrorHandler.registerTempFile('/tmp/strategy_123.json')
-    MockErrorHandler.registerTempFile('/tmp/results_123.json')
+    MockErrorHandler.registerTempFile('/tmp/strategy_123_results.json')
     
     await manager.cancelBacktest()
     await MockErrorHandler.cleanup()
@@ -993,7 +1007,7 @@ describe('BacktestProcessManager with ErrorHandler integration', () => {
 
   it('should cleanup temporary files on error', async () => {
     MockErrorHandler.registerTempFile('/tmp/strategy_123.json')
-    MockErrorHandler.registerTempFile('/tmp/results_123.json')
+    MockErrorHandler.registerTempFile('/tmp/strategy_123_results.json')
     
     const error = new Error('Test error')
     MockErrorHandler.handleBacktestError(error, 'test')

@@ -13,7 +13,7 @@ MetaTrader5の過去データに対してバックテストするためのエン
     python backtest_engine.py --config ../ea/tests/strategy_123.json 
                               --symbol USDJPY --timeframe M1 
                               --start 2024-01-01T00:00:00Z --end 2024-03-31T23:59:59Z
-                              --output ../ea/tests/results_123.json
+                              --output ../tmp/backtest/results_123.json
 """
 
 import argparse
@@ -131,6 +131,11 @@ class BacktestEngine:
         if terminal_info:
             print(f"MT5初期化成功: バージョン {version}")
             print(f"ターミナル: {terminal_info.name}, ビルド {terminal_info.build}")
+            if getattr(terminal_info, "connected", True) is False:
+                print(
+                    "Warning: MT5 terminal is not connected. Please log in and ensure the terminal is online.",
+                    file=sys.stderr
+                )
         else:
             print(f"MT5初期化成功: バージョン {version}")
         
@@ -221,6 +226,43 @@ class BacktestEngine:
         mt5_timeframe = timeframe_map.get(self.timeframe)
         if mt5_timeframe is None:
             raise ValueError(f"サポートされていない時間軸: {self.timeframe}")
+
+        requested_symbol = self.symbol
+        symbol_info = mt5.symbol_info(requested_symbol)
+        if symbol_info is None:
+            candidates = [
+                s.name
+                for s in (mt5.symbols_get() or [])
+                if s.name.lower().startswith(requested_symbol.lower())
+            ]
+            if candidates:
+                lower_map = {c.lower(): c for c in candidates}
+                if requested_symbol.lower() in lower_map:
+                    selected = lower_map[requested_symbol.lower()]
+                elif len(candidates) == 1:
+                    selected = candidates[0]
+                else:
+                    preview = ", ".join(candidates[:5])
+                    more = "" if len(candidates) <= 5 else f" (+{len(candidates) - 5} more)"
+                    raise Exception(
+                        f"シンボルが見つかりません: {requested_symbol}。"
+                        f"候補が複数あります: {preview}{more}。"
+                        "正確なシンボル名を指定してください。"
+                    )
+                self.symbol = selected
+                symbol_info = mt5.symbol_info(self.symbol)
+                if requested_symbol.lower() != self.symbol.lower():
+                    print(
+                        f"警告: シンボルが見つかりません: {requested_symbol}。{self.symbol} を使用します。",
+                        file=sys.stderr,
+                    )
+            else:
+                raise Exception(f"シンボルが見つかりません: {requested_symbol}。類似候補がありません。")
+        if not symbol_info or not symbol_info.visible:
+            if not mt5.symbol_select(self.symbol, True):
+                error = mt5.last_error()
+                raise Exception(f"Failed to select symbol: {self.symbol}. Error: {error}")
+
         
         # バーデータを取得
         print(f"過去データを取得中...")
@@ -246,10 +288,16 @@ class BacktestEngine:
         from datetime import timezone
         first_time = datetime.fromtimestamp(rates[0]['time'], tz=timezone.utc)
         last_time = datetime.fromtimestamp(rates[-1]['time'], tz=timezone.utc)
+        start_date = self.start_date
+        end_date = self.end_date
+        if start_date.tzinfo is None:
+            start_date = start_date.replace(tzinfo=timezone.utc)
+        if end_date.tzinfo is None:
+            end_date = end_date.replace(tzinfo=timezone.utc)
         
         print(f"データ範囲: {first_time} - {last_time}")
         
-        if first_time > self.start_date or last_time < self.end_date:
+        if first_time > start_date or last_time < end_date:
             print(
                 f"警告: データ範囲が不完全です。"
                 f"要求: {self.start_date} - {self.end_date}, "

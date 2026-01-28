@@ -2,6 +2,9 @@
 
 このディレクトリには、Strategy Bricks EAのテスト設定ファイルが含まれています。
 
+> NOTE: Windows / Wine（macOS）両方で運用します。  
+> 詳細は `docs/04_operations/70_strategy_tester_windows.md` を参照してください。
+
 ## テストファイル一覧
 
 ### 1. `active.json` (2.7KB)
@@ -13,8 +16,8 @@
 
 ### 2. `test_single_blocks.json` (25KB) ⭐ 最重要
 **目的**: 単体ブロックテスト（問題の切り分け）
-- **戦略数**: 27
-- **ブロック数**: 27
+- **戦略数**: 32
+- **ブロック数**: 32
 - **期待取引回数**: 50-200回（3ヶ月）
 - **用途**: 各ブロックが単体で正しく動作するか確認
 - **特徴**: 
@@ -23,14 +26,20 @@
   - 取引発生の可能性を最大化
 
 **カバーするブロック**:
-- Filter: spreadMax, atrRange, stddevRange, daysOfWeek
+- Filter: spreadMax, atrRange, stddevRange, daysOfWeek, timeWindow
 - Trend: maRelation, maCross, adxThreshold, ichimokuCloud, sarDirection
 - Trigger: bbReentry, bbBreakout, macdCross, stochCross, rsiLevel, cciLevel, sarFlip, wprLevel, mfiLevel, rviCross
 - Osc: momentum, osma, forceIndex
 - Volume: obvTrend
 - Bill: fractals, alligator
 
-### 3. `test_strategy_advanced.json` (8KB)
+### 3. `test_single_blocks_extra.json` (2KB)
+**Purpose**: Extra single-block tests beyond MAX_STRATEGIES.
+- **Strategies**: 2
+- **Blocks**: 2
+- **Notes**: Covers exit.weekendClose, nanpin.fixed (not in `test_single_blocks.json`).
+
+### 4. `test_strategy_advanced.json` (8KB)
 **目的**: 高度な戦略の統合テスト
 - **戦略数**: 3
 - **ブロック数**: 19
@@ -41,7 +50,7 @@
   - 新ブロック（lot.riskPercent, risk.atrBased, exit.trail等）の使用
   - 実際の戦略に近い複雑な条件
 
-### 4. `test_strategy_all_blocks.json` (11KB)
+### 5. `test_strategy_all_blocks.json` (11KB)
 **目的**: 全ブロック網羅テスト
 - **戦略数**: 4
 - **ブロック数**: 30
@@ -59,29 +68,17 @@
 
 **手動テスト実行**:
 
-```bash
-# 1. MT5を起動
-open "/Applications/MetaTrader 5.app"
+1. MT5を起動  
+2. ストラテジーテスターで各テストを実行  
+   - 詳細手順: `docs/04_operations/MT5_MANUAL_TEST_GUIDE.md`
+3. 結果を記録: `python3 scripts/record_test_results.py`
 
-# 2. ストラテジーテスターで各テストを実行
-#    詳細手順: docs/04_operations/MT5_MANUAL_TEST_GUIDE.md
-
-# 3. 結果を記録
-python3 scripts/record_test_results.py
-```
-
-### 準備
-
-1. **ファイルをMT5にコピー**:
-
-```bash
-# 通常実行用
-cp ea/tests/*.json "$HOME/Library/Application Support/net.metaquotes.wine.metatrader5/drive_c/Program Files/MetaTrader 5/MQL5/Files/strategy/"
-
-# ストラテジーテスター用
-cp ea/tests/*.json "$HOME/Library/Application Support/net.metaquotes.wine.metatrader5/drive_c/Program Files/MetaTrader 5/Tester/Agent-127.0.0.1-3000/Files/strategy/"
-cp ea/tests/*.json "$HOME/Library/Application Support/net.metaquotes.wine.metatrader5/drive_c/Program Files/MetaTrader 5/Tester/Agent-127.0.0.1-3001/Files/strategy/"
-```
+**推奨実行順**:
+1. `test_single_blocks.json` - 単体ブロックの動作確認
+2. `test_single_blocks_extra.json` - 追加2ブロックの確認
+3. `active.json` - 基本動作
+4. `test_strategy_advanced.json` - 複合条件
+5. `test_strategy_all_blocks.json` - 全ブロック網羅
 
 2. **自動テストスクリプト実行**:
 
@@ -108,11 +105,13 @@ python3 scripts/automated_tester.py
 ```
 1. test_single_blocks.json    ← 最優先（問題の切り分け）
    ↓
-2. active.json                ← 基本動作確認
+2. test_single_blocks_extra.json ← 追加2ブロックの確認
    ↓
-3. test_strategy_advanced.json ← 複雑な条件確認
+3. active.json                ← 基本動作確認
    ↓
-4. test_strategy_all_blocks.json ← 全機能網羅確認
+4. test_strategy_advanced.json ← 複雑な条件確認
+   ↓
+5. test_strategy_all_blocks.json ← 全機能網羅確認
 ```
 
 ## テスト結果の評価
@@ -173,10 +172,14 @@ python3 scripts/automated_tester.py
    - 新ブロック用の戦略追加
    - ブロック定義追加
 
-2. **`test_strategy_all_blocks.json`**:
+2. **`test_single_blocks_extra.json`**:
+   - Add strategies for blocks beyond MAX_STRATEGIES
+   - Add corresponding block definitions
+
+3. **`test_strategy_all_blocks.json`**:
    - 新ブロックを使用する戦略追加
 
-3. **BlockRegistry**:
+4. **BlockRegistry**:
    - `ea/include/Core/BlockRegistry.mqh`
    - CreateBlock()に新ブロック追加
 

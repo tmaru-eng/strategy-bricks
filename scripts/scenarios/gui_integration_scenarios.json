@@ -1,0 +1,12 @@
+{
+  "recent-7d": {
+    "symbol": "USDJPY",
+    "timeframe": "M1",
+    "days": 7
+  },
+  "recent-30d": {
+    "symbol": "USDJPY",
+    "timeframe": "M1",
+    "days": 30
+  }
+}

@@ -1,4 +1,3 @@
-import React from 'react'
 import { describe, expect, it } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import App from '../App'
@@ -8,8 +7,13 @@ window.matchMedia =
   function matchMedia() {
     return {
       matches: false,
+      media: '',
+      onchange: null,
       addListener: () => {},
-      removeListener: () => {}
+      removeListener: () => {},
+      addEventListener: () => {},
+      removeEventListener: () => {},
+      dispatchEvent: () => false
     }
   }
 

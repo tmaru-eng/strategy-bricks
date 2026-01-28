@@ -1,0 +1,153 @@
+{
+  "meta": {
+    "formatVersion": "1.0",
+    "name": "Single Block Unit Tests (extra)",
+    "description": "Extra single-block tests beyond MAX_STRATEGIES.",
+    "generatedBy": "Strategy Bricks Test Suite",
+    "generatedAt": "2026-01-27T12:28:12Z"
+  },
+  "globalGuards": {
+    "timeframe": "M1",
+    "useClosedBarOnly": true,
+    "noReentrySameBar": true,
+    "maxPositionsTotal": 50,
+    "maxPositionsPerSymbol": 50,
+    "maxSpreadPips": 10.0,
+    "session": {
+      "enabled": true,
+      "windows": [
+        {
+          "start": "00:00",
+          "end": "23:59"
+        }
+      ],
+      "weekDays": {
+        "sun": true,
+        "mon": true,
+        "tue": true,
+        "wed": true,
+        "thu": true,
+        "fri": true,
+        "sat": true
+      }
+    }
+  },
+  "strategies": [
+    {
+      "id": "test_model_exit_weekendClose",
+      "name": "Model: Exit WeekendClose",
+      "enabled": true,
+      "priority": 33,
+      "conflictPolicy": "all",
+      "directionPolicy": "longOnly",
+      "entryRequirement": {
+        "type": "OR",
+        "ruleGroups": [
+          {
+            "id": "RG33",
+            "type": "AND",
+            "conditions": [
+              {
+                "blockId": "trend.maRelation#7"
+              }
+            ]
+          }
+        ]
+      },
+      "lotModel": {
+        "type": "lot.fixed",
+        "params": {
+          "lots": 0.01
+        }
+      },
+      "riskModel": {
+        "type": "risk.fixedSLTP",
+        "params": {
+          "slPips": 20,
+          "tpPips": 40
+        }
+      },
+      "exitModel": {
+        "type": "exit.weekendClose",
+        "params": {
+          "dayOfWeek": 5,
+          "warningTime": "22:00",
+          "closeTime": "22:30"
+        }
+      },
+      "nanpinModel": {
+        "type": "nanpin.off",
+        "params": {}
+      }
+    },
+    {
+      "id": "test_model_nanpin_fixed",
+      "name": "Model: Nanpin Fixed",
+      "enabled": true,
+      "priority": 34,
+      "conflictPolicy": "all",
+      "directionPolicy": "longOnly",
+      "entryRequirement": {
+        "type": "OR",
+        "ruleGroups": [
+          {
+            "id": "RG34",
+            "type": "AND",
+            "conditions": [
+              {
+                "blockId": "trend.maRelation#8"
+              }
+            ]
+          }
+        ]
+      },
+      "lotModel": {
+        "type": "lot.fixed",
+        "params": {
+          "lots": 0.01
+        }
+      },
+      "riskModel": {
+        "type": "risk.fixedSLTP",
+        "params": {
+          "slPips": 20,
+          "tpPips": 40
+        }
+      },
+      "exitModel": {
+        "type": "exit.none",
+        "params": {}
+      },
+      "nanpinModel": {
+        "type": "nanpin.fixed",
+        "params": {
+          "intervalPips": 10,
+          "maxCount": 2,
+          "lotAdjustMethod": 0,
+          "fixedIncrement": 0.01,
+          "multiplier": 2
+        }
+      }
+    }
+  ],
+  "blocks": [
+    {
+      "id": "trend.maRelation#7",
+      "typeId": "trend.maRelation",
+      "params": {
+        "period": 20,
+        "maType": "SMA",
+        "relation": "closeAbove"
+      }
+    },
+    {
+      "id": "trend.maRelation#8",
+      "typeId": "trend.maRelation",
+      "params": {
+        "period": 20,
+        "maType": "SMA",
+        "relation": "closeAbove"
+      }
+    }
+  ]
+}

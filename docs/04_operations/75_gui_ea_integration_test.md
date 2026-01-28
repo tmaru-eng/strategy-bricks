@@ -11,8 +11,9 @@ GUI Builderが生成する `blockId` と EA側の参照整合性を検証しま�
 - スクリプト: `ea/src/TestGuiIntegration.mq5`
 - 生成物検証: `ea/src/TestGuiGeneratedConfigs.mq5`
 - 補助スクリプト:
-  - `scripts/test-gui-configs.ps1`
-  - `scripts/test_gui_generated_configs.ps1`
+  - `scripts/run_gui_integration_flow.ps1`
+  - `scripts/run_gui_integration_suite.ps1`
+  - `scripts/run_gui_e2e_suite.ps1`
   - `scripts/compile-gui-test.ps1`
 - 仕様: `docs/03_design/45_interface_contracts.md`
 

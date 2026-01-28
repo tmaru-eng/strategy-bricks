@@ -1,8 +1,10 @@
 /// <reference types="vite/client" />
 
+import type { BacktestAPI } from './types/backtest'
+
 declare global {
   interface Window {
-    electron: {
+    electron?: {
       ping: () => Promise<{ ok: boolean }>
       openCatalog: () => Promise<{ path: string; content: string } | null>
       env: {
@@ -17,33 +19,16 @@ declare global {
         filename: string
         content: string
       }) => Promise<{ success: boolean; path?: string; error?: string }>
+      dialog: {
+        showOpenDialog: (options: unknown) => Promise<{ canceled: boolean; filePaths: string[] }>
+        showSaveDialog: (options: unknown) => Promise<{ canceled: boolean; filePath?: string }>
+      }
+      fs: {
+        readFile: (filePath: string) => Promise<string>
+        writeFile: (filePath: string, content: string) => Promise<void>
+      }
     }
-    backtestAPI: {
-      checkEnvironment: () => Promise<{
-        isWindows: boolean
-        pythonAvailable: boolean
-        mt5Available: boolean
-        backtestEnabled: boolean
-        message?: string
-      }>
-      startBacktest: (
-        config: {
-          symbol: string
-          timeframe: string
-          startDate: Date | string
-          endDate: Date | string
-        },
-        strategyPath: string
-      ) => Promise<void>
-      cancelBacktest: () => Promise<void>
-      onBacktestProgress: (callback: (progress: any) => void) => void
-      onBacktestComplete: (callback: (results: any) => void) => void
-      onBacktestError: (callback: (error: string) => void) => void
-      exportResults: (
-        results: any,
-        outputPath?: string
-      ) => Promise<{ success: boolean; path?: string; canceled?: boolean }>
-    }
+    backtestAPI?: BacktestAPI
   }
 }
 

@@ -49,6 +49,7 @@ logs/
 tmp/
 temp/
 *.tmp
+*.backup
 _pr_threads*.json
 
 # Build artifacts

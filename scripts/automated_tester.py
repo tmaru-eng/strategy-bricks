@@ -23,6 +23,7 @@ RESULTS_DIR = Path("ea/tests/results")
 TEST_CONFIGS = [
     "active.json",
     "test_single_blocks.json",
+    "test_single_blocks_extra.json",
     "test_strategy_advanced.json",
     "test_strategy_all_blocks.json"
 ]
@@ -206,10 +207,11 @@ def print_manual_instructions():
     
     print("=" * 60)
     print("\n各テストの期待結果:")
-    print(f"  - {TEST_CONFIGS[0]}: 基本戦略、取引 10-50回")
-    print(f"  - {TEST_CONFIGS[1]}: 単体ブロックテスト、取引 50-200回 (27戦略)")
-    print(f"  - {TEST_CONFIGS[2]}: 高度な戦略、取引 5-30回")
-    print(f"  - {TEST_CONFIGS[3]}: 全ブロック、取引 3-20回")
+    print(f"  - {TEST_CONFIGS[0]}: baseline strategy (10-50 trades)")
+    print(f"  - {TEST_CONFIGS[1]}: single-block tests (50-200 trades, 32 strategies)")
+    print(f"  - {TEST_CONFIGS[2]}: extra single-block tests (1-20 trades, 2 strategies)")
+    print(f"  - {TEST_CONFIGS[3]}: advanced strategies (5-30 trades)")
+    print(f"  - {TEST_CONFIGS[4]}: all blocks (3-20 trades)")
     print("\n3ヶ月のテスト期間で取引が0回の場合は条件が厳しすぎる可能性があります")
     print("単体ブロックテストで取引が発生しない場合は、そのブロックに問題がある可能性があります")
     print("=" * 60)

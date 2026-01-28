@@ -31,12 +31,12 @@ pip install -r requirements.txt
 
 ```bash
 python backtest_engine.py \
-  --config ../ea/tests/strategy_123.json \
+  --config ../ea/tests/active.json \
   --symbol USDJPY \
   --timeframe M1 \
   --start 2024-01-01T00:00:00Z \
   --end 2024-03-31T23:59:59Z \
-  --output ../ea/tests/results_123.json
+  --output ../tmp/backtest/results_123.json
 ```
 
 ### パラメータ
@@ -59,8 +59,10 @@ python backtest_engine.py \
   --timeframe M1 \
   --start 2024-01-01T00:00:00Z \
   --end 2024-03-31T23:59:59Z \
-  --output ../ea/tests/results_my_strategy.json
+  --output ../tmp/backtest/results_my_strategy.json
 ```
+
+出力先は `tmp/` 配下など git 管理外のディレクトリを推奨します。
 
 ## 入力ファイル形式
 

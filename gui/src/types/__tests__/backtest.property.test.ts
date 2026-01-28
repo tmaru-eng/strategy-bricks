@@ -7,7 +7,7 @@
 
 import { describe, it, expect } from 'vitest';
 import * as fc from 'fast-check';
-import type { BacktestConfig, Trade } from '../backtest';
+import type { BacktestConfig } from '../backtest';
 
 describe('Backtest Types - Property Tests', () => {
   /**

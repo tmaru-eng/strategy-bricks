@@ -221,15 +221,46 @@ public:
     //+------------------------------------------------------------------+
     bool ValidateBlockTypes(const Config &config) {
         // MVPで対応するブロックtypeId
+        // Keep in sync with BlockRegistry supported typeIds.
         string validTypes[] = {
             "filter.spreadMax",
+            "filter.volatility.atrRange",
+            "filter.volatility.stddevRange",
             "env.session.timeWindow",
+            "filter.session.timeWindow",
+            "filter.session.daysOfWeek",
             "trend.maRelation",
+            "trend.maCross",
+            "trend.adxThreshold",
+            "trend.ichimokuCloud",
+            "trend.sarDirection",
             "trigger.bbReentry",
+            "trigger.bbBreakout",
+            "trigger.macdCross",
+            "trigger.stochCross",
+            "trigger.rsiLevel",
+            "trigger.cciLevel",
+            "trigger.sarFlip",
+            "trigger.wprLevel",
+            "trigger.mfiLevel",
+            "trigger.rviCross",
+            "osc.momentum",
+            "osc.osma",
+            "osc.forceIndex",
+            "volume.obvTrend",
+            "bill.fractals",
+            "bill.alligator",
+            // Models (non-blocks but included for completeness)
             "lot.fixed",
+            "lot.riskPercent",
             "risk.fixedSLTP",
+            "risk.atrBased",
             "exit.none",
-            "nanpin.off"
+            "exit.trail",
+            "exit.breakEven",
+            "exit.weekendClose",
+            "nanpin.off",
+            "nanpin.fixed"
         };
 
         for (int i = 0; i < config.blockCount; i++) {
