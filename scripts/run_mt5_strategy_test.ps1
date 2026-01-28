@@ -64,7 +64,7 @@ if ($Portable) {
     Write-Host "Terminal (portable): $terminalDir" -ForegroundColor Green
 } else {
     $mt5DataDir = "$env:APPDATA\MetaQuotes\Terminal"
-    $terminals = @(Get-ChildItem $mt5DataDir -Directory | Where-Object { $_.Name -match "^[A-F0-9]{32}$" })
+    $terminals = @(Get-ChildItem $mt5DataDir -Directory | Where-Object { $_.Name -match "^[A-F0-9]{32}$" } | Sort-Object LastWriteTime -Descending)
 
     if ($terminals.Count -eq 0) {
         Write-Host "Error: MT5 terminal directory not found" -ForegroundColor Red
