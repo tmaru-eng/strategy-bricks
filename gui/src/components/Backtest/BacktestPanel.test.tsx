@@ -23,6 +23,7 @@ interface MockBacktestAPI {
 }
 
 let mockBacktestAPI: MockBacktestAPI
+let mockElectronAPI: { saveStrategyConfig: ReturnType<typeof vi.fn> }
 
 // window.backtestAPI をモック
 beforeEach(() => {
@@ -37,12 +38,23 @@ beforeEach(() => {
   
   // @ts-ignore
   window.backtestAPI = mockBacktestAPI
+
+  mockElectronAPI = {
+    saveStrategyConfig: vi.fn().mockResolvedValue({
+      success: true,
+      path: '/mock/path/strategy_123.json'
+    })
+  }
+  // @ts-ignore
+  window.electron = mockElectronAPI
 })
 
 afterEach(() => {
   cleanup()
   // @ts-ignore
   delete window.backtestAPI
+  // @ts-ignore
+  delete window.electron
   vi.clearAllMocks()
 })
 
@@ -111,22 +123,17 @@ describe('BacktestPanel - Environment Check', () => {
     // バックテスト実行ボタンが表示されないことを確認
     expect(screen.queryByText('バックテスト実行')).not.toBeInTheDocument()
     
-    // 環境詳細が表示されることを確認
-    expect(screen.getByText('✗ Windows以外')).toBeInTheDocument()
-    expect(screen.getByText('✗ 利用不可')).toBeInTheDocument()
   })
   
   /**
    * 要件 9.4: MT5未インストール → インストール手順を表示
    */
-  it('should show installation instructions when MT5 is not installed', async () => {
-    // Windows だが MT5 未インストールの環境をモック
+  it('should show setup instructions when backtest engine is missing', async () => {
+    // Windows だがバックテストエンジン未準備の環境をモック
     mockBacktestAPI.checkEnvironment.mockResolvedValue({
       isWindows: true,
-      pythonAvailable: true,
-      mt5Available: false,
       backtestEnabled: false,
-      message: 'MetaTrader5 Pythonライブラリがインストールされていません。\n\nインストール手順:\n1. コマンドプロンプトを開く\n2. 次のコマンドを実行: pip install MetaTrader5\n3. アプリケーションを再起動'
+      message: 'バックテストエンジンが見つかりません。\n\n期待されるパス: python/dist/backtest_engine.exe'
     })
     
     render(<BacktestPanel />)
@@ -139,27 +146,25 @@ describe('BacktestPanel - Environment Check', () => {
     // インストール手順が表示されることを確認
     await waitFor(() => {
       expect(screen.getByText('セットアップが必要です')).toBeInTheDocument()
-      expect(screen.getByText(/MetaTrader5 Pythonライブラリがインストールされていません/)).toBeInTheDocument()
-      expect(screen.getByText(/pip install MetaTrader5/)).toBeInTheDocument()
+      expect(screen.getByText(/バックテストエンジンが見つかりません/)).toBeInTheDocument()
     })
     
     // バックテスト実行ボタンが表示されないことを確認
     expect(screen.queryByText('バックテスト実行')).not.toBeInTheDocument()
     
-    // 環境詳細が表示されることを確認
-    expect(screen.getByText('✓ Windows')).toBeInTheDocument()
-    expect(screen.getByText('✓ 利用可能')).toBeInTheDocument()
-    expect(screen.getByText('✗ 未インストール')).toBeInTheDocument()
   })
   
-  it('should show environment details for all check results', async () => {
-    // Windows + Python OK だが MT5 NG の環境をモック
+  it('should show environment details when debug info is provided', async () => {
+    // Windows だがバックテスト無効 + debug 情報あり
     mockBacktestAPI.checkEnvironment.mockResolvedValue({
       isWindows: true,
-      pythonAvailable: true,
-      mt5Available: false,
       backtestEnabled: false,
-      message: 'MT5ライブラリが必要です。'
+      message: 'バックテストエンジンが見つかりません。',
+      debug: {
+        enginePath: null,
+        engineExists: false,
+        checkedPaths: ['python/dist/backtest_engine.exe']
+      }
     })
     
     render(<BacktestPanel />)
@@ -170,14 +175,14 @@ describe('BacktestPanel - Environment Check', () => {
     
     // 環境詳細が正しく表示されることを確認
     await waitFor(() => {
+      expect(screen.getByText('詳細情報')).toBeInTheDocument()
       expect(screen.getByText('OS:')).toBeInTheDocument()
       expect(screen.getByText('✓ Windows')).toBeInTheDocument()
-      
-      expect(screen.getByText('Python:')).toBeInTheDocument()
-      expect(screen.getByText('✓ 利用可能')).toBeInTheDocument()
-      
-      expect(screen.getByText('MT5ライブラリ:')).toBeInTheDocument()
-      expect(screen.getByText('✗ 未インストール')).toBeInTheDocument()
+      expect(screen.getByText('エンジンパス:')).toBeInTheDocument()
+      expect(screen.getByText('なし')).toBeInTheDocument()
+      expect(screen.getByText('エンジン存在:')).toBeInTheDocument()
+      expect(screen.getByText('✗ なし')).toBeInTheDocument()
+      expect(screen.getByText('チェックしたパス:')).toBeInTheDocument()
     })
   })
   

@@ -3,7 +3,7 @@
 ## 位置づけ
 
 GUIからバックテストエンジンを起動し、結果JSONを取得する導線です。  
-**非Windowsは未対応**のため、UIは環境チェックで無効化されます。
+**現状は Windows のみ対応**で、Wine/macOS では UI が無効化されます。
 
 ## 前提
 
@@ -32,9 +32,45 @@ GUIからバックテストエンジンを起動し、結果JSONを取得する�
 
 ## 結果ファイル
 
-- 開発: `<repo_root>/ea/tests/results_<timestamp>.json`
-- パッケージ: `<app_root>/ea/tests/results_<timestamp>.json`
+- 開発: `<repo_root>/ea/tests/<configBase>_results.json`
+- パッケージ: `<app_root>/ea/tests/<configBase>_results.json`
+- `configBase` は GUI が保存した設定ファイル名（例: `strategy_<timestamp>.json`）の拡張子を除いたもの
 - GUIのエクスポート機能で任意パスへ保存可能
+- これらは一時生成物のため、リポジトリにはコミットしない
+
+## 設定ファイルのバックテスト（CLI）
+
+GUIで出力した `active.json` などを、バックテストエンジンに直接渡して実行できます。
+**バックテストエンジン自体は Windows のみ対応**です。
+一時生成物は `tmp/` 配下に出力する運用を推奨します（git 管理外）。
+
+### Python で実行（開発）
+
+```powershell
+$repoRoot = (Resolve-Path .)
+$outDir = Join-Path $repoRoot "tmp\backtest"
+New-Item -ItemType Directory -Path $outDir -Force | Out-Null
+
+python\backtest_engine.py `
+  --config "C:\path\to\active.json" `
+  --symbol USDJPY `
+  --timeframe M1 `
+  --start 2024-01-01T00:00:00Z `
+  --end 2024-01-31T23:59:59Z `
+  --output (Join-Path $outDir "results_$(Get-Date -Format yyyyMMdd_HHmmss).json")
+```
+
+### exe で実行（開発）
+
+```powershell
+.\python\dist\backtest_engine.exe `
+  --config "C:\path\to\active.json" `
+  --symbol USDJPY `
+  --timeframe M1 `
+  --start 2024-01-01T00:00:00Z `
+  --end 2024-01-31T23:59:59Z `
+  --output ".\tmp\backtest\results_$(Get-Date -Format yyyyMMdd_HHmmss).json"
+```
 
 ## トラブルシューティング
 

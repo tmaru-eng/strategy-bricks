@@ -2,8 +2,8 @@
 
 ## 対象
 
-Windows環境で EA + strategy_config を実行し、動作確認するための手順です。  
-**非Windowsは未対応**（既存のmacOS/Wine手順はサポート外）。
+Windows 環境で EA + strategy_config を実行し、動作確認するための手順です。  
+Wine（macOS）での運用メモは末尾に記載しています。
 
 ## 1. MT5データフォルダを確認
 
@@ -32,6 +32,10 @@ New-Item -ItemType Directory -Path $destInclude -Force
 Copy-Item "ea\include\*" $destInclude -Recurse -Force
 ```
 
+Note:
+- If `-ReportPath` is omitted, the report is saved as `ea/tests/results/<config>.htm`.
+- A block summary is generated alongside the report: `<config>_block_summary.txt/json`.
+
 ## 3. 設定ファイルを配置
 
 ### GUI生成物（E2E）
@@ -49,6 +53,81 @@ $mt5Terminal = "$env:APPDATA\MetaQuotes\Terminal\<TERMINAL_ID>"
 New-Item -ItemType Directory -Path "$mt5Terminal\MQL5\Files\strategy" -Force
 Copy-Item "ea\tests\*.json" "$mt5Terminal\MQL5\Files\strategy\" -Force
 ```
+
+### 補助スクリプト（Windows）
+
+GUI 出力や任意パスの設定ファイルを使う場合は、以下のスクリプトが便利です。
+
+```powershell
+# GUI E2E → GUIバックテスト → Strategy Tester を一括実行
+.\scripts\run_gui_e2e_suite.ps1 -Scenario recent-7d -SymbolBase USDJPY -Portable:$false
+
+# 任意の設定で GUIバックテスト → Strategy Tester
+.\scripts\run_gui_integration_flow.ps1 -ConfigPath "C:\path\to\strategy.json" -Portable:$false
+
+# GUI e2e の出力を使って MT5 テスト準備
+.\scripts\prepare_mt5_test.ps1 -ConfigPath "$env:TEMP\strategy-bricks-e2e\active.json"
+
+# 既存のテスト設定（ea/tests）を使う
+.\scripts\prepare_mt5_test.ps1 -ConfigFile "active.json"
+
+# Strategy Tester を config で起動（実験的）
+.\scripts\run_mt5_strategy_test.ps1 -ConfigPath "C:\path\to\active.json"
+```
+
+## 3.5 Strategy Tester ?????????
+
+?????????? `scripts/run_mt5_strategy_test.ps1` ??????????????????
+??????????? Strategy Tester ?????????????????????
+
+```powershell
+# ??? active.json ??????
+.\scripts\run_mt5_strategy_test.ps1 -Portable:$false -ReportPath "tmp\backtest\mt5_report"
+
+# ????????????
+.\scripts\run_mt5_strategy_test.ps1 -Portable:$false -ConfigPath "C:\path\to\strategy.json" -ReportPath "tmp\backtest\custom_report"
+```
+
+???????:
+- `-Portable:$false` : AppData ? MT5 ????????????
+- `-ReportPath` : ????????????? MT5 ? `Tester\<name>.htm` ??? `Terminal\<name>.htm` ????????????????
+- `-ConfigPath` : strategy_config.json ?????
+- `-ExpertPath` : EA ??????? `StrategyBricks\StrategyBricks`?
+
+? `/portable` ??????????????????????????????
+   ????????????????????? MT5 ??????????
+
+## 3.6 ????????????????
+
+????????????? **1???????????????** ???????
+`ea/tests/test_single_blocks.json` ???????? `ea/tests/block-test-<block>.json` ???????????
+
+```powershell
+# ????????? Strategy Tester ???
+.\scripts\run_mt5_strategy_test.ps1 -Portable:$false `
+  -ConfigPath ".\ea\tests\test_single_blocks.json" `
+  -ReportPath "tmp\backtest\single_block_report"
+
+# Extra single-block tests (beyond MAX_STRATEGIES)
+.\scripts\run_mt5_strategy_test.ps1 -Portable:$false `
+  -ConfigPath ".\ea\tests\test_single_blocks_extra.json" `
+  -ReportPath "tmp\backtest\single_block_extra_report"
+```
+
+??? **????? Total trades ? 0 ?????** ????????
+
+## 3.7 ???????????????????
+
+???????????????????????????????
+`test_strategy_all_blocks.json` ???????????????? **?????????** ???????
+
+```powershell
+.\scripts\run_mt5_strategy_test.ps1 -Portable:$false `
+  -ConfigPath ".\ea\tests\test_strategy_all_blocks.json" `
+  -ReportPath "tmp\backtest\all_blocks_report"
+```
+
+`Total trades` ? 0 ???????/????/????????????????
 
 ## 4. EAをコンパイル
 
@@ -88,6 +167,7 @@ $eaPath = "$env:APPDATA\MetaQuotes\Terminal\<TERMINAL_ID>\MQL5\Experts\StrategyB
 | ファイル | 目的 | 期待 |
 | --- | --- | --- |
 | `test_single_blocks.json` | ブロック単体テスト | 50-200取引/戦略 |
+| `test_single_blocks_extra.json` | Extra single-block tests | 1-20 trades/strategy |
 | `active.json` | 基本動作テスト | 10-50取引 |
 | `test_strategy_advanced.json` | 複合条件テスト | 3-30取引 |
 | `test_strategy_all_blocks.json` | 全ブロック網羅 | 1-10取引 |
@@ -137,3 +217,22 @@ $eaPath = "$env:APPDATA\MetaQuotes\Terminal\<TERMINAL_ID>\MQL5\Experts\StrategyB
     Sort-Object LastWriteTime -Descending | Select-Object -First 1
   ```
 - 詳細は `docs/04_operations/90_observability_and_testing.md`
+
+## Wine（macOS）での実行メモ
+
+Wine 環境でも Strategy Tester を運用する場合は、以下のスクリプトを使用します。
+（MT5 の配置先はスクリプト内で定義されています）
+
+```bash
+# Wine 用のテスター設定ファイルを生成
+python3 scripts/create_tester_configs.py
+
+# テスト実行（全テスト）
+bash scripts/run_mt5_tests.sh
+
+# 単発テスト
+bash scripts/run_mt5_tests.sh test_single_blocks
+bash scripts/run_mt5_tests.sh test_single_blocks_extra
+```
+
+結果は `ea/tests/results/` に集約し、必要に応じて `scripts/record_test_results.py` で記録します。

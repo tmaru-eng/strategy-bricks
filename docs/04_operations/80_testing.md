@@ -4,179 +4,94 @@
 
 Strategy Bricks EAの品質保証のための包括的なテスト戦略を定義します。
 
-## テスト入口（Windowsのみ）
+## テスト入口（Windows / Wine）
 
-バックテスト/Strategy Tester は **Windowsのみ**を正とします。  
+Strategy Tester は **Windows / Wine（macOS）** の両方で運用します。  
+バックテスト（GUI）は **Windows のみ対応**です。  
 実行手順は以下を参照してください。
 
-- Backtest（GUI）: `docs/04_operations/60_backtest_windows.md`
-- Strategy Tester（手動）: `docs/04_operations/70_strategy_tester_windows.md`
+- Backtest（GUI/Windowsのみ）: `docs/04_operations/60_backtest_windows.md`
+- Strategy Tester（Windows/手動）: `docs/04_operations/70_strategy_tester_windows.md`
 - GUI-EA統合テスト: `docs/04_operations/75_gui_ea_integration_test.md`
+- Wine（macOS）での Strategy Tester: `scripts/run_mt5_tests.sh` / `scripts/run_mt5_tester.sh`
 - ログ/観測: `docs/04_operations/90_observability_and_testing.md`
+## GUI結合テスト（ビルダー → GUIバックテスト → Strategy Tester）
 
-## テスト方針
+GUIビルダーで作成した設定が **GUIバックテスター** と **MT5 Strategy Tester** の両方で
+正しく動作することを確認します。  
+同一コンフィグ名で成果物を揃え、どの結果がどれかを必ず追跡できるようにします。
 
-### 基本原則
+### 前提
 
-1. **段階的テスト**: 単体 → 統合 → システム の順でテスト
-2. **問題の切り分け**: 各レイヤーで問題を特定できる構造
-3. **自動化と手動の組み合わせ**: 効率と信頼性のバランス
-4. **継続的な改善**: 新機能追加時にテストも拡張
+- Windows + MT5ログイン済み・オンライン
+- 期間はデータが存在する範囲（推奨: 直近7日）
+- Strategy Tester を CLI で起動する場合、**MT5が起動中なら終了してから実行**
 
-### テストレイヤー
+### 手順
 
-```
-┌─────────────────────────────────────┐
-│  システムテスト (MT5 Strategy Tester) │  ← 実際の取引動作確認
-├─────────────────────────────────────┤
-│  統合テスト (GUI Integration Tests)  │  ← コンポーネント連携確認
-├─────────────────────────────────────┤
-│  単体テスト (EA Block Unit Tests)    │  ← 個別ブロック動作確認
-└─────────────────────────────────────┘
-```
+1) **GUIビルダーでユニット構成を作成**  
+   - 1条件ブロック + 最小構成で作成  
+   - 保存先: `ea/tests/strategy_<timestamp>.json`
 
-## テストタイプ
+2) **GUIバックテストを実行**  
+   - 出力: `ea/tests/strategy_<timestamp>_results.json`  
+   - `metadata.symbol` を確認（接尾辞付きシンボルが入る）
 
-### 1. GUI統合テスト
+3) **Strategy Tester で同一コンフィグを実行**  
+   - シンボルは **結果JSONの `metadata.symbol`** を使用  
+   - 例:
+   ```powershell
+   $config = "ea/tests/strategy_<timestamp>.json"
+   $results = "ea/tests/strategy_<timestamp>_results.json"
+   $symbol = (Get-Content $results -Raw | ConvertFrom-Json).metadata.symbol
 
-**目的**: フロントエンドの動作確認とコンポーネント連携テスト
+   .\scripts\run_mt5_strategy_test.ps1 -Portable:$false `
+     -ConfigPath $config `
+     -Symbol $symbol
+   ```
 
-**場所**: `gui/src/__tests__/`
+### 補助スクリプト（推奨）
 
-**実行方法**:
-```bash
-cd gui
-npm test
-```
+GUIで作成したコンフィグを渡すだけで、GUIバックテストとStrategy Testerを連続実行できます。
 
-**テスト内容**:
-- パレット表示確認
-- 全ブロックカテゴリの表示確認
-- 複数ブロック組み合わせの設定生成
-- バリデーション機能
+```powershell
+# 直近7日シナリオ（default）
+.\scripts\run_gui_integration_flow.ps1 -ConfigPath "ea\tests\strategy_<timestamp>.json" -StopMt5
 
-**テストファイル**:
-- `app.integration.test.tsx` - アプリケーション統合テスト
-- `validator.test.ts` - バリデーションロジックテスト
+# ディレクトリ内の設定を一括で結合テスト
+.\scripts\run_gui_integration_suite.ps1 -ConfigDir "ea\tests" -Pattern "strategy_*.json" -StopMt5
 
-**カバレッジ目標**: 80%以上
+# Playwrightシナリオ → 結合テスト一括実行
+.\scripts\run_gui_e2e_suite.ps1 -StopMt5
 
-### 2. EA単体ブロックテスト
-
-**目的**: 各ブロックが単体で正しく動作するか確認
-
-**場所**: `ea/tests/test_single_blocks.json`
-
-**テスト戦略**:
-- 1ブロック = 1戦略
-- 最もシンプルな条件設定
-- 取引発生の可能性を最大化
-
-**テスト設定**:
-```json
-{
-  "strategies": [
-    {
-      "id": "test_<blockType>_<variant>",
-      "conditions": [
-        { "blockId": "<single_block>" }  // 単一ブロックのみ
-      ],
-      "lotModel": { "type": "lot.fixed", "params": { "lots": 0.01 } },
-      "riskModel": { "type": "risk.fixedSLTP", "params": { "slPips": 20, "tpPips": 40 } }
-    }
-  ]
-}
+# シナリオ指定（scripts/scenarios/gui_integration_scenarios.json）
+.\scripts\run_gui_integration_flow.ps1 `
+  -ConfigPath "ea\tests\strategy_<timestamp>.json" `
+  -Scenario "recent-30d" `
+  -StopMt5
 ```
 
-**カバレッジ**: 全36ブロックタイプ × 27戦略
+シナリオは `scripts/scenarios/gui_integration_scenarios.json` に追加できます。  
+`symbol` は 6桁（例: `USDJPY`）で指定して問題ありません。
 
-**期待結果**:
-- 初期化成功
-- 3ヶ月で50-200回の取引発生
-- エラーなし
+### 出力ファイルの対応
 
-**問題の切り分け**:
-- 取引0回 → そのブロックに問題あり
-- エラー発生 → ブロック実装の不具合
-- 初期化失敗 → 設定パラメータの問題
+- 設定: `ea/tests/strategy_<timestamp>.json`
+- GUIバックテスト: `ea/tests/strategy_<timestamp>_results.json`
+- Strategy Tester レポート: `ea/tests/results/strategy_<timestamp>.htm`
+- ブロック評価サマリー:  
+  `ea/tests/results/strategy_<timestamp>_block_summary.txt/json`
 
-### 3. EA統合テスト（複数ブロック組み合わせ）
+### 判定
 
-**目的**: 複数ブロックの組み合わせ動作確認
+- **GUIバックテスト**: 結果JSONが生成され、`summary.totalTrades` が存在
+- **Strategy Tester**: レポートが生成され、初期証拠金が0でない  
+  かつ `block_summary` の `Blocks missing = 0`
 
-**場所**: 
-- `ea/tests/test_strategy_advanced.json` - 高度な戦略
-- `ea/tests/test_strategy_all_blocks.json` - 全ブロック網羅
+### シンボル指定の注意
 
-**テスト戦略**:
-- 実際の戦略に近い複雑な条件
-- 複数フィルタ・トリガーの組み合わせ
-- 各種モデル（Lot/Risk/Exit/Nanpin）の動作確認
-
-**カバレッジ**:
-- `test_strategy_advanced.json`: 19ブロック、3戦略
-- `test_strategy_all_blocks.json`: 30ブロック、4戦略
-
-**期待結果**:
-- 初期化成功
-- 3ヶ月で3-30回の取引発生（条件が厳しいため）
-- エラーなし
-
-### 4. EA基本動作テスト
-
-**目的**: 基本的な戦略の動作確認
-
-**場所**: `ea/tests/active.json`
-
-**テスト内容**:
-- シンプルな戦略（6ブロック）
-- 基本的なフィルタ・トリガー・モデル
-
-**期待結果**:
-- 初期化成功
-- 3ヶ月で10-50回の取引発生
-- エラーなし
-
-### 5. GUI-EA統合テスト
-
-**目的**: GUI生成物とEAのblockId参照整合性を確認
-
-**場所**: `ea/tests/gui_integration_test.json`
-
-**詳細手順**: `docs/04_operations/75_gui_ea_integration_test.md`
-
-## テスト実行手順
-
-### 自動テストスクリプト
-
-**場所**: `scripts/automated_tester.py`
-
-**実行方法**:
-```bash
-python scripts/automated_tester.py
-```
-
-**機能**:
-- 設定ファイルの存在確認
-- 手動テスト手順の表示
-- テストレポートテンプレート生成
-
-### 手動テスト（Windows）
-
-- Strategy Tester: `docs/04_operations/70_strategy_tester_windows.md`
-- Backtest（GUI）: `docs/04_operations/60_backtest_windows.md`
-
-### テスト順序（推奨）
-
-```
-1. test_single_blocks.json    ← 最優先（問題の切り分け）
-   ↓
-2. active.json                ← 基本動作確認
-   ↓
-3. test_strategy_advanced.json ← 複雑な条件確認
-   ↓
-4. test_strategy_all_blocks.json ← 全機能網羅確認
-```
+MT5はブローカー接尾辞が付くため、**入力は6桁（例: USDJPY）でOK**ですが、  
+**Strategy Tester では結果JSONの `metadata.symbol` を使う**のが確実です。
 
 ## テスト結果の評価基準
 
@@ -280,6 +195,7 @@ python scripts/automated_tester.py
 
 2. **EA単体テスト更新**:
    - `ea/tests/test_single_blocks.json`
+- `ea/tests/test_single_blocks_extra.json` (extra blocks beyond MAX_STRATEGIES)
    - 新ブロック用の戦略追加
    - ブロック定義追加
 

@@ -1,0 +1,11 @@
+﻿# Generated from GUI/backtest (do not commit)
+strategy_*.json
+*_results.json
+
+test_backtest_*.json
+test_backtest_results_*.json
+
+test_embedded_*.json
+test_embedded_results_*.json
+
+gui-generated.json

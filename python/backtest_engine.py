@@ -13,7 +13,7 @@ MetaTrader5の過去データに対してバックテストするためのエン
     python backtest_engine.py --config ../ea/tests/strategy_123.json 
                               --symbol USDJPY --timeframe M1 
                               --start 2024-01-01T00:00:00Z --end 2024-03-31T23:59:59Z
-                              --output ../ea/tests/results_123.json
+                              --output ../tmp/backtest/results_123.json
 """
 
 import argparse
@@ -131,6 +131,11 @@ class BacktestEngine:
         if terminal_info:
             print(f"MT5初期化成功: バージョン {version}")
             print(f"ターミナル: {terminal_info.name}, ビルド {terminal_info.build}")
+            if getattr(terminal_info, "connected", True) is False:
+                print(
+                    "Warning: MT5 terminal is not connected. Please log in and ensure the terminal is online.",
+                    file=sys.stderr
+                )
         else:
             print(f"MT5初期化成功: バージョン {version}")
         
@@ -221,6 +226,26 @@ class BacktestEngine:
         mt5_timeframe = timeframe_map.get(self.timeframe)
         if mt5_timeframe is None:
             raise ValueError(f"サポートされていない時間軸: {self.timeframe}")
+
+        requested_symbol = self.symbol
+        symbol_info = mt5.symbol_info(requested_symbol)
+        if symbol_info is None:
+            candidates = [s.name for s in (mt5.symbols_get() or []) if s.name.startswith(requested_symbol)]
+            if len(candidates) == 1:
+                self.symbol = candidates[0]
+                symbol_info = mt5.symbol_info(self.symbol)
+                print(f"Symbol not found: {requested_symbol}. Using {self.symbol}.")
+            else:
+                if candidates:
+                    preview = ", ".join(candidates[:5])
+                    more = "" if len(candidates) <= 5 else f" (+{len(candidates) - 5} more)"
+                    raise Exception(f"Symbol not found: {requested_symbol}. Candidates: {preview}{more}")
+                raise Exception(f"Symbol not found: {requested_symbol}. No similar symbols found.")
+        if not symbol_info or not symbol_info.visible:
+            if not mt5.symbol_select(self.symbol, True):
+                error = mt5.last_error()
+                raise Exception(f"Failed to select symbol: {self.symbol}. Error: {error}")
+
         
         # バーデータを取得
         print(f"過去データを取得中...")

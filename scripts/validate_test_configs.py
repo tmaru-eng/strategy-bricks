@@ -70,21 +70,21 @@ def validate_config(filepath):
         with open(filepath, 'r', encoding='utf-8') as f:
             data = json.load(f)
     except json.JSONDecodeError as e:
-        print(f"❌ JSON Parse Error: {e}")
+        print(f"ERROR: JSON Parse Error: {e}")
         return False
     except Exception as e:
-        print(f"❌ File Read Error: {e}")
+        print(f"ERROR: File Read Error: {e}")
         return False
     
     # メタ情報確認
     meta = data.get('meta', {})
-    print(f"\n📋 Meta Information:")
+    print(f"\nMeta Information:")
     print(f"  Format Version: {meta.get('formatVersion', 'N/A')}")
     print(f"  Name: {meta.get('name', 'N/A')}")
     
     # 戦略確認
     strategies = data.get('strategies', [])
-    print(f"\n📊 Strategies: {len(strategies)}")
+    print(f"\nStrategies: {len(strategies)}")
     
     if len(strategies) == 0:
         errors.append("No strategies defined")
@@ -130,7 +130,7 @@ def validate_config(filepath):
     
     # ブロック確認
     blocks = data.get('blocks', [])
-    print(f"\n📦 Blocks: {len(blocks)}")
+    print(f"\nBlocks: {len(blocks)}")
     
     if len(blocks) == 0:
         warnings.append("No blocks defined")
@@ -152,7 +152,7 @@ def validate_config(filepath):
         print(f"  {i:2d}. {block_id:40s} ({type_id})")
     
     # 参照整合性確認
-    print(f"\n🔗 Reference Validation:")
+    print(f"\nReference Validation:")
     referenced_blocks = set()
     
     for strat in strategies:
@@ -186,12 +186,12 @@ def validate_config(filepath):
     # 結果表示
     print(f"\n{'='*60}")
     if errors:
-        print(f"❌ VALIDATION FAILED")
+        print(f"VALIDATION FAILED")
         print(f"\nErrors ({len(errors)}):")
         for error in errors:
             print(f"  - {error}")
     else:
-        print(f"✅ VALIDATION PASSED")
+        print(f"VALIDATION PASSED")
     
     if warnings:
         print(f"\nWarnings ({len(warnings)}):")
@@ -210,6 +210,7 @@ def main():
     test_files = [
         test_dir / "active.json",
         test_dir / "test_single_blocks.json",
+        test_dir / "test_single_blocks_extra.json",
         test_dir / "test_strategy_advanced.json",
         test_dir / "test_strategy_all_blocks.json",
     ]
@@ -220,7 +221,7 @@ def main():
     all_valid = True
     for test_file in test_files:
         if not test_file.exists():
-            print(f"\n❌ File not found: {test_file}")
+            print(f"\nERROR: File not found: {test_file}")
             all_valid = False
             continue
         
@@ -230,11 +231,11 @@ def main():
     # 最終結果
     print("\n" + "="*60)
     if all_valid:
-        print("✅ ALL CONFIGURATIONS VALID")
+        print("ALL CONFIGURATIONS VALID")
         print("="*60)
         return 0
     else:
-        print("❌ SOME CONFIGURATIONS HAVE ERRORS")
+        print("SOME CONFIGURATIONS HAVE ERRORS")
         print("="*60)
         return 1
 

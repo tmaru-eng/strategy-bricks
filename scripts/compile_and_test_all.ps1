@@ -33,7 +33,7 @@ Write-Host ""
 Write-Host "[Step 1/4] Copying files..." -ForegroundColor Yellow
 
 # 設定ファイルをコピー
-$testFiles = @("active.json", "test_single_blocks.json", "test_strategy_advanced.json", "test_strategy_all_blocks.json")
+$testFiles = @("active.json", "test_single_blocks.json", "test_single_blocks_extra.json", "test_strategy_advanced.json", "test_strategy_all_blocks.json")
 foreach ($file in $testFiles) {
     $source = "ea\tests\$file"
     $dest = Join-Path $terminalDir "MQL5\Files\strategy\$file"
@@ -97,6 +97,11 @@ $testConfigs = @(
         ExpectedTrades = "50-200"
     },
     @{
+        Name = "test_single_blocks_extra.json"
+        Description = "Extra single-block tests beyond MAX_STRATEGIES"
+        ExpectedTrades = "1-20"
+    },
+    @{
         Name = "test_strategy_advanced.json"
         Description = "高度な戦略の統合テスト"
         ExpectedTrades = "5-30"
@@ -147,5 +152,5 @@ Write-Host "5. 結果を確認:" -ForegroundColor White
 Write-Host "   - 取引回数が期待範囲内か" -ForegroundColor Gray
 Write-Host "   - 取引が0回の場合はログを確認" -ForegroundColor Gray
 Write-Host ""
-Write-Host "推奨テスト順序: test_single_blocks.json → active.json → advanced → all_blocks" -ForegroundColor Yellow
 Write-Host ""
+Write-Host "Recommended order: test_single_blocks.json -> test_single_blocks_extra.json -> active.json -> advanced -> all_blocks" -ForegroundColor Yellow

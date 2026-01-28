@@ -1,16 +1,19 @@
 # Strategy Bricks EA テスト実行スクリプト
-# Usage: .\test-ea.ps1 [ConfigFile]
-# Example: .\test-ea.ps1 active.json
+# Usage:
+#   .\test-ea.ps1 -ConfigFile active.json
+#   .\test-ea.ps1 -ConfigFile gui-generated
+#   .\test-ea.ps1 -ConfigPath "C:\path\to\active.json"
 
 param(
-    [string]$ConfigFile = "active.json"
+    [string]$ConfigFile = "active.json",
+    [string]$ConfigPath
 )
 
 Write-Host "=== Strategy Bricks EA Test ===" -ForegroundColor Cyan
 Write-Host ""
 
 # GUIで生成した設定ファイルを使用する場合
-if ($ConfigFile -eq "gui-generated") {
+if (-not $ConfigPath -and $ConfigFile -eq "gui-generated") {
     Write-Host "Using GUI-generated config..." -ForegroundColor Yellow
     
     # e2eテストを実行して設定ファイルを生成
@@ -18,17 +21,24 @@ if ($ConfigFile -eq "gui-generated") {
     npm run e2e
     Pop-Location
     
-    # 生成されたファイルをea/testsにコピー
     $guiConfig = "$env:TEMP\strategy-bricks-e2e\active.json"
     if (Test-Path $guiConfig) {
-        Copy-Item $guiConfig "ea\tests\gui-generated.json" -Force
-        $ConfigFile = "gui-generated.json"
-        Write-Host "GUI config copied to: ea\tests\$ConfigFile" -ForegroundColor Green
+        $ConfigPath = $guiConfig
+        Write-Host "GUI config found: $ConfigPath" -ForegroundColor Green
     } else {
         Write-Host "Error: GUI config not found" -ForegroundColor Red
         exit 1
     }
 }
 
+if ($ConfigPath) {
+    if (-not (Test-Path $ConfigPath)) {
+        Write-Host "Error: Config path not found: $ConfigPath" -ForegroundColor Red
+        exit 1
+    }
+    & (Join-Path $PSScriptRoot "prepare_mt5_test.ps1") -ConfigPath $ConfigPath
+    exit $LASTEXITCODE
+}
+
 # MT5テスト準備を実行
-& ".\scripts\prepare_mt5_test.ps1" -ConfigFile $ConfigFile
+& (Join-Path $PSScriptRoot "prepare_mt5_test.ps1") -ConfigFile $ConfigFile

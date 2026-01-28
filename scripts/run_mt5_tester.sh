@@ -12,6 +12,7 @@ echo ""
 # テスト設定
 TESTS=(
     "test_single_blocks:Single Block Unit Tests"
+    "test_single_blocks_extra:Single Block Unit Tests (extra)"
     "active:Basic Strategy Test"
     "test_strategy_advanced:Advanced Strategy Test"
     "test_strategy_all_blocks:All Blocks Comprehensive Test"

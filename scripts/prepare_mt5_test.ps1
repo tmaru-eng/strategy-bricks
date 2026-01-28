@@ -3,7 +3,8 @@
 # 実際のテスト実行は、MT5のGUIから手動で行う必要があります
 
 param(
-    [string]$ConfigFile = "active.json"
+    [string]$ConfigFile = "active.json",
+    [string]$ConfigPath
 )
 
 Write-Host "=== MT5 Test Preparation ===" -ForegroundColor Cyan
@@ -24,13 +25,24 @@ Write-Host ""
 
 # 1. 設定ファイルをコピー
 Write-Host "[1/3] Copying config file..." -ForegroundColor Yellow
-$configSource = Join-Path $PSScriptRoot "..\ea\tests\$ConfigFile"
-$configDest = Join-Path $terminalDir "MQL5\Files\strategy\$ConfigFile"
-
-if (-not (Test-Path $configSource)) {
-    Write-Host "Error: Config file not found: $configSource" -ForegroundColor Red
-    exit 1
+$configFileName = $ConfigFile
+if ($ConfigPath) {
+    $configItem = Get-Item $ConfigPath -ErrorAction SilentlyContinue
+    if (-not $configItem) {
+        Write-Host "Error: Config path not found: $ConfigPath" -ForegroundColor Red
+        exit 1
+    }
+    $configSource = $configItem.FullName
+    $configFileName = $configItem.Name
+} else {
+    $configSource = Join-Path $PSScriptRoot "..\ea\tests\$ConfigFile"
+    if (-not (Test-Path $configSource)) {
+        Write-Host "Error: Config file not found: $configSource" -ForegroundColor Red
+        exit 1
+    }
 }
+
+$configDest = Join-Path $terminalDir "MQL5\Files\strategy\$configFileName"
 
 New-Item -ItemType Directory -Path (Split-Path $configDest) -Force | Out-Null
 Copy-Item $configSource $configDest -Force
@@ -85,7 +97,7 @@ Write-Host "     Deposit: 1,000,000 JPY" -ForegroundColor Cyan
 Write-Host "     Leverage: 1:100" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "     Input Parameters:" -ForegroundColor Cyan
-Write-Host "       InpConfigPath = strategy/$ConfigFile" -ForegroundColor Cyan
+Write-Host "       InpConfigPath = strategy/$configFileName" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "  6. Start ボタンをクリック" -ForegroundColor White
 Write-Host ""

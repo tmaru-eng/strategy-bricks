@@ -160,7 +160,7 @@ describe('BacktestConfigDialog', () => {
       const symbolInput = screen.getByLabelText('シンボル') as HTMLInputElement
       const timeframeSelect = screen.getByLabelText('時間軸') as HTMLSelectElement
       
-      expect(symbolInput.value).toBe('USDJPY')
+      expect(symbolInput.value).toBe('USDJPYm')
       expect(timeframeSelect.value).toBe('M1')
     })
     
@@ -341,11 +341,14 @@ describe('BacktestConfigDialog', () => {
     })
     
     it('should load configuration from localStorage on mount', () => {
+      const now = new Date()
+      const endDate = new Date(now.getTime() - (24 * 60 * 60 * 1000))
+      const startDate = new Date(endDate.getTime() - (7 * 24 * 60 * 60 * 1000))
       const savedConfig = {
         symbol: 'AUDUSD',
         timeframe: 'M15',
-        startDate: new Date('2024-02-01').toISOString(),
-        endDate: new Date('2024-04-30').toISOString()
+        startDate: startDate.toISOString(),
+        endDate: endDate.toISOString()
       }
       
       localStorage.setItem('backtest-config', JSON.stringify(savedConfig))
@@ -366,11 +369,14 @@ describe('BacktestConfigDialog', () => {
     })
     
     it('should prefer lastConfig over localStorage', () => {
+      const now = new Date()
+      const endDate = new Date(now.getTime() - (24 * 60 * 60 * 1000))
+      const startDate = new Date(endDate.getTime() - (7 * 24 * 60 * 60 * 1000))
       const savedConfig = {
         symbol: 'AUDUSD',
         timeframe: 'M15',
-        startDate: new Date('2024-02-01').toISOString(),
-        endDate: new Date('2024-04-30').toISOString()
+        startDate: startDate.toISOString(),
+        endDate: endDate.toISOString()
       }
       
       localStorage.setItem('backtest-config', JSON.stringify(savedConfig))
@@ -378,8 +384,8 @@ describe('BacktestConfigDialog', () => {
       const lastConfig: BacktestConfig = {
         symbol: 'NZDUSD',
         timeframe: 'H4',
-        startDate: new Date('2024-03-01'),
-        endDate: new Date('2024-05-31')
+        startDate: new Date(startDate.getTime() - (7 * 24 * 60 * 60 * 1000)),
+        endDate: endDate
       }
       
       render(

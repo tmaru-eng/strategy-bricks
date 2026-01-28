@@ -1,6 +1,6 @@
 import { app, BrowserWindow, dialog, ipcMain } from 'electron'
 import { mkdir, readFile, writeFile, unlink, readdir } from 'fs/promises'
-import { basename, join } from 'path'
+import { basename, extname, join } from 'path'
 import { spawn, execFile, ChildProcess } from 'child_process'
 import { existsSync } from 'fs'
 import * as os from 'os'
@@ -430,7 +430,7 @@ class ErrorHandler {
           
           try {
             // ファイル名からタイムスタンプを抽出
-            const match = file.name.match(/_(\\d+)\\.json$/)
+            const match = file.name.match(/_(\\d+)(?:_results)?\\.json$/)
             if (match) {
               const timestamp = parseInt(match[1], 10)
               const age = now - timestamp
@@ -491,19 +491,16 @@ class BacktestProcessManager {
       await this.cancelBacktest()
     }
 
-    // 結果ファイルパスを生成
-    const timestamp = Date.now()
+    // 結果ファイルパスを生成（設定ファイル名に揃える）
     const isDev = !app.isPackaged
     const projectRoot = isDev 
       ? join(__dirname, '../../..') 
       : join(process.resourcesPath, '..')
-    
-    const resultsPath = join(
-      projectRoot,
-      'ea',
-      'tests',
-      `results_${timestamp}.json`
-    )
+
+    const configBaseName = sanitizeProfileName(basename(strategyConfigPath, extname(strategyConfigPath)))
+    const hasTimestampSuffix = /_\d+$/.test(configBaseName)
+    const resultsBaseName = hasTimestampSuffix ? configBaseName : `${configBaseName}_${Date.now()}`
+    const resultsPath = join(projectRoot, 'ea', 'tests', `${resultsBaseName}_results.json`)
 
     // 一時ファイルを登録
     this.currentStrategyPath = strategyConfigPath

@@ -13,14 +13,15 @@ RESULTS_DIR="ea/tests/results"
 
 # Test configurations (name|description)
 TESTS=(
-    "test_single_blocks|Single Block Unit Tests (27 strategies)"
+    "test_single_blocks|Single Block Unit Tests (32 strategies)"
+    "test_single_blocks_extra|Single Block Unit Tests (extra, 2 strategies)"
     "active|Basic Strategy Test (1 strategy)"
     "test_strategy_advanced|Advanced Strategy Test (3 strategies)"
     "test_strategy_all_blocks|All Blocks Comprehensive Test (4 strategies)"
 )
 
 # Test order
-TEST_ORDER=("test_single_blocks" "active" "test_strategy_advanced" "test_strategy_all_blocks")
+TEST_ORDER=("test_single_blocks" "test_single_blocks_extra" "active" "test_strategy_advanced" "test_strategy_all_blocks")
 
 get_test_desc() {
     local test_name=$1

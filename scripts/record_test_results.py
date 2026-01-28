@@ -13,9 +13,15 @@ RESULTS_DIR = Path("ea/tests/results")
 TESTS = [
     {
         "name": "test_single_blocks",
-        "description": "単体ブロックテスト (27戦略)",
-        "expected_strategies": 27,
+        "description": "Single-block tests (32 strategies)",
+        "expected_strategies": 32,
         "expected_trades": "50-200 (各戦略)"
+    },
+    {
+        "name": "test_single_blocks_extra",
+        "description": "Single-block tests (extra, 2 strategies)",
+        "expected_strategies": 2,
+        "expected_trades": "1-20"
     },
     {
         "name": "active",
