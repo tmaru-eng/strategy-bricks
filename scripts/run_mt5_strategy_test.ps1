@@ -137,7 +137,8 @@ if (Test-Path $testerRoot) {
 # Create tester .set file to override InpConfigPath.
 $testerProfilesDir = Join-Path $terminalDir "MQL5\\Profiles\\Tester"
 New-Item -ItemType Directory -Path $testerProfilesDir -Force | Out-Null
-$setFileName = "StrategyBricks_" + [System.IO.Path]::GetFileNameWithoutExtension($configFileName) + ".set"
+$expertName = [System.IO.Path]::GetFileNameWithoutExtension($ExpertPath)
+$setFileName = $expertName + "_" + [System.IO.Path]::GetFileNameWithoutExtension($configFileName) + ".set"
 $setPath = Join-Path $testerProfilesDir $setFileName
 $setContent = @"
 InpConfigPath=strategy/$configFileName

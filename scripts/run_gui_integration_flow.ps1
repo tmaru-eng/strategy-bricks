@@ -120,65 +120,6 @@ function Parse-DateUtc {
     return $dto.UtcDateTime
 }
 
-function Resolve-SymbolCandidate {
-    param([string]$SymbolBaseValue)
-
-    if (-not $SymbolBaseValue) {
-        return $SymbolBaseValue
-    }
-
-    $pythonCmd = Get-Command python -ErrorAction SilentlyContinue
-    if (-not $pythonCmd) {
-        Write-Host "Warning: 'python'コマンドが見つかりません。シンボルの自動解決をスキップし、ベースシンボル '$SymbolBaseValue' を使用します。" -ForegroundColor Yellow
-        return $SymbolBaseValue
-    }
-
-    $script = @'
-import MetaTrader5 as mt5
-import sys
-
-base = sys.argv[1]
-if not mt5.initialize():
-    print(f"ERROR: MT5 initialize failed: {mt5.last_error()}", file=sys.stderr)
-    sys.exit(1)
-
-info = mt5.symbol_info(base)
-symbol = base
-if info is None or not getattr(info, "visible", False):
-    symbols = mt5.symbols_get() or []
-    candidates = [s.name for s in symbols if s.name.lower().startswith(base.lower())]
-    if candidates:
-        lower_map = {c.lower(): c for c in candidates}
-        if base.lower() in lower_map:
-            symbol = lower_map[base.lower()]
-        else:
-            candidates_sorted = sorted(candidates, key=lambda c: (len(c), c.lower()))
-            symbol = candidates_sorted[0]
-    info = mt5.symbol_info(symbol)
-    if info and not info.visible:
-        mt5.symbol_select(symbol, True)
-
-print(symbol)
-mt5.shutdown()
-'@
-
-    $resolved = $script | python - $SymbolBaseValue
-    if ($LASTEXITCODE -ne 0) {
-        throw "Symbol resolution failed (python exit code: $LASTEXITCODE)."
-    }
-    if (-not $resolved) {
-        return $SymbolBaseValue
-    }
-
-    $lines = @(($resolved -split "`r?`n") |
-        ForEach-Object { $_.Trim() } |
-        Where-Object { $_ -and ($_ -match '^[A-Za-z0-9._#@+\-]+$') })
-    if ($lines.Count -eq 0) {
-        return $SymbolBaseValue
-    }
-    return $lines[-1]
-}
-
 Write-Host "=== GUI Integration Flow ===" -ForegroundColor Cyan
 
 $configPathResolved = Resolve-ConfigPath $ConfigPath
@@ -192,11 +133,7 @@ $scenarioEnd = Get-ScenarioValue $scenarioMap $Scenario "end"
 $scenarioDays = Get-ScenarioValue $scenarioMap $Scenario "days"
 
 $symbolBaseValue = if ($SymbolBase) { $SymbolBase } elseif ($scenarioSymbol) { $scenarioSymbol } else { "USDJPY" }
-$resolvedSymbol = Resolve-SymbolCandidate $symbolBaseValue
-if ($resolvedSymbol -and $resolvedSymbol -ne $symbolBaseValue) {
-    Write-Host "Resolved symbol: $resolvedSymbol (from $symbolBaseValue)" -ForegroundColor Gray
-}
-$symbolForEngine = if ($resolvedSymbol) { $resolvedSymbol } else { $symbolBaseValue }
+$symbolForEngine = $symbolBaseValue
 $globalGuards = $null
 $globalGuardsProp = $configJson.PSObject.Properties["globalGuards"]
 if ($globalGuardsProp) {
@@ -264,7 +201,15 @@ if (-not (Test-Path $resultsPath)) {
 }
 
 $resultsJson = Get-Content -Path $resultsPath -Raw -Encoding UTF8 | ConvertFrom-Json
-$testerSymbol = $resultsJson.metadata.symbol
+$testerSymbol = $null
+$metadataProp = $resultsJson.PSObject.Properties["metadata"]
+if ($metadataProp) {
+    $metadata = $metadataProp.Value
+    $symbolProp = $metadata.PSObject.Properties["symbol"]
+    if ($symbolProp) {
+        $testerSymbol = $symbolProp.Value
+    }
+}
 if (-not $testerSymbol) {
     Write-Host "Warning: metadata.symbol not found. Falling back to symbol base." -ForegroundColor Yellow
     $testerSymbol = $symbolBaseValue

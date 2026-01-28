@@ -9,7 +9,7 @@ def read_text(path: Path) -> str:
     for enc in ("utf-16", "utf-16-le", "utf-8", "cp932"):
         try:
             return raw.decode(enc)
-        except Exception:
+        except UnicodeDecodeError:
             continue
     return raw.decode("utf-16", errors="ignore")
 
