@@ -138,7 +138,8 @@ if (Test-Path $testerRoot) {
 $testerProfilesDir = Join-Path $terminalDir "MQL5\\Profiles\\Tester"
 New-Item -ItemType Directory -Path $testerProfilesDir -Force | Out-Null
 $expertName = [System.IO.Path]::GetFileNameWithoutExtension($ExpertPath)
-$setFileName = $expertName + "_" + [System.IO.Path]::GetFileNameWithoutExtension($configFileName) + ".set"
+$configHash = (Get-FileHash -Algorithm SHA256 -Path $configSource).Hash.Substring(0, 16)
+$setFileName = "{0}_{1}.set" -f $expertName, $configHash
 $setPath = Join-Path $testerProfilesDir $setFileName
 $setContent = @"
 InpConfigPath=strategy/$configFileName
@@ -329,10 +330,15 @@ if (Test-Path $summaryScript) {
     if ($testerLogDirs.Count -gt 0) {
         $logFile = $testerLogDirs | ForEach-Object { Get-ChildItem -Path $_ -Filter "*.log" -ErrorAction SilentlyContinue } | Sort-Object LastWriteTime -Descending | Select-Object -First 1
         if ($logFile) {
+            $pythonCmd = Get-Command python -ErrorAction SilentlyContinue
+            if (-not $pythonCmd) {
+                Write-Host "Warning: python not found, skipping log summary" -ForegroundColor Yellow
+                return
+            }
             $summaryJson = Join-Path (Split-Path $reportOutputPath) ("{0}_block_summary.json" -f $reportIniValue)
             $summaryText = Join-Path (Split-Path $reportOutputPath) ("{0}_block_summary.txt" -f $reportIniValue)
             Write-Host "Summarizing block evaluation..." -ForegroundColor Yellow
-            & python $summaryScript --log "$($logFile.FullName)" --config "$configSource" --json "$summaryJson" --text "$summaryText"
+            & $pythonCmd.Source $summaryScript --log "$($logFile.FullName)" --config "$configSource" --json "$summaryJson" --text "$summaryText"
         } else {
             Write-Host "Warning: Tester log file not found in agent logs" -ForegroundColor Yellow
         }

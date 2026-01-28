@@ -498,8 +498,9 @@ class BacktestProcessManager {
       : join(process.resourcesPath, '..')
 
     const configBaseName = sanitizeProfileName(basename(strategyConfigPath, extname(strategyConfigPath)))
-    const hasTimestampSuffix = /_\d+$/.test(configBaseName)
-    const resultsBaseName = hasTimestampSuffix ? configBaseName : `${configBaseName}_${Date.now()}`
+    const trimmedBaseName = configBaseName.slice(0, 100)
+    const hasTimestampSuffix = /_\d+$/.test(trimmedBaseName)
+    const resultsBaseName = hasTimestampSuffix ? trimmedBaseName : `${trimmedBaseName}_${Date.now()}`
     const resultsPath = join(projectRoot, 'ea', 'tests', `${resultsBaseName}_results.json`)
 
     // 一時ファイルを登録
