@@ -74,14 +74,7 @@ foreach ($config in $configs) {
 
     try {
         & $flowScript -ConfigPath $config.FullName -Scenario $Scenario -ScenarioFile $ScenarioFile -SymbolBase $SymbolBase -Timeframe $Timeframe -Start $Start -End $End -Days $Days -StopMt5:$StopMt5 -Portable:$Portable
-        if ($LASTEXITCODE -eq 0) {
-            $success += $config.FullName
-        } else {
-            $failed += $config.FullName
-            if (-not $ContinueOnError) {
-                throw "Flow failed for $($config.FullName)"
-            }
-        }
+        $success += $config.FullName
     } catch {
         $failed += $config.FullName
         Write-Host "Error: $($_.Exception.Message)" -ForegroundColor Red

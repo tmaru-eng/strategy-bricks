@@ -22,11 +22,11 @@ Write-Host "=== MT5 Strategy Tester 自動実行 ===" -ForegroundColor Cyan
 
 $configFileName = $ConfigFile
 if ($ConfigPath) {
-    $configItem = Get-Item $ConfigPath -ErrorAction SilentlyContinue
-    if (-not $configItem) {
-        Write-Host "Error: Config path not found: $ConfigPath" -ForegroundColor Red
+    if (-not (Test-Path $ConfigPath -PathType Leaf)) {
+        Write-Host "Error: Config path must be an existing file: $ConfigPath" -ForegroundColor Red
         exit 1
     }
+    $configItem = Get-Item $ConfigPath
     $configSource = $configItem.FullName
     $configFileName = $configItem.Name
 } else {
@@ -297,11 +297,15 @@ Write-Host ""
 # Summarize block evaluation from tester log (best-effort)
 $summaryScript = Join-Path $PSScriptRoot "summarize_tester_log.py"
 if (Test-Path $summaryScript) {
-    $terminalId = Split-Path $terminalDir -Leaf
     $testerLogCandidates = @(
-        (Join-Path $env:APPDATA "MetaQuotes\Tester\$terminalId\Agent-127.0.0.1-3000\logs"),
         (Join-Path $terminalDir "Tester\Agent-127.0.0.1-3000\logs")
     )
+    if (-not $Portable) {
+        $terminalId = Split-Path $terminalDir -Leaf
+        $testerLogCandidates = @(
+            (Join-Path $env:APPDATA "MetaQuotes\Tester\$terminalId\Agent-127.0.0.1-3000\logs")
+        ) + $testerLogCandidates
+    }
     $testerLogDir = $testerLogCandidates | Where-Object { Test-Path $_ } | Select-Object -First 1
     if ($testerLogDir) {
         $logFile = Get-ChildItem -Path $testerLogDir -Filter "*.log" | Sort-Object LastWriteTime -Descending | Select-Object -First 1

@@ -35,7 +35,7 @@ function Resolve-ConfigPath {
     $repoRoot = Resolve-Path (Join-Path $PSScriptRoot "..")
     $testsDir = Join-Path $repoRoot "ea\tests"
     $latest = Get-ChildItem -Path $testsDir -Filter "strategy_*.json" -ErrorAction SilentlyContinue |
-        Where-Object { $_.Name -match "^strategy_\\d+\\.json$" } |
+        Where-Object { $_.Name -match "^strategy_[\\d_]+\\.json$" } |
         Sort-Object LastWriteTime -Descending |
         Select-Object -First 1
 
