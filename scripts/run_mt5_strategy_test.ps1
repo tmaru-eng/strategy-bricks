@@ -84,6 +84,10 @@ if ($ReportPath) {
         $repoRoot = Resolve-Path (Join-Path $PSScriptRoot "..")
         $reportOutputPath = Join-Path $repoRoot $reportOutputPath
     }
+    $endsWithSeparator = $reportOutputPath.EndsWith([System.IO.Path]::DirectorySeparatorChar) -or $reportOutputPath.EndsWith([System.IO.Path]::AltDirectorySeparatorChar)
+    if ($endsWithSeparator -or (Test-Path $reportOutputPath -PathType Container)) {
+        $reportOutputPath = Join-Path $reportOutputPath "$configBaseName.htm"
+    }
     if ([System.IO.Path]::GetExtension($reportOutputPath) -eq "") {
         $reportOutputPath = "$reportOutputPath.htm"
     }
