@@ -37,15 +37,17 @@ Write-Host "Config: $configFileName"
 Write-Host "Expert: $ExpertPath"
 Write-Host "Symbol: $Symbol"
 Write-Host "Period: $Period"
-$periodValue = $Period
-switch ($Period) {
-    "M1" { $periodValue = "1" }
-    "M5" { $periodValue = "5" }
-    "M15" { $periodValue = "15" }
-    "M30" { $periodValue = "30" }
-    "H1" { $periodValue = "60" }
-    "H4" { $periodValue = "240" }
-    "D1" { $periodValue = "1440" }
+$periodMap = @{
+    "M1" = "1"; "M5" = "5"; "M15" = "15"; "M30" = "30";
+    "H1" = "60"; "H4" = "240"; "D1" = "1440"
+}
+$periodValue = ""
+if ($periodMap.ContainsKey($Period)) {
+    $periodValue = $periodMap[$Period]
+} elseif ($Period -match '^\d+$') {
+    $periodValue = $Period
+} else {
+    throw "Invalid period '$Period'. Supported values are M1, M5, M15, M30, H1, H4, D1, or a number of minutes."
 }
 
 Write-Host "Tester Period: $periodValue"
