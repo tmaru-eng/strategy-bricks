@@ -12,7 +12,7 @@ param(
     [int]$Deposit = 1000000,
     [string]$Currency = "JPY",
     [int]$Leverage = 100,
-    [bool]$Portable = $true,
+    [bool]$Portable = $false,
     [string]$ReportPath,
     [string]$MT5Path = "C:\Program Files\MetaTrader 5\terminal64.exe",
     [bool]$SyncEA = $true
@@ -333,12 +333,12 @@ if (Test-Path $summaryScript) {
             $pythonCmd = Get-Command python -ErrorAction SilentlyContinue
             if (-not $pythonCmd) {
                 Write-Host "Warning: python not found, skipping log summary" -ForegroundColor Yellow
-                return
+            } else {
+                $summaryJson = Join-Path (Split-Path $reportOutputPath) ("{0}_block_summary.json" -f $reportIniValue)
+                $summaryText = Join-Path (Split-Path $reportOutputPath) ("{0}_block_summary.txt" -f $reportIniValue)
+                Write-Host "Summarizing block evaluation..." -ForegroundColor Yellow
+                & $pythonCmd.Source $summaryScript --log "$($logFile.FullName)" --config "$configSource" --json "$summaryJson" --text "$summaryText"
             }
-            $summaryJson = Join-Path (Split-Path $reportOutputPath) ("{0}_block_summary.json" -f $reportIniValue)
-            $summaryText = Join-Path (Split-Path $reportOutputPath) ("{0}_block_summary.txt" -f $reportIniValue)
-            Write-Host "Summarizing block evaluation..." -ForegroundColor Yellow
-            & $pythonCmd.Source $summaryScript --log "$($logFile.FullName)" --config "$configSource" --json "$summaryJson" --text "$summaryText"
         } else {
             Write-Host "Warning: Tester log file not found in agent logs" -ForegroundColor Yellow
         }
