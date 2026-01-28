@@ -44,7 +44,11 @@ def main() -> int:
     tail = lines[start_idx:]
 
     # Parse config
-    config = json.loads(config_path.read_text(encoding="utf-8"))
+    try:
+        config = json.loads(config_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        print(f"ERROR: invalid config json: {config_path} ({exc})")
+        return 1
     expected_blocks = [b.get("id") for b in config.get("blocks", []) if b.get("id")]
 
     # Parse log events
