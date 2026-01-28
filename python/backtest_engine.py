@@ -231,15 +231,19 @@ class BacktestEngine:
         symbol_info = mt5.symbol_info(requested_symbol)
         if symbol_info is None:
             candidates = [s.name for s in (mt5.symbols_get() or []) if s.name.startswith(requested_symbol)]
-            if len(candidates) == 1:
-                self.symbol = candidates[0]
+            if candidates:
+                lower_map = {c.lower(): c for c in candidates}
+                if requested_symbol.lower() in lower_map:
+                    selected = lower_map[requested_symbol.lower()]
+                else:
+                    candidates_sorted = sorted(candidates, key=lambda c: (len(c), c.lower()))
+                    selected = candidates_sorted[0]
+                self.symbol = selected
                 symbol_info = mt5.symbol_info(self.symbol)
-                print(f"Symbol not found: {requested_symbol}. Using {self.symbol}.")
+                preview = ", ".join(candidates[:5])
+                more = "" if len(candidates) <= 5 else f" (+{len(candidates) - 5} more)"
+                print(f"Symbol not found: {requested_symbol}. Using {self.symbol}. Candidates: {preview}{more}")
             else:
-                if candidates:
-                    preview = ", ".join(candidates[:5])
-                    more = "" if len(candidates) <= 5 else f" (+{len(candidates) - 5} more)"
-                    raise Exception(f"Symbol not found: {requested_symbol}. Candidates: {preview}{more}")
                 raise Exception(f"Symbol not found: {requested_symbol}. No similar symbols found.")
         if not symbol_info or not symbol_info.visible:
             if not mt5.symbol_select(self.symbol, True):
