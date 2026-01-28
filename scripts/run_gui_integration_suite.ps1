@@ -21,14 +21,18 @@ $ErrorActionPreference = "Stop"
 $repoRoot = Resolve-Path (Join-Path $PSScriptRoot "..")
 $targetDir = if ($ConfigDir) {
     if (Test-Path $ConfigDir) {
-        (Resolve-Path $ConfigDir).Path
+        $resolved = (Resolve-Path $ConfigDir).Path
     } else {
         $candidate = Join-Path $repoRoot $ConfigDir
         if (-not (Test-Path $candidate)) {
             throw "ConfigDir not found: $ConfigDir"
         }
-        (Resolve-Path $candidate).Path
+        $resolved = (Resolve-Path $candidate).Path
     }
+    if (-not (Test-Path $resolved -PathType Container)) {
+        throw "ConfigDir must be a directory: $resolved"
+    }
+    $resolved
 } else {
     Join-Path $repoRoot "ea\tests"
 }

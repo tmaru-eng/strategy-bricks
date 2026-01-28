@@ -21,6 +21,9 @@ function Resolve-ConfigPath {
         if (-not (Test-Path $PathHint)) {
             throw "Config path not found: $PathHint"
         }
+        if (-not (Test-Path $PathHint -PathType Leaf)) {
+            throw "Config path must be a file: $PathHint"
+        }
         $resolved = (Resolve-Path $PathHint).Path
         if ($resolved -match "_results\\.json$") {
             $candidate = $resolved -replace "_results\\.json$", ".json"
