@@ -129,6 +129,7 @@ function Resolve-SymbolCandidate {
 
     $pythonCmd = Get-Command python -ErrorAction SilentlyContinue
     if (-not $pythonCmd) {
+        Write-Host "Warning: 'python'コマンドが見つかりません。シンボルの自動解決をスキップし、ベースシンボル '$SymbolBaseValue' を使用します。" -ForegroundColor Yellow
         return $SymbolBaseValue
     }
 
