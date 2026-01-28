@@ -251,6 +251,7 @@ if ($process.HasExited) {
 
 # レポートを確認
 $reportCandidates = @(
+    (Join-Path $terminalDir "Tester\Reports\$reportIniValue.htm"),
     (Join-Path $terminalDir "Tester\$reportIniValue.htm"),
     (Join-Path $terminalDir "$reportIniValue.htm")
 )
