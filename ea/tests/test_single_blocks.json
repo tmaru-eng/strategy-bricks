@@ -2,7 +2,7 @@
   "meta": {
     "formatVersion": "1.0",
     "name": "Single Block Unit Tests",
-    "description": "Single-block test config to validate each block in isolation.",
+    "description": "各ブロックを単体で動作確認するためのテスト設定",
     "generatedBy": "Strategy Bricks Test Suite",
     "generatedAt": "2026-01-26T10:50:00Z"
   },

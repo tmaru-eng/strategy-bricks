@@ -301,25 +301,34 @@ Write-Host ""
 # Summarize block evaluation from tester log (best-effort)
 $summaryScript = Join-Path $PSScriptRoot "summarize_tester_log.py"
 if (Test-Path $summaryScript) {
-    $testerLogCandidates = @(
-        (Join-Path $terminalDir "Tester\Agent-127.0.0.1-3000\logs")
-    )
+    $testerLogDirs = @()
+    $portableTesterRoot = Join-Path $terminalDir "Tester"
+    if (Test-Path $portableTesterRoot) {
+        $agentDirs = Get-ChildItem $portableTesterRoot -Directory -ErrorAction SilentlyContinue | Where-Object { $_.Name -like "Agent-*" }
+        foreach ($agent in $agentDirs) {
+            $testerLogDirs += (Join-Path $agent.FullName "logs")
+        }
+    }
     if (-not $Portable) {
         $terminalId = Split-Path $terminalDir -Leaf
-        $testerLogCandidates = @(
-            (Join-Path $env:APPDATA "MetaQuotes\Tester\$terminalId\Agent-127.0.0.1-3000\logs")
-        ) + $testerLogCandidates
+        $dataTesterRoot = Join-Path $env:APPDATA "MetaQuotes\Tester\$terminalId"
+        if (Test-Path $dataTesterRoot) {
+            $agentDirs = Get-ChildItem $dataTesterRoot -Directory -ErrorAction SilentlyContinue | Where-Object { $_.Name -like "Agent-*" }
+            foreach ($agent in $agentDirs) {
+                $testerLogDirs += (Join-Path $agent.FullName "logs")
+            }
+        }
     }
-    $testerLogDir = $testerLogCandidates | Where-Object { Test-Path $_ } | Select-Object -First 1
-    if ($testerLogDir) {
-        $logFile = Get-ChildItem -Path $testerLogDir -Filter "*.log" | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+    $testerLogDirs = $testerLogDirs | Where-Object { Test-Path $_ } | Sort-Object -Unique
+    if ($testerLogDirs.Count -gt 0) {
+        $logFile = $testerLogDirs | ForEach-Object { Get-ChildItem -Path $_ -Filter "*.log" -ErrorAction SilentlyContinue } | Sort-Object LastWriteTime -Descending | Select-Object -First 1
         if ($logFile) {
             $summaryJson = Join-Path (Split-Path $reportOutputPath) ("{0}_block_summary.json" -f $reportIniValue)
             $summaryText = Join-Path (Split-Path $reportOutputPath) ("{0}_block_summary.txt" -f $reportIniValue)
             Write-Host "Summarizing block evaluation..." -ForegroundColor Yellow
             & python $summaryScript --log "$($logFile.FullName)" --config "$configSource" --json "$summaryJson" --text "$summaryText"
         } else {
-            Write-Host "Warning: Tester log file not found in $testerLogDir" -ForegroundColor Yellow
+            Write-Host "Warning: Tester log file not found in agent logs" -ForegroundColor Yellow
         }
     } else {
         Write-Host "Warning: Tester log directory not found" -ForegroundColor Yellow

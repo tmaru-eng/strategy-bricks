@@ -246,7 +246,10 @@ class BacktestEngine:
                 symbol_info = mt5.symbol_info(self.symbol)
                 preview = ", ".join(candidates[:5])
                 more = "" if len(candidates) <= 5 else f" (+{len(candidates) - 5} more)"
-                print(f"Symbol not found: {requested_symbol}. Using {self.symbol}. Candidates: {preview}{more}")
+                print(
+                    f"Warning: Symbol not found: {requested_symbol}. Using {self.symbol}. Candidates: {preview}{more}",
+                    file=sys.stderr,
+                )
             else:
                 raise Exception(f"Symbol not found: {requested_symbol}. No similar symbols found.")
         if not symbol_info or not symbol_info.visible:
