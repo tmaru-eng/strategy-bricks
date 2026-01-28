@@ -1471,8 +1471,8 @@
       "id": "filter.timeWindow#1",
       "typeId": "filter.session.timeWindow",
       "params": {
-        "start": "00:00",
-        "end": "23:59"
+        "start": "09:00",
+        "end": "17:00"
       }
     },
     {

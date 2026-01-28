@@ -157,6 +157,7 @@ if ($SyncEA -or -not (Test-Path $eaDest)) {
     # Sync include files
     $includeSource = Join-Path $PSScriptRoot "..\ea\include"
     $includeDest = Join-Path $terminalDir "MQL5\Include\StrategyBricks"
+    New-Item -ItemType Directory -Path $includeDest -Force | Out-Null
     Copy-Item (Join-Path $includeSource "*") $includeDest -Recurse -Force
     Write-Host "EA source synced" -ForegroundColor Green
 }

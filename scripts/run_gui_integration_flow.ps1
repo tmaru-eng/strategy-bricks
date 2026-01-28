@@ -139,8 +139,8 @@ import sys
 
 base = sys.argv[1]
 if not mt5.initialize():
-    print(base)
-    sys.exit(0)
+    print(f"ERROR: MT5 initialize failed: {mt5.last_error()}", file=sys.stderr)
+    sys.exit(1)
 
 info = mt5.symbol_info(base)
 symbol = base
@@ -162,12 +162,17 @@ print(symbol)
 mt5.shutdown()
 '@
 
-    $resolved = $script | python - $SymbolBaseValue 2>$null
-    if ($LASTEXITCODE -ne 0 -or -not $resolved) {
+    $resolved = $script | python - $SymbolBaseValue
+    if ($LASTEXITCODE -ne 0) {
+        throw "Symbol resolution failed (python exit code: $LASTEXITCODE)."
+    }
+    if (-not $resolved) {
         return $SymbolBaseValue
     }
 
-    $lines = @(($resolved -split "`r?`n") | Where-Object { $_ -and ($_ -match '^[A-Za-z0-9._-]+$') })
+    $lines = @(($resolved -split "`r?`n") |
+        ForEach-Object { $_.Trim() } |
+        Where-Object { $_ -and ($_ -match '^[A-Za-z0-9._#@+\-]+$') })
     if ($lines.Count -eq 0) {
         return $SymbolBaseValue
     }
