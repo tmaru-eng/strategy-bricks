@@ -55,6 +55,10 @@ Write-Host "Date: $DateFrom - $DateTo"
 Write-Host ""
 
 # MT5のデータディレクトリを取得
+if (-not $MT5Path -or -not (Test-Path $MT5Path)) {
+    Write-Host "Error: MT5 executable not found: $MT5Path" -ForegroundColor Red
+    exit 1
+}
 if ($Portable) {
     $terminalDir = Split-Path $MT5Path
     Write-Host "Terminal (portable): $terminalDir" -ForegroundColor Green
