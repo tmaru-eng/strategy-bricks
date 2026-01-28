@@ -157,13 +157,13 @@ class MockBacktestProcessManager {
         if (code === 0) {
           if (!settled) {
             settled = true
+            resolve(resultsPath)
           }
-          resolve(resultsPath)
         } else {
           if (!settled) {
             settled = true
+            reject(new Error(`Backtest failed with code ${code}`))
           }
-          reject(new Error(`Backtest failed with code ${code}`))
         }
       })
 
@@ -176,8 +176,8 @@ class MockBacktestProcessManager {
         this.currentProcess = null
         if (!settled) {
           settled = true
+          reject(err)
         }
-        reject(err)
       })
 
       // テスト用: 即座に成功を返す
