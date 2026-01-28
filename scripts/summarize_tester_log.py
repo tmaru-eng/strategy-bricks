@@ -1,5 +1,6 @@
 import argparse
 import json
+import sys
 from pathlib import Path
 
 
@@ -47,7 +48,7 @@ def main() -> int:
     try:
         config = json.loads(config_path.read_text(encoding="utf-8"))
     except json.JSONDecodeError as exc:
-        print(f"ERROR: invalid config json: {config_path} ({exc})")
+        print(f"ERROR: invalid config json: {config_path} ({exc})", file=sys.stderr)
         return 1
     expected_blocks = [b.get("id") for b in config.get("blocks", []) if b.get("id")]
 

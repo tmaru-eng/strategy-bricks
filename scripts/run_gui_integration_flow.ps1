@@ -25,12 +25,15 @@ function Resolve-ConfigPath {
             throw "Config path must be a file: $PathHint"
         }
         $resolved = (Resolve-Path $PathHint).Path
+        if (-not (Test-Path $resolved -PathType Leaf)) {
+            throw "Config path must be a file: $resolved"
+        }
         if ($resolved -match "_results\\.json$") {
             $candidate = $resolved -replace "_results\\.json$", ".json"
-            if (Test-Path $candidate) {
-                return (Resolve-Path $candidate).Path
+            if (-not (Test-Path $candidate -PathType Leaf)) {
+                throw "Results file provided. Expected config at: $candidate"
             }
-            throw "Results file provided. Expected config at: $candidate"
+            return (Resolve-Path $candidate).Path
         }
         return $resolved
     }
