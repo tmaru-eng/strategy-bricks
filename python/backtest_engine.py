@@ -239,17 +239,23 @@ class BacktestEngine:
                 lower_map = {c.lower(): c for c in candidates}
                 if requested_symbol.lower() in lower_map:
                     selected = lower_map[requested_symbol.lower()]
+                elif len(candidates) == 1:
+                    selected = candidates[0]
                 else:
-                    candidates_sorted = sorted(candidates, key=lambda c: (len(c), c.lower()))
-                    selected = candidates_sorted[0]
+                    preview = ", ".join(candidates[:5])
+                    more = "" if len(candidates) <= 5 else f" (+{len(candidates) - 5} more)"
+                    raise Exception(
+                        f"Symbol not found: {requested_symbol}. "
+                        f"Multiple candidates found: {preview}{more}. "
+                        "Please specify the exact symbol."
+                    )
                 self.symbol = selected
                 symbol_info = mt5.symbol_info(self.symbol)
-                preview = ", ".join(candidates[:5])
-                more = "" if len(candidates) <= 5 else f" (+{len(candidates) - 5} more)"
-                print(
-                    f"Warning: Symbol not found: {requested_symbol}. Using {self.symbol}. Candidates: {preview}{more}",
-                    file=sys.stderr,
-                )
+                if requested_symbol.lower() != self.symbol.lower():
+                    print(
+                        f"Warning: Symbol not found: {requested_symbol}. Using {self.symbol}.",
+                        file=sys.stderr,
+                    )
             else:
                 raise Exception(f"Symbol not found: {requested_symbol}. No similar symbols found.")
         if not symbol_info or not symbol_info.visible:
