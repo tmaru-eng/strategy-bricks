@@ -230,7 +230,11 @@ class BacktestEngine:
         requested_symbol = self.symbol
         symbol_info = mt5.symbol_info(requested_symbol)
         if symbol_info is None:
-            candidates = [s.name for s in (mt5.symbols_get() or []) if s.name.startswith(requested_symbol)]
+            candidates = [
+                s.name
+                for s in (mt5.symbols_get() or [])
+                if s.name.lower().startswith(requested_symbol.lower())
+            ]
             if candidates:
                 lower_map = {c.lower(): c for c in candidates}
                 if requested_symbol.lower() in lower_map:
