@@ -145,12 +145,17 @@ info = mt5.symbol_info(base)
 symbol = base
 if info is None or not getattr(info, "visible", False):
     symbols = mt5.symbols_get() or []
-    candidates = [s for s in symbols if s.name.startswith(base)]
-    visible = [s.name for s in candidates if getattr(s, "visible", False)]
-    if visible:
-        symbol = visible[0]
-    elif candidates:
-        symbol = candidates[0].name
+    candidates = [s.name for s in symbols if s.name.lower().startswith(base.lower())]
+    if candidates:
+        lower_map = {c.lower(): c for c in candidates}
+        if base.lower() in lower_map:
+            symbol = lower_map[base.lower()]
+        else:
+            candidates_sorted = sorted(candidates, key=lambda c: (len(c), c.lower()))
+            symbol = candidates_sorted[0]
+    info = mt5.symbol_info(symbol)
+    if info and not info.visible:
+        mt5.symbol_select(symbol, True)
 
 print(symbol)
 mt5.shutdown()
