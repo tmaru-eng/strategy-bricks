@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import { validateNodes } from '../services/Validator'
+import type { BlockCatalog } from '../models/catalog'
 import type { Node } from 'reactflow'
 
-const catalog = {
+const catalog: BlockCatalog = {
   meta: { formatVersion: '1.0' },
   blocks: [
     {

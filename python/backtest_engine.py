@@ -282,10 +282,16 @@ class BacktestEngine:
         from datetime import timezone
         first_time = datetime.fromtimestamp(rates[0]['time'], tz=timezone.utc)
         last_time = datetime.fromtimestamp(rates[-1]['time'], tz=timezone.utc)
+        start_date = self.start_date
+        end_date = self.end_date
+        if start_date.tzinfo is None:
+            start_date = start_date.replace(tzinfo=timezone.utc)
+        if end_date.tzinfo is None:
+            end_date = end_date.replace(tzinfo=timezone.utc)
         
         print(f"データ範囲: {first_time} - {last_time}")
         
-        if first_time > self.start_date or last_time < self.end_date:
+        if first_time > start_date or last_time < end_date:
             print(
                 f"警告: データ範囲が不完全です。"
                 f"要求: {self.start_date} - {self.end_date}, "

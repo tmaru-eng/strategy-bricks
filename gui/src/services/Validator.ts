@@ -20,6 +20,7 @@ export type StrategyConfig = {
     generatedBy: string
     generatedAt: string
   }
+  globalGuards?: Record<string, unknown>
   strategies: Array<{
     id: string
     name: string

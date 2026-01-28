@@ -1,4 +1,3 @@
-import React from 'react'
 import { render, screen, waitFor, fireEvent, cleanup } from '@testing-library/react'
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { BacktestPanel } from './BacktestPanel'
@@ -298,9 +297,9 @@ describe('BacktestPanel - Backtest Execution', () => {
     }
     
     // onBacktestComplete コールバックをキャプチャ
-    let completeCallback: ((results: BacktestResults) => void) | null = null
+    let completeCallback: ((results: BacktestResults) => void) | undefined
     mockBacktestAPI.onBacktestComplete.mockImplementation((callback) => {
-      completeCallback = callback
+      completeCallback = callback as (results: BacktestResults) => void
     })
     
     render(<BacktestPanel />)
@@ -314,9 +313,7 @@ describe('BacktestPanel - Backtest Execution', () => {
     expect(completeCallback).not.toBeNull()
     
     // バックテスト完了をシミュレート
-    if (completeCallback) {
-      completeCallback(mockResults)
-    }
+    completeCallback?.(mockResults)
     
     // 結果が表示されることを確認
     await waitFor(() => {
@@ -332,9 +329,9 @@ describe('BacktestPanel - Backtest Execution', () => {
     }
     
     // onBacktestError コールバックをキャプチャ
-    let errorCallback: ((error: { message: string }) => void) | null = null
+    let errorCallback: ((error: { message: string }) => void) | undefined
     mockBacktestAPI.onBacktestError.mockImplementation((callback) => {
-      errorCallback = callback
+      errorCallback = callback as (error: { message: string }) => void
     })
     
     render(<BacktestPanel />)
@@ -348,9 +345,7 @@ describe('BacktestPanel - Backtest Execution', () => {
     expect(errorCallback).not.toBeNull()
     
     // バックテストエラーをシミュレート
-    if (errorCallback) {
-      errorCallback(mockError)
-    }
+    errorCallback?.(mockError)
     
     // エラーが表示されることを確認
     await waitFor(() => {

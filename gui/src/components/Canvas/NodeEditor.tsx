@@ -141,8 +141,6 @@ export const NodeEditor: React.FC = () => {
         onNodeClick={onNodeClick}
         fitView
         defaultViewport={defaultViewport}
-        nodesDeletable={true}
-        edgesDeletable={true}
         deleteKeyCode={['Backspace', 'Delete']}
       >
         <Background gap={22} size={1} />

@@ -9,7 +9,7 @@ import {
 } from 'reactflow'
 import type { BlockCatalog } from '../models/catalog'
 import defaultCatalog from '../resources/block_catalog.default.json'
-import { exportConfig } from '../services/Exporter'
+import { exportConfig, type ExportResult } from '../services/Exporter'
 import { validateNodes, type ValidationIssue } from '../services/Validator'
 
 type FlowState = {
@@ -26,7 +26,7 @@ type FlowState = {
   addRuleGroup: () => void
   updateNodeData: (nodeId: string, data: Record<string, unknown>) => void
   runValidation: () => ValidationIssue[]
-  exportCurrentConfig: (profileName: string) => Promise<{ ok: boolean; path?: string }>
+  exportCurrentConfig: (profileName: string) => Promise<ExportResult>
 }
 
 type CatalogState = {

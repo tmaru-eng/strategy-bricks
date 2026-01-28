@@ -293,13 +293,3 @@ export interface BacktestAPI {
   }>;
 }
 
-/**
- * Window オブジェクトの拡張
- * 
- * preload.tsでcontextBridgeを使用してbacktestAPIを公開する際に使用
- */
-declare global {
-  interface Window {
-    backtestAPI?: BacktestAPI;
-  }
-}
