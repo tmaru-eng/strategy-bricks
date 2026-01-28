@@ -303,23 +303,26 @@ Write-Host ""
 # Summarize block evaluation from tester log (best-effort)
 $summaryScript = Join-Path $PSScriptRoot "summarize_tester_log.py"
 if (Test-Path $summaryScript) {
+    function Get-AgentLogDirs {
+        param([string]$TesterRoot)
+        if (-not (Test-Path $TesterRoot)) {
+            return @()
+        }
+        return Get-ChildItem -Path $TesterRoot -Directory -ErrorAction SilentlyContinue |
+            Where-Object { $_.Name -like "Agent-*" } |
+            ForEach-Object { Join-Path $_.FullName "logs" }
+    }
+
     $testerLogDirs = @()
     $portableTesterRoot = Join-Path $terminalDir "Tester"
-    if (Test-Path $portableTesterRoot) {
-        $agentDirs = Get-ChildItem $portableTesterRoot -Directory -ErrorAction SilentlyContinue | Where-Object { $_.Name -like "Agent-*" }
-        foreach ($agent in $agentDirs) {
-            $testerLogDirs += (Join-Path $agent.FullName "logs")
-        }
-    }
+    $testerLogDirs += Get-AgentLogDirs $portableTesterRoot
     if (-not $Portable) {
+        $installDir = Split-Path $MT5Path
+        $testerLogDirs += Get-AgentLogDirs (Join-Path $installDir "Tester")
+
         $terminalId = Split-Path $terminalDir -Leaf
         $dataTesterRoot = Join-Path $env:APPDATA "MetaQuotes\Tester\$terminalId"
-        if (Test-Path $dataTesterRoot) {
-            $agentDirs = Get-ChildItem $dataTesterRoot -Directory -ErrorAction SilentlyContinue | Where-Object { $_.Name -like "Agent-*" }
-            foreach ($agent in $agentDirs) {
-                $testerLogDirs += (Join-Path $agent.FullName "logs")
-            }
-        }
+        $testerLogDirs += Get-AgentLogDirs $dataTesterRoot
     }
     $testerLogDirs = $testerLogDirs | Where-Object { Test-Path $_ } | Sort-Object -Unique
     if ($testerLogDirs.Count -gt 0) {
