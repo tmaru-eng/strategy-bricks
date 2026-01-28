@@ -254,11 +254,11 @@ private:
 
         // すべてのstrategyのconditionを検証
         for (int s = 0; s < config.strategyCount; s++) {
-            const StrategyConfig strategy = config.strategies[s];
-            const EntryRequirement req = strategy.entryRequirement;
+            const StrategyConfig &strategy = config.strategies[s];
+            const EntryRequirement &req = strategy.entryRequirement;
 
             for (int rg = 0; rg < req.ruleGroupCount; rg++) {
-                const RuleGroup ruleGroup = req.ruleGroups[rg];
+                const RuleGroup &ruleGroup = req.ruleGroups[rg];
 
                 for (int c = 0; c < ruleGroup.conditionCount; c++) {
                     string blockId = ruleGroup.conditions[c].blockId;
