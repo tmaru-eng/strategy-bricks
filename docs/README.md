@@ -162,6 +162,15 @@ docs/
 
 ---
 
+# 実装/テストの入口
+- EA Runtime: `ea/README.md`
+- GUI Builder: `gui/README.md`
+- Backtest（Python）: `python/README.md`
+- テスト/運用スクリプト: `scripts/README.md`
+- 設定ファイルの説明: `config/README.md`
+
+---
+
 # 最小セット（まず作るなら）
 - 01_project_brief.md（企画サマリ）
 - 02_requirements/10_requirements.md（要件定義）

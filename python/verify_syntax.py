@@ -16,15 +16,15 @@ all_ok = True
 for filename in files_to_check:
     try:
         py_compile.compile(filename, doraise=True)
-        print(f"✓ {filename} - Syntax OK")
+        print(f"[OK] {filename} - Syntax OK")
     except py_compile.PyCompileError as e:
-        print(f"✗ {filename} - Syntax Error:")
+        print(f"[ERROR] {filename} - Syntax Error:")
         print(f"  {e}")
         all_ok = False
 
 if all_ok:
-    print("\n✓ All files have valid Python syntax")
+    print("\n[OK] All files have valid Python syntax")
     sys.exit(0)
 else:
-    print("\n✗ Some files have syntax errors")
+    print("\n[ERROR] Some files have syntax errors")
     sys.exit(1)

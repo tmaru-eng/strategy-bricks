@@ -15,6 +15,21 @@ Strategy Tester は **Windows / Wine（macOS）** の両方で運用します。
 - GUI-EA統合テスト: `docs/04_operations/75_gui_ea_integration_test.md`
 - Wine（macOS）での Strategy Tester: `scripts/run_mt5_tests.sh` / `scripts/run_mt5_tester.sh`
 - ログ/観測: `docs/04_operations/90_observability_and_testing.md`
+
+## スクリプトの役割（実行補助）
+
+### Windows（PowerShell）
+- `scripts/compile_and_test_all.ps1`：EA/設定/Include の配置 → コンパイル → MT5起動まで
+- `scripts/prepare_mt5_test.ps1`：設定ファイルの配置
+- `scripts/run_mt5_strategy_test.ps1`：Strategy Tester の起動補助
+- `scripts/run_gui_integration_flow.ps1`：GUI→バックテスト→Tester の連結実行
+- `scripts/run_gui_integration_suite.ps1`：連結テストの一括実行
+- `scripts/run_gui_e2e_suite.ps1`：E2E生成 + 連結テスト一括
+
+### macOS/Wine
+- `scripts/run_mt5_tests.sh`：Wine向け Strategy Tester 一括
+- `scripts/run_mt5_tester.sh`：Wine向け Strategy Tester 起動
+- `scripts/run_strategy_tests.sh`：手動テスト手順の記録補助
 ## GUI結合テスト（ビルダー → GUIバックテスト → Strategy Tester）
 
 GUIビルダーで作成した設定が **GUIバックテスター** と **MT5 Strategy Tester** の両方で

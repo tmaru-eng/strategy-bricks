@@ -61,28 +61,28 @@ print_section() {
 
 check_prerequisites() {
     print_section "Checking Prerequisites"
-    
+
     # Check wine
     if [ ! -f "$WINE" ]; then
         echo -e "${RED}❌ Wine not found: $WINE${NC}"
         exit 1
     fi
     echo -e "${GREEN}✅ Wine found${NC}"
-    
+
     # Check MT5
     if [ ! -f "$TERMINAL" ]; then
         echo -e "${RED}❌ MT5 terminal not found: $TERMINAL${NC}"
         exit 1
     fi
     echo -e "${GREEN}✅ MT5 terminal found${NC}"
-    
+
     # Check config directory
     if [ ! -d "$CONFIG_DIR" ]; then
         echo -e "${RED}❌ Config directory not found: $CONFIG_DIR${NC}"
         exit 1
     fi
     echo -e "${GREEN}✅ Config directory found${NC}"
-    
+
     # Check results directory
     mkdir -p "$RESULTS_DIR"
     echo -e "${GREEN}✅ Results directory ready${NC}"
@@ -92,55 +92,57 @@ run_test() {
     local test_name=$1
     local test_desc=$2
     local config_file="$CONFIG_DIR/tester_${test_name}.ini"
-    
+
     print_section "Running: $test_desc"
-    
+
     # Check config file
     if [ ! -f "$config_file" ]; then
         echo -e "${RED}❌ Config file not found: $config_file${NC}"
         return 1
     fi
     echo -e "${BLUE}📄 Config: tester_${test_name}.ini${NC}"
-    
+
     # Get current date for log file
-    local log_date=$(date +%Y%m%d)
+    local log_date
+    log_date=$(date +%Y%m%d)
     local log_file="$LOG_DIR/${log_date}.log"
-    
+
     # Clear previous log if exists
     if [ -f "$log_file" ]; then
         echo -e "${YELLOW}⚠️  Clearing previous log${NC}"
         > "$log_file"
     fi
-    
+
     # Run MT5 tester
     echo -e "${BLUE}🚀 Starting MT5 Strategy Tester...${NC}"
-    
+
     # Run in background and wait
     WINEPREFIX="$HOME/Library/Application Support/net.metaquotes.wine.metatrader5" \
     "$WINE" "$TERMINAL" /config:"$config_file" &
-    
+
     local mt5_pid=$!
     echo -e "${BLUE}   Process ID: $mt5_pid${NC}"
-    
+
     # Wait for test to complete (check log file for completion)
     echo -e "${BLUE}⏳ テスト完了を待機中...${NC}"
     local wait_count=0
     local max_wait=600  # 10 minutes max
-    
+
     while [ $wait_count -lt $max_wait ]; do
         sleep 10
         wait_count=$((wait_count + 10))
-        
+
         # Check if process is still running
         if ! ps -p $mt5_pid > /dev/null 2>&1; then
             echo -e "${GREEN}✅ MT5プロセスが終了しました${NC}"
             break
         fi
-        
+
         # Check if log file exists and has content
         if [ -f "$log_file" ]; then
-            local log_size=$(wc -c < "$log_file" 2>/dev/null || echo "0")
-            
+            local log_size
+            log_size=$(wc -c < "$log_file" 2>/dev/null || echo "0")
+
             # Check for completion indicators
             if grep -q "test finished" "$log_file" 2>/dev/null || \
                grep -q "testing stopped" "$log_file" 2>/dev/null || \
@@ -148,7 +150,7 @@ run_test() {
                 echo -e "${GREEN}✅ テスト完了${NC}"
                 break
             fi
-            
+
             # Show progress with log size
             if [ $((wait_count % 60)) -eq 0 ]; then
                 echo -e "${BLUE}   実行中... (${wait_count}秒経過, ログサイズ: ${log_size} bytes)${NC}"
@@ -160,17 +162,17 @@ run_test() {
             fi
         fi
     done
-    
+
     # Kill MT5 process if still running
     if ps -p $mt5_pid > /dev/null 2>&1; then
         echo -e "${YELLOW}⚠️  MT5プロセスを停止中${NC}"
         kill $mt5_pid 2>/dev/null || true
         sleep 2
     fi
-    
+
     # Wait a bit for files to be written
     sleep 3
-    
+
     # Parse results
     parse_test_results "$test_name" "$log_file"
 }
@@ -178,29 +180,29 @@ run_test() {
 parse_test_results() {
     local test_name=$1
     local log_file=$2
-    
+
     print_section "結果解析中: $test_name"
-    
+
     if [ ! -f "$log_file" ]; then
         echo -e "${RED}❌ ログファイルが見つかりません: $log_file${NC}"
         return 1
     fi
-    
-    local log_size=$(wc -c < "$log_file" 2>/dev/null || echo "0")
+
+    local log_size
+    log_size=$(wc -c < "$log_file" 2>/dev/null || echo "0")
     echo -e "${BLUE}📄 ログファイルサイズ: $log_size bytes${NC}"
-    
+
     if [ "$log_size" -eq 0 ]; then
         echo -e "${RED}❌ ログファイルが空です - テストが実行されていない可能性があります${NC}"
         return 1
     fi
-    
+
     # Extract key information
     local initialized=false
     local blocks_loaded=0
     local strategies_loaded=0
-    local trades=0
     local errors=0
-    
+
     # Check initialization
     if grep -q "Strategy Bricks EA initialized successfully" "$log_file" 2>/dev/null; then
         initialized=true
@@ -208,15 +210,15 @@ parse_test_results() {
     else
         echo -e "${RED}❌ EA初期化失敗${NC}"
     fi
-    
+
     # Extract blocks loaded
     blocks_loaded=$(grep -o "Preloaded [0-9]* blocks" "$log_file" 2>/dev/null | grep -o "[0-9]*" | head -1 || echo "0")
     echo -e "${BLUE}📦 ロード済みブロック数: $blocks_loaded${NC}"
-    
+
     # Extract strategies loaded
     strategies_loaded=$(grep -o "Strategies: [0-9]*" "$log_file" 2>/dev/null | grep -o "[0-9]*" | head -1 || echo "0")
     echo -e "${BLUE}🎯 ロード済み戦略数: $strategies_loaded${NC}"
-    
+
     # Count errors
     errors=$(grep -c "ERROR\|error" "$log_file" 2>/dev/null || echo "0")
     if [ $errors -gt 0 ]; then
@@ -226,11 +228,10 @@ parse_test_results() {
     else
         echo -e "${GREEN}✅ エラーなし${NC}"
     fi
-    
-    # Extract trade count (this would need to be added to EA logging)
-    # For now, we'll mark as unknown
+
+    # Trade count is derived from MT5 report
     echo -e "${BLUE}📊 取引回数: (MT5レポートを確認)${NC}"
-    
+
     # Save results
     local result_file="$RESULTS_DIR/${test_name}_result.txt"
     {
@@ -243,16 +244,17 @@ parse_test_results() {
         echo ""
         echo "ログファイル: $log_file"
     } > "$result_file"
-    
+
     echo -e "${GREEN}💾 結果保存: $result_file${NC}"
 }
 
 generate_summary_report() {
     print_section "Generating Summary Report"
-    
-    local timestamp=$(date +%Y%m%d_%H%M%S)
+
+    local timestamp
+    timestamp=$(date +%Y%m%d_%H%M%S)
     local report_file="$RESULTS_DIR/test_report_${timestamp}.txt"
-    
+
     {
         echo "============================================================"
         echo "Strategy Bricks EA - Automated Test Report"
@@ -269,7 +271,7 @@ generate_summary_report() {
         echo "Test Results Summary"
         echo "------------------------------------------------------------"
         echo ""
-        
+
         for test_name in "${TEST_ORDER[@]}"; do
             local result_file="$RESULTS_DIR/${test_name}_result.txt"
             if [ -f "$result_file" ]; then
@@ -277,7 +279,7 @@ generate_summary_report() {
                 echo ""
             fi
         done
-        
+
         echo "------------------------------------------------------------"
         echo "Next Steps"
         echo "------------------------------------------------------------"
@@ -290,7 +292,7 @@ generate_summary_report() {
         echo ""
         echo "============================================================"
     } > "$report_file"
-    
+
     echo -e "${GREEN}📊 Summary report generated: $report_file${NC}"
     echo ""
     cat "$report_file"
@@ -298,12 +300,13 @@ generate_summary_report() {
 
 main() {
     print_header "MT5 Strategy Tester - Automated Test Runner"
-    
+
     # Check if specific test requested
     if [ $# -eq 1 ]; then
         local test_name=$1
-        local test_desc=$(get_test_desc "$test_name")
-        
+        local test_desc
+        test_desc=$(get_test_desc "$test_name")
+
         if [ "$test_desc" != "Unknown test" ]; then
             check_prerequisites
             run_test "$test_name" "$test_desc"
@@ -320,20 +323,21 @@ main() {
             exit 1
         fi
     fi
-    
+
     # Run all tests
     check_prerequisites
-    
+
     for test_name in "${TEST_ORDER[@]}"; do
-        local test_desc=$(get_test_desc "$test_name")
+        local test_desc
+        test_desc=$(get_test_desc "$test_name")
         run_test "$test_name" "$test_desc"
         echo ""
         sleep 3  # Brief pause between tests
     done
-    
+
     # Generate summary
     generate_summary_report
-    
+
     print_header "All Tests Completed"
     echo -e "${GREEN}✅ Test execution finished${NC}"
     echo -e "${BLUE}📁 Results directory: $RESULTS_DIR${NC}"
