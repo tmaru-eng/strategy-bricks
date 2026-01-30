@@ -9,7 +9,7 @@ echo "MT5 Strategy Tester - Automated Test Runner"
 echo "============================================================"
 echo ""
 
-# Test configurations
+# テスト設定
 TESTS=(
     "test_single_blocks:Single Block Unit Tests"
     "test_single_blocks_extra:Single Block Unit Tests (extra)"
@@ -20,7 +20,7 @@ TESTS=(
 
 for test_info in "${TESTS[@]}"; do
     IFS=':' read -r test_name test_desc <<< "$test_info"
-
+    
     echo "------------------------------------------------------------"
     echo "Running: $test_desc"
     echo "Config: tester_${test_name}.ini"
@@ -32,15 +32,15 @@ for test_info in "${TESTS[@]}"; do
         echo "Run: python3 scripts/create_tester_configs.py"
         exit 1
     fi
-
-    # Launch MT5 tester
-    # Note: if using Wine, wine command is required
+    
+    # MT5をストラテジーテスターモードで起動
+    # Note: Wineを使用している場合は wine コマンドが必要
     wine "$TERMINAL" /config:"$config_path" /tester
-
-    # Wait briefly
+    
+    # テスト完了を待つ
     echo "Test started. Waiting for completion..."
     sleep 5
-
+    
     echo ""
 done
 

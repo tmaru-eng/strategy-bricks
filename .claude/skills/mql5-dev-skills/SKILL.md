@@ -1,5 +1,5 @@
 ---
-name: mql5-x-compile
+name: mql5-dev-skills
 description: >-
   MQL5開発時のコマンドラインツール関連スキル。CLIコンパイルやTester実行の
   コマンドと、Windows/macOSでのFiles配置先を汎用的に整理する。
