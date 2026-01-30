@@ -145,6 +145,14 @@ $eaPath = "$env:APPDATA\MetaQuotes\Terminal\<TERMINAL_ID>\MQL5\Experts\StrategyB
 & $metaeditor /compile:"$eaPath" /log
 ```
 
+## 4.5 一括補助スクリプト（任意）
+
+以下は **EA配置/コンパイル/MT5起動**までをまとめて行う補助スクリプトです。
+
+```powershell
+.\scripts\compile_and_test_all.ps1
+```
+
 ## 5. Strategy Tester 実行
 
 1. MT5で **Ctrl+R** を押してStrategy Testerを開く  

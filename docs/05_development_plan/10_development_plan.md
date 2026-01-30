@@ -6,7 +6,7 @@
 
 ## 1. 前提と参照ドキュメント
 - 参照: `docs/00_overview.md`, `docs/02_requirements/10_requirements.md`, `docs/03_design/30_config_spec.md`, `docs/03_design/40_block_catalog_spec.md`, `docs/04_operations/90_observability_and_testing.md`
-- 重要前提: M1のみ、確定足（shift=1）、同一足再エントリー禁止、OR×AND、Strategyは firstOnly。
+- 重要前提: M1のみ、確定足（shift=1）、同一足再エントリー禁止、OR×AND、Strategyは firstOnly、ポジション管理は新バーのみ。
 
 ## 2. フェーズと成果物
 ### Phase 0: 契約確定
@@ -49,7 +49,6 @@
 - M4: 運用安全性強化（制限/ログ/ナンピン安全）。
 
 ## 5. 未決事項とリスク
-- ポジション管理を毎Tickか新バーのみか（挙動の一貫性に影響）。(owner: EA Runtime担当)
 - ナンピン詳細仕様（段数、追加条件、シリーズ損切り）。(owner: EA Runtime担当)
 - Strategy競合解決の拡張（firstOnly以外）。(owner: EA Runtime担当)
 - ログ形式（CSV/JSONL）とテスト自動化範囲。(owner: 運用/検証担当)

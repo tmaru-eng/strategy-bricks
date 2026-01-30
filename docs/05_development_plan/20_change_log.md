@@ -3,6 +3,14 @@
 本ドキュメントは、散在していた修正メモを統合したものです。  
 **運用・手順は `docs/04_operations` を正**とします。
 
+## 2026-01-29: ドキュメント整合性の更新
+
+- トップREADME/概要/索引を実装状況に合わせて整理
+- 開発計画の「ポジション管理は新バーのみ」決定を明文化
+- `python/verify_syntax.py` の出力をASCII化（Windows cp932対策）
+- テスト補助スクリプトの役割をドキュメント化
+- macOS/WineスクリプトはWindows/WSLではCRLFで失敗、macOS側の実行確認は未実施
+
 ## 2026-01-26: Backtest / GUI修正
 
 ### Backtest機能

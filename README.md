@@ -24,15 +24,11 @@ Strategy Bricks/
 │   ├── 03_design/           # 設計仕様（契約定義 - 最重要）
 │   ├── 04_operations/       # 運用・テスト計画
 │   └── 05_development_plan/ # 開発計画とマイルストーン
-├── ea/                      # EA Runtime（MQL5）
-│   ├── src/                 # ソースコード
-│   └── include/             # ヘッダファイル
+├── ea/                      # EA Runtime（MQL5）+ テスト設定
 ├── gui/                     # GUI Builder（Electron）
-│   └── src/                 # ソースコード
-├── config/                  # 設定ファイル
-│   └── samples/             # サンプル設定
+├── python/                  # Backtestエンジン（Python）
+├── config/                  # 設定ファイルの説明（サンプルは今後追加）
 └── scripts/                 # 検証・運用スクリプト
-    └── validation/          # ログ検証スクリプト
 ```
 
 ## クイックスタート
@@ -53,13 +49,14 @@ Strategy Bricks/
 ### 開発を開始する
 
 **現在の状態:**
-- ドキュメント成熟度: **98%**
-- 実装状態: **Phase 0完了間近**（未決事項決定済み、契約書作成済み）
+- ドキュメント: 企画/要件/設計/運用/計画の主要資料が揃っている
+- 実装: EA Runtime MVP / GUI Builder MVP / Backtestエンジンの実装あり
+- テスト: 統合テスト/運用スクリプトが整備済み（Windows / macOS-Wine）
 
 **次のステップ:**
-1. プロトタイプ検証（EA）の実施
-2. GUI技術検証の実施
-3. Phase 1（EA Runtime MVP）の実装開始
+1. 仕様・実装の整合性確認（ドキュメント更新）
+2. テスト/動作確認の定期実行と結果記録
+3. Phase 4（安全装置/運用強化）の設計・実装方針整理
 
 **開発計画:**
 - `docs/05_development_plan/10_development_plan.md` - 全体計画
@@ -118,14 +115,10 @@ Strategy Bricks/
 ## 開発コマンド
 
 **現在の状態:**
-- このリポジトリは現在ドキュメント専用です
-- MQL5コードやElectron GUIの実装はまだ含まれていません
-- ビルド・テスト・実行コマンドは実装フェーズで追加予定
-
-**将来の実装時:**
-- EA開発: MetaEditor（MT5付属）を使用
-- GUI開発: Electron + Node.js
-- テスト: MT5 Strategy Tester
+- EA開発: MetaEditor（MT5付属）でコンパイル、`scripts/compile_and_test_all.ps1` で統合実行
+- GUI開発: `gui/` 配下で `npm run dev/test/typecheck/e2e`
+- Backtest: `python/` で `verify_syntax.py` / `pytest`
+- 統合テスト: `scripts/run_gui_integration_flow.ps1` 等を使用
 
 ## ライセンス
 
@@ -141,6 +134,6 @@ TBD
 
 ---
 
-**最終更新**: 2026-01-22
-**プロジェクト状態**: Phase 0（契約確定）- 実装開始間近
-**ドキュメント成熟度**: 98%
+**最終更新**: 2026-01-29
+**プロジェクト状態**: EA Runtime/GUI MVP 実装済み・統合検証運用中
+**ドキュメント成熟度**: 更新中

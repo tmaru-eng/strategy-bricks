@@ -6,19 +6,21 @@ strategy_config.jsonとblock_catalog.jsonのサンプルファイルを格納し
 
 ```
 config/
-└── samples/            # サンプル設定
-    ├── strategy_config_mvp.json      # MVP設定サンプル
-    ├── block_catalog_mvp.json        # MVPブロックカタログ
-    └── README.md                     # サンプルの説明
+├── README.md            # 本ドキュメント
+└── samples/             # サンプル設定（今後追加）
 ```
 
 ## 実装状況
 
-**現在の状態**: 未実装（Phase 0完了後に作成予定）
+**現在の状態**: サンプルは未整備
 
 **次のステップ**:
 1. strategy_config_mvp.jsonの作成（MVPブロック使用）
 2. block_catalog_mvp.jsonの作成（MVPブロック8種）
+
+**代替の参照先**:
+- テスト用設定: `ea/tests/*.json`
+- GUI側のデフォルトカタログ: `gui/src/resources/block_catalog.default.json`
 
 ## 設定ファイル仕様
 

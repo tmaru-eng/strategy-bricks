@@ -6,21 +6,17 @@
 
 ```
 gui/
-├── src/                    # ソースコード
-│   ├── main/               # Electronメインプロセス
-│   ├── renderer/           # Electronレンダラープロセス
-│   │   ├── components/     # Reactコンポーネント
-│   │   │   ├── Palette/    # ブロックパレット
-│   │   │   ├── Canvas/     # ノードベースエディタ
-│   │   │   ├── Property/   # プロパティパネル
-│   │   │   └── Validator/  # バリデーションパネル
-│   │   ├── models/         # データモデル
-│   │   ├── services/       # ビジネスロジック
-│   │   └── utils/          # ユーティリティ
+├── electron/               # Electronメインプロセス
+├── e2e/                    # E2Eシナリオ
+├── src/                    # レンダラ（React）と共通コード
+│   ├── components/         # UIコンポーネント
+│   ├── models/             # データモデル
+│   ├── resources/          # デフォルトカタログ等
+│   ├── services/           # ビジネスロジック
+│   ├── store/              # 状態管理
 │   └── types/              # TypeScript型定義
-├── public/                 # 静的ファイル
 ├── package.json            # npm設定
-└── tsconfig.json           # TypeScript設定
+└── vite.config.ts          # Vite設定
 ```
 
 ## 実装状況
@@ -68,13 +64,13 @@ npm run test
 npm run e2e
 ```
 
-## 技術スタック（予定）
+## 技術スタック
 
 - **フレームワーク**: Electron
 - **UIライブラリ**: React + TypeScript
 - **ノードエディタ**: React Flow
-- **状態管理**: Redux または Context API
-- **スタイリング**: Tailwind CSS または styled-components
+- **状態管理**: Zustand
+- **スタイリング**: Tailwind CSS
 
 ## 主要機能
 
